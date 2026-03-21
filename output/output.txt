@@ -1,6 +1,6 @@
 ======================================
   GitHub Actions Runner System Specs
-  Started at: Sat Mar 21 22:07:38 UTC 2026
+  Started at: Sat Mar 21 22:11:50 UTC 2026
 ======================================
 
 --- CPU INFO ---
@@ -11,21 +11,21 @@ CPU Cores (logical):
 CPU Cores (physical):
 cpu cores	: 1
 CPU Speed:
-cpu MHz		: 3243.475
+cpu MHz		: 3244.758
 
 --- RAM INFO ---
                total        used        free      shared  buff/cache   available
-Mem:           7.8Gi       804Mi       4.9Gi        39Mi       2.4Gi       7.0Gi
+Mem:           7.8Gi       774Mi       5.8Gi        39Mi       1.5Gi       7.0Gi
 Swap:          3.0Gi          0B       3.0Gi
 
 Total RAM:
 MemTotal:        8133952 kB
 Available RAM:
-MemAvailable:    7310180 kB
+MemAvailable:    7340384 kB
 
 --- STORAGE INFO ---
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/root        72G   55G   18G  76% /
+/dev/root        72G   54G   19G  75% /
 tmpfs           3.9G   84K  3.9G   1% /dev/shm
 tmpfs           1.6G  1.0M  1.6G   1% /run
 tmpfs           5.0M     0  5.0M   0% /run/lock
@@ -35,7 +35,7 @@ efivarfs        128M   26K  128M   1% /sys/firmware/efi/efivars
 tmpfs           795M   12K  795M   1% /run/user/1001
 
 Total Disk:
-total            79G   55G   25G  69% -
+total            79G   54G   26G  68% -
 
 --- GPU INFO ---
 Checking for GPU...
@@ -55,5 +55,5 @@ NAME      TYPE SIZE USED PRIO
 /swapfile file   3G   0B   -2
 
 ======================================
-  Scan Complete at: Sat Mar 21 22:07:38 UTC 2026
+  Scan Complete at: Sat Mar 21 22:11:50 UTC 2026
 ======================================
