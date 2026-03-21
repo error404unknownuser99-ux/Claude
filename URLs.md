@@ -138,3 +138,13 @@ https://git-hub-remote-five.vercel.app/github?action=get_gist&gist_id=6cad326836
 https://git-hub-remote-five.vercel.app/github?action=rate_limit
 https://git-hub-remote-five.vercel.app/github?action=help
 ```
+
+---
+
+## 🧪 External Testing Domains
+
+```
+https://jsonplaceholder.typicode.com/posts/1
+https://jsonplaceholder.typicode.com/users/1
+https://jsonplaceholder.typicode.com/todos/1
+```
