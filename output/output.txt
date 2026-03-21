@@ -2,13 +2,12 @@
 🤖 GitHub Actions Auto Log
 =====================================
 
-📅 Run Time    : 2026-03-21 21:17:57 UTC
-🔁 Run ID      : 23388997146
-🔢 Run Number  : 2
+📅 Run Time    : 2026-03-21 21:28:43 UTC
+🔁 Run ID      : 23389180139
+🔢 Run Number  : 4
 🌿 Branch      : main
 👤 Triggered by: error404unknownuser99-ux
-📝 Commit SHA  : fc19cb2569f4e9361d6a33b130a154b3232b4524
-💬 Commit Msg  : feat: add CPU, RAM, Storage info to logger
+📝 Commit SHA  : b43b7f5fc281c65dce2d9965c42ba12ec9031f75
 
 =====================================
 🖥️  CPU INFO
@@ -16,24 +15,23 @@
 model name	: AMD EPYC 7763 64-Core Processor
 Cores: 2
 Architecture:                            x86_64
-CPU(s):                                  2
-On-line CPU(s) list:                     0,1
 Model name:                              AMD EPYC 7763 64-Core Processor
 Thread(s) per core:                      2
 Core(s) per socket:                      1
 Socket(s):                               1
+NUMA node(s):                            1
 NUMA node0 CPU(s):                       0,1
 
 =====================================
 🧠 RAM INFO
 =====================================
                total        used        free      shared  buff/cache   available
-Mem:           7.8Gi       761Mi       5.8Gi        39Mi       1.5Gi       7.0Gi
+Mem:           7.8Gi       803Mi       4.9Gi        40Mi       2.4Gi       7.0Gi
 Swap:          3.0Gi          0B       3.0Gi
 
-MemTotal:        8129712 kB
-MemFree:         6111772 kB
-MemAvailable:    7350368 kB
+MemTotal:        8133952 kB
+MemFree:         5148432 kB
+MemAvailable:    7310948 kB
 SwapTotal:       3145724 kB
 SwapFree:        3145724 kB
 
@@ -41,14 +39,14 @@ SwapFree:        3145724 kB
 💾 STORAGE INFO
 =====================================
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/root        72G   54G   19G  75% /
+/dev/root        72G   55G   18G  76% /
 tmpfs           3.9G   84K  3.9G   1% /dev/shm
-tmpfs           1.6G 1020K  1.6G   1% /run
+tmpfs           1.6G  1.0M  1.6G   1% /run
 tmpfs           5.0M     0  5.0M   0% /run/lock
-efivarfs        128M   32K  128M   1% /sys/firmware/efi/efivars
+efivarfs        128M   26K  128M   1% /sys/firmware/efi/efivars
 /dev/sda16      881M   63M  757M   8% /boot
 /dev/sda15      105M  6.2M   99M   6% /boot/efi
-tmpfs           794M   12K  794M   1% /run/user/1001
+tmpfs           795M   12K  795M   1% /run/user/1001
 
 NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 sda       8:0    0   75G  0 disk 
