@@ -1,7 +1,3 @@
-```json
-{
-  "owner": "facebook",
-  "repo": "react",
-  "branch": "main"
-}
-```
+username = facebook
+repo     = react
+branch   = main
