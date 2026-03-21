@@ -2,27 +2,68 @@
 🤖 GitHub Actions Auto Log
 =====================================
 
-📅 Run Time   : 2026-03-21 21:12:39 UTC
-🔁 Run ID     : 23388906970
-🔢 Run Number : 1
-🌿 Branch     : main
+📅 Run Time    : 2026-03-21 21:17:57 UTC
+🔁 Run ID      : 23388997146
+🔢 Run Number  : 2
+🌿 Branch      : main
 👤 Triggered by: error404unknownuser99-ux
-📝 Commit SHA : b9a48ff004271f1378b1dccf5a2327c510481ddd
-💬 Commit Msg : feat: add auto-logger workflow - saves logs to output/output.txt on push
+📝 Commit SHA  : fc19cb2569f4e9361d6a33b130a154b3232b4524
+💬 Commit Msg  : feat: add CPU, RAM, Storage info to logger
 
 =====================================
-📂 Repo Files:
+🖥️  CPU INFO
 =====================================
-./URLs.md
-./.github/workflows/logger.yml
-./output/.gitkeep
-./output/output.txt
+model name	: AMD EPYC 7763 64-Core Processor
+Cores: 2
+Architecture:                            x86_64
+CPU(s):                                  2
+On-line CPU(s) list:                     0,1
+Model name:                              AMD EPYC 7763 64-Core Processor
+Thread(s) per core:                      2
+Core(s) per socket:                      1
+Socket(s):                               1
+NUMA node0 CPU(s):                       0,1
 
 =====================================
-📜 URLs.md Content:
+🧠 RAM INFO
 =====================================
-username = facebook
-repo     = react
-branch   = main
+               total        used        free      shared  buff/cache   available
+Mem:           7.8Gi       761Mi       5.8Gi        39Mi       1.5Gi       7.0Gi
+Swap:          3.0Gi          0B       3.0Gi
+
+MemTotal:        8129712 kB
+MemFree:         6111772 kB
+MemAvailable:    7350368 kB
+SwapTotal:       3145724 kB
+SwapFree:        3145724 kB
+
+=====================================
+💾 STORAGE INFO
+=====================================
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root        72G   54G   19G  75% /
+tmpfs           3.9G   84K  3.9G   1% /dev/shm
+tmpfs           1.6G 1020K  1.6G   1% /run
+tmpfs           5.0M     0  5.0M   0% /run/lock
+efivarfs        128M   32K  128M   1% /sys/firmware/efi/efivars
+/dev/sda16      881M   63M  757M   8% /boot
+/dev/sda15      105M  6.2M   99M   6% /boot/efi
+tmpfs           794M   12K  794M   1% /run/user/1001
+
+NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda       8:0    0   75G  0 disk 
+├─sda1    8:1    0   74G  0 part /
+├─sda14   8:14   0    4M  0 part 
+├─sda15   8:15   0  106M  0 part /boot/efi
+└─sda16 259:0    0  913M  0 part /boot
+
+=====================================
+🌐 OS INFO
+=====================================
+Linux runnervm46oaq 6.14.0-1017-azure #17~24.04.1-Ubuntu SMP Mon Dec  1 20:10:50 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.3 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
 
 ✅ Log complete!
