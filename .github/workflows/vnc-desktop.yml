@@ -14,167 +14,145 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Git Config
+        run: |
+          git config user.email "claude@anthropic.com"
+          git config user.name "Claude Bot"
+
+      - name: Init Status
+        run: |
+          mkdir -p output
+          cat > output/output.txt << EOF
+⏳ WORKFLOW STARTED at $(date)
+Step: Installing packages... IN PROGRESS 🔄
+EOF
+          git add output/output.txt
+          git commit -m "⏳ VNC started - $(date +%s)"
+          git push https://error404unknownuser99-ux:${{ secrets.GITHUB_TOKEN }}@github.com/error404unknownuser99-ux/Claude.git
+
       - name: Install Desktop + VNC
         run: |
-          sudo apt-get update -qq
+          set -e
+
+          push_status() {
+            mkdir -p output
+            printf '%s\n' "$1" > output/output.txt
+            git add output/output.txt
+            git commit -m "status $(date +%s)" || true
+            git push https://error404unknownuser99-ux:${{ secrets.GITHUB_TOKEN }}@github.com/error404unknownuser99-ux/Claude.git || true
+          }
+
+          sudo apt-get update -qq || {
+            push_status "❌ CRASH: apt-get update FAILED at $(date)"
+            exit 1
+          }
+
+          push_status "⏳ Installing XFCE4 + VNC + Themes... $(date) (2-3 min lagega)"
+
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
             xfce4 xfce4-goodies xfce4-terminal xfce4-whiskermenu-plugin \
             tigervnc-standalone-server tigervnc-common \
             arc-theme papirus-icon-theme \
             dbus-x11 x11-utils x11-apps \
-            firefox-esr gedit thunar \
+            gedit thunar mousepad chromium-browser \
             fonts-noto fonts-noto-color-emoji \
-            --no-install-recommends
-          echo "✅ Desktop installed!"
+            --no-install-recommends || {
+            push_status "❌ CRASH: apt install FAILED at $(date)"
+            exit 1
+          }
 
-      - name: Setup VNC Password & Config
+          push_status "✅ Packages installed! Setting up VNC... $(date)"
+
+      - name: Setup VNC
         run: |
+          set -e
           mkdir -p ~/.vnc
+
           echo "android123" | vncpasswd -f > ~/.vnc/passwd
           chmod 600 ~/.vnc/passwd
 
           cat > ~/.vnc/xstartup << 'XEOF'
-          #!/bin/bash
-          unset SESSION_MANAGER
-          unset DBUS_SESSION_BUS_ADDRESS
-          export XDG_CURRENT_DESKTOP=XFCE
-          dbus-launch --exit-with-session startxfce4 &
-          wait
-          XEOF
+#!/bin/bash
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+export XDG_CURRENT_DESKTOP=XFCE
+dbus-launch --exit-with-session startxfce4 &
+wait
+XEOF
           chmod +x ~/.vnc/xstartup
 
       - name: Start VNC Server
         run: |
-          vncserver :1 -geometry 1366x768 -depth 24 -localhost no -SecurityTypes VncAuth
-          sleep 5
-          echo "✅ VNC Started on :1 (port 5901)"
+          set -e
 
-      - name: Apply Arc-Dark Theme & Papirus Icons
+          vncserver :1 -geometry 1366x768 -depth 24 -localhost no -SecurityTypes VncAuth || {
+            echo "❌ CRASH: VNC failed to start at $(date)" > output/output.txt
+            git add output/output.txt && git commit -m "crash" && git push https://error404unknownuser99-ux:${{ secrets.GITHUB_TOKEN }}@github.com/error404unknownuser99-ux/Claude.git
+            exit 1
+          }
+          sleep 5
+
+          echo "✅ VNC running! Starting bore tunnel..." > output/output.txt
+          git add output/output.txt && git commit -m "vnc ok $(date +%s)" && git push https://error404unknownuser99-ux:${{ secrets.GITHUB_TOKEN }}@github.com/error404unknownuser99-ux/Claude.git
+
+      - name: Apply Theme
         run: |
           export DISPLAY=:1
           sleep 2
-          # Set Arc-Dark theme
           xfconf-query -c xsettings -p /Net/ThemeName -s "Arc-Dark" 2>/dev/null || true
-          # Set Papirus-Dark icons
           xfconf-query -c xsettings -p /Net/IconThemeName -s "Papirus-Dark" 2>/dev/null || true
-          # Set nice font
           xfconf-query -c xsettings -p /Gtk/FontName -s "Noto Sans 10" 2>/dev/null || true
-          # Remove desktop icons clutter
-          xfconf-query -c xfce4-desktop -p /desktop-icons/style -s 0 2>/dev/null || true
-          # Set a dark wallpaper color
-          xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color-style -s 0 2>/dev/null || true
-          xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/rgba1 -s "0.10 0.11 0.14 1.0" 2>/dev/null || true
-          echo "✅ Theme Applied: Arc-Dark + Papirus-Dark"
+          echo "✅ Theme Applied"
 
-      - name: Download & Start bore tunnel
+      - name: bore Tunnel + Keep Alive
         run: |
-          # Download bore
-          curl -sL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz -o bore.tar.gz
-          tar xzf bore.tar.gz
-          chmod +x bore
-          echo "✅ bore downloaded"
-
           mkdir -p output
 
-          # Start bore tunnel in background
+          push_status() {
+            printf '%s\n' "$1" > output/output.txt
+            git add output/output.txt
+            git commit -m "status $(date +%s)" || true
+            git push https://error404unknownuser99-ux:${{ secrets.GITHUB_TOKEN }}@github.com/error404unknownuser99-ux/Claude.git || true
+          }
+
+          curl -sL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz -o bore.tar.gz || {
+            push_status "❌ CRASH: bore download failed at $(date)"
+            exit 1
+          }
+          tar xzf bore.tar.gz && chmod +x bore
+
           ./bore local 5901 --to bore.pub > /tmp/bore_log.txt 2>&1 &
           BORE_PID=$!
-          echo $BORE_PID > /tmp/bore_pid.txt
 
-          # Wait for bore to connect
-          echo "⏳ Waiting for bore tunnel..."
-          for i in {1..20}; do
+          push_status "⏳ bore tunnel connecting... $(date)"
+
+          for i in {1..25}; do
             sleep 2
-            if grep -q "listening" /tmp/bore_log.txt 2>/dev/null; then
-              echo "✅ bore connected!"
-              break
-            fi
-            echo "  attempt $i..."
+            grep -q "listening" /tmp/bore_log.txt 2>/dev/null && break
           done
 
-          cat /tmp/bore_log.txt
-
-          # Extract port
           BORE_PORT=$(grep -oP '(?<=bore\.pub:)\d+' /tmp/bore_log.txt | head -1)
+          [ -z "$BORE_PORT" ] && BORE_PORT=$(grep -oP '\d{5}' /tmp/bore_log.txt | tail -1)
 
           if [ -z "$BORE_PORT" ]; then
-            BORE_PORT=$(grep -oP '\d{4,5}' /tmp/bore_log.txt | tail -1)
+            push_status "❌ CRASH: bore port not found! Log: $(cat /tmp/bore_log.txt)"
+            exit 1
           fi
 
-          echo "🌐 bore Port: $BORE_PORT"
+          push_status "$(printf '╔══════════════════════════════════════╗\n║   VNC DESKTOP SESSION ACTIVE! 🖥️    ║\n╚══════════════════════════════════════╝\n\n🌐 VNC Address : bore.pub:%s\n🔑 Password    : android123\n🖥️  Resolution  : 1366x768\n🎨 Theme       : Arc-Dark + Papirus Icons\n⏰ Started At  : %s\n✅ Status      : RUNNING 💚\n\n📱 App: VNC Viewer (RealVNC)\n   bore.pub:%s | Pass: android123\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' "$BORE_PORT" "$(date)" "$BORE_PORT")"
 
-          # Save initial connection info
-          cat > output/output.txt << EOF
-          ╔══════════════════════════════════════╗
-          ║     VNC DESKTOP SESSION ACTIVE! 🖥️   ║
-          ╚══════════════════════════════════════╝
-
-          🌐 VNC Address : bore.pub:${BORE_PORT}
-          🔑 Password    : android123
-          🖥️  Resolution  : 1366x768
-          🎨 Theme       : Arc-Dark + Papirus Icons
-          ⏰ Started At  : $(date)
-          ✅ Status      : RUNNING
-
-          📱 Android pe connect karne ke liye:
-             App: "VNC Viewer" by RealVNC
-             Address: bore.pub:${BORE_PORT}
-             Password: android123
-
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          EOF
-
-          git config user.email "claude@anthropic.com"
-          git config user.name "Claude Bot"
-          git add output/output.txt
-          git commit -m "🖥️ VNC Session Started - bore.pub:${BORE_PORT}"
-          git push https://error404unknownuser99-ux:${{ secrets.GITHUB_TOKEN }}@github.com/error404unknownuser99-ux/Claude.git
-
-          # ────── KEEP ALIVE LOOP ──────
           COUNTER=0
           while kill -0 $BORE_PID 2>/dev/null; do
             sleep 10
             COUNTER=$((COUNTER + 10))
             UPTIME_MIN=$((COUNTER / 60))
 
-            BORE_PORT_LIVE=$(grep -oP '(?<=bore\.pub:)\d+' /tmp/bore_log.txt | head -1)
-            [ -z "$BORE_PORT_LIVE" ] && BORE_PORT_LIVE=$BORE_PORT
-
-            cat > output/output.txt << EOF
-          ╔══════════════════════════════════════╗
-          ║     VNC DESKTOP SESSION ACTIVE! 🖥️   ║
-          ╚══════════════════════════════════════╝
-
-          🌐 VNC Address : bore.pub:${BORE_PORT_LIVE}
-          🔑 Password    : android123
-          🖥️  Resolution  : 1366x768
-          🎨 Theme       : Arc-Dark + Papirus Icons
-          ⏰ Started At  : $(date)
-          ⏱️  Uptime      : ${UPTIME_MIN} minutes
-          ✅ Status      : RUNNING 💚
-
-          📱 Android pe connect karne ke liye:
-             App: "VNC Viewer" by RealVNC
-             Address: bore.pub:${BORE_PORT_LIVE}
-             Password: android123
-
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          Last Updated: $(date)
-          EOF
-
-            # Push every 60 seconds
             if [ $((COUNTER % 60)) -eq 0 ]; then
-              git add output/output.txt
-              git commit -m "🔄 VNC alive - uptime ${UPTIME_MIN}min - $(date +%s)" || true
-              git push https://error404unknownuser99-ux:${{ secrets.GITHUB_TOKEN }}@github.com/error404unknownuser99-ux/Claude.git || true
+              LIVE_PORT=$(grep -oP '(?<=bore\.pub:)\d+' /tmp/bore_log.txt | head -1)
+              [ -z "$LIVE_PORT" ] && LIVE_PORT=$BORE_PORT
+
+              push_status "$(printf '🖥️ VNC LIVE | bore.pub:%s | Pass: android123\n⏱️ Uptime: %s min | Updated: %s\n✅ Status: RUNNING 💚' "$LIVE_PORT" "$UPTIME_MIN" "$(date)")"
             fi
           done
 
-          # Session ended
-          cat > output/output.txt << EOF
-          ❌ VNC Session Ended at $(date)
-          Bore tunnel disconnected after ${UPTIME_MIN} minutes.
-          EOF
-          git add output/output.txt
-          git commit -m "❌ VNC Session Ended"
-          git push https://error404unknownuser99-ux:${{ secrets.GITHUB_TOKEN }}@github.com/error404unknownuser99-ux/Claude.git || true
+          push_status "❌ VNC Session Ended at $(date) | Was running for ${UPTIME_MIN} min"
