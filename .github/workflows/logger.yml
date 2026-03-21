@@ -13,45 +13,42 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Generate logs
+      - name: Generate logs + yt-dlp latest release
         run: |
           mkdir -p output
 
           echo "=====================================" > output/output.txt
           echo "🤖 GitHub Actions Auto Log"           >> output/output.txt
           echo "=====================================" >> output/output.txt
-          echo ""                                      >> output/output.txt
-          echo "📅 Run Time    : $(date '+%Y-%m-%d %H:%M:%S UTC')"      >> output/output.txt
-          echo "🔁 Run ID      : ${{ github.run_id }}"                  >> output/output.txt
-          echo "🔢 Run Number  : ${{ github.run_number }}"              >> output/output.txt
-          echo "🌿 Branch      : ${{ github.ref_name }}"                >> output/output.txt
-          echo "👤 Triggered by: ${{ github.actor }}"                   >> output/output.txt
-          echo "📝 Commit SHA  : ${{ github.sha }}"                     >> output/output.txt
+          echo "📅 Run Time    : $(date '+%Y-%m-%d %H:%M:%S UTC')"        >> output/output.txt
+          echo "🔁 Run ID      : ${{ github.run_id }}"                    >> output/output.txt
+          echo "🔢 Run Number  : ${{ github.run_number }}"                >> output/output.txt
+          echo "🌿 Branch      : ${{ github.ref_name }}"                  >> output/output.txt
+          echo "👤 Triggered by: ${{ github.actor }}"                     >> output/output.txt
+          echo "📝 Commit SHA  : ${{ github.sha }}"                       >> output/output.txt
           echo "💬 Commit Msg  : ${{ github.event.head_commit.message }}" >> output/output.txt
 
           echo ""                                      >> output/output.txt
           echo "=====================================" >> output/output.txt
-          echo "🖥️  CPU INFO"                          >> output/output.txt
+          echo "📦 YT-DLP LATEST RELEASE"             >> output/output.txt
           echo "=====================================" >> output/output.txt
-          cat /proc/cpuinfo | grep "model name" | head -1              >> output/output.txt
-          echo "Cores: $(nproc --all)"                                 >> output/output.txt
-          lscpu | grep -E "Architecture|CPU\(s\)|Thread|Core|Socket|MHz|Cache" >> output/output.txt
 
-          echo ""                                      >> output/output.txt
-          echo "=====================================" >> output/output.txt
-          echo "🧠 RAM INFO"                           >> output/output.txt
-          echo "=====================================" >> output/output.txt
-          free -h                                      >> output/output.txt
-          echo ""                                      >> output/output.txt
-          cat /proc/meminfo | grep -E "MemTotal|MemFree|MemAvailable|SwapTotal|SwapFree" >> output/output.txt
+          YTDLP=$(curl -s https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest)
 
-          echo ""                                      >> output/output.txt
-          echo "=====================================" >> output/output.txt
-          echo "💾 STORAGE INFO"                       >> output/output.txt
-          echo "=====================================" >> output/output.txt
-          df -h                                        >> output/output.txt
-          echo ""                                      >> output/output.txt
-          lsblk                                        >> output/output.txt
+          echo $YTDLP | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+print(f'🏷️  Version    : {d[\"tag_name\"]}')
+print(f'📛 Name       : {d[\"name\"]}')
+print(f'📅 Released   : {d[\"published_at\"]}')
+print(f'🔗 Release URL: {d[\"html_url\"]}')
+print(f'📝 Prerelease : {d[\"prerelease\"]}')
+print()
+print('⬇️  Download Links:')
+for a in d['assets']:
+    print(f'  {a[\"name\"]}')
+    print(f'    {a[\"browser_download_url\"]}')
+" >> output/output.txt
 
           echo ""                                      >> output/output.txt
           echo "=====================================" >> output/output.txt
@@ -68,5 +65,5 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add output/output.txt
-          git diff --staged --quiet || git commit -m "🤖 auto: system info log [run #${{ github.run_number }}]"
+          git diff --staged --quiet || git commit -m "🤖 auto: log + yt-dlp release [run #${{ github.run_number }}]"
           git push
