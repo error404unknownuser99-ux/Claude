@@ -2,6 +2,7 @@
 {
   "owner": "error404unknownuser99-ux",
   "repo": "test",
-  "branch": "main"
+  "branch": "main",
+  "trigger_workflows": true
 }
 ```
