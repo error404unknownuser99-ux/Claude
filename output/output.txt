@@ -1,43 +1,29 @@
-=====================================
-🤖 GitHub Actions Auto Log
-=====================================
+======================================
+  GitHub Actions Runner System Specs
+  Started at: Sat Mar 21 22:07:38 UTC 2026
+======================================
 
-📅 Run Time    : 2026-03-21 21:28:43 UTC
-🔁 Run ID      : 23389180139
-🔢 Run Number  : 4
-🌿 Branch      : main
-👤 Triggered by: error404unknownuser99-ux
-📝 Commit SHA  : b43b7f5fc281c65dce2d9965c42ba12ec9031f75
-
-=====================================
-🖥️  CPU INFO
-=====================================
+--- CPU INFO ---
+CPU Model:
 model name	: AMD EPYC 7763 64-Core Processor
-Cores: 2
-Architecture:                            x86_64
-Model name:                              AMD EPYC 7763 64-Core Processor
-Thread(s) per core:                      2
-Core(s) per socket:                      1
-Socket(s):                               1
-NUMA node(s):                            1
-NUMA node0 CPU(s):                       0,1
+CPU Cores (logical):
+2
+CPU Cores (physical):
+cpu cores	: 1
+CPU Speed:
+cpu MHz		: 3243.475
 
-=====================================
-🧠 RAM INFO
-=====================================
+--- RAM INFO ---
                total        used        free      shared  buff/cache   available
-Mem:           7.8Gi       803Mi       4.9Gi        40Mi       2.4Gi       7.0Gi
+Mem:           7.8Gi       804Mi       4.9Gi        39Mi       2.4Gi       7.0Gi
 Swap:          3.0Gi          0B       3.0Gi
 
+Total RAM:
 MemTotal:        8133952 kB
-MemFree:         5148432 kB
-MemAvailable:    7310948 kB
-SwapTotal:       3145724 kB
-SwapFree:        3145724 kB
+Available RAM:
+MemAvailable:    7310180 kB
 
-=====================================
-💾 STORAGE INFO
-=====================================
+--- STORAGE INFO ---
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/root        72G   55G   18G  76% /
 tmpfs           3.9G   84K  3.9G   1% /dev/shm
@@ -48,20 +34,26 @@ efivarfs        128M   26K  128M   1% /sys/firmware/efi/efivars
 /dev/sda15      105M  6.2M   99M   6% /boot/efi
 tmpfs           795M   12K  795M   1% /run/user/1001
 
-NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-sda       8:0    0   75G  0 disk 
-├─sda1    8:1    0   74G  0 part /
-├─sda14   8:14   0    4M  0 part 
-├─sda15   8:15   0  106M  0 part /boot/efi
-└─sda16 259:0    0  913M  0 part /boot
+Total Disk:
+total            79G   55G   25G  69% -
 
-=====================================
-🌐 OS INFO
-=====================================
+--- GPU INFO ---
+Checking for GPU...
+No NVIDIA GPU found (standard GitHub runner has no GPU)
+No VGA device found via lspci
+
+--- OS INFO ---
 Linux runnervm46oaq 6.14.0-1017-azure #17~24.04.1-Ubuntu SMP Mon Dec  1 20:10:50 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+PRETTY_NAME="Ubuntu 24.04.3 LTS"
 NAME="Ubuntu"
 VERSION_ID="24.04"
 VERSION="24.04.3 LTS (Noble Numbat)"
 VERSION_CODENAME=noble
 
-✅ Log complete!
+--- SWAP INFO ---
+NAME      TYPE SIZE USED PRIO
+/swapfile file   3G   0B   -2
+
+======================================
+  Scan Complete at: Sat Mar 21 22:07:38 UTC 2026
+======================================
