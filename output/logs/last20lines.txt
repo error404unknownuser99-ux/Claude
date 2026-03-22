@@ -1,3 +1,22 @@
-[Log fetch failed HTTP 404]
+2026-03-22T18:00:29.5230758Z Post job cleanup.
+2026-03-22T18:00:29.6219746Z [command]/usr/bin/git version
+2026-03-22T18:00:29.6266021Z git version 2.53.0
+2026-03-22T18:00:29.6316876Z Temporarily overriding HOME='/home/runner/work/_temp/dec93de5-eb6a-4ff0-bca9-a38e5d68cc16' before making global git config changes
+2026-03-22T18:00:29.6318049Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T18:00:29.6325113Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Claude/Claude
+2026-03-22T18:00:29.6382918Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T18:00:29.6433679Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-22T18:00:29.6716866Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T18:00:29.6742279Z http.https://github.com/.extraheader
+2026-03-22T18:00:29.6756925Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T18:00:29.6796232Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-22T18:00:29.7083952Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T18:00:29.7124023Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-22T18:00:29.7542911Z Cleaning up orphan processes
+2026-03-22T18:00:29.7917431Z Terminate orphan process: pid (3899) (Xvfb)
+2026-03-22T18:00:29.7935470Z Terminate orphan process: pid (3903) (xfce4-session)
+2026-03-22T18:00:29.7964394Z Terminate orphan process: pid (3907) (dbus-launch)
+2026-03-22T18:00:29.8063480Z Terminate orphan process: pid (3908) (dbus-daemon)
+2026-03-22T18:00:29.8209101Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
 
-⏰ Updated: 2026-03-22 17:59:38
+⏰ Updated: 2026-03-22 18:00:34
