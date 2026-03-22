@@ -1,170 +1,126 @@
-name: Ubuntu XFCE RDP
+name: 🖥️ Ubuntu Desktop via XRDP + bore.pub
 
 on:
   push:
     branches: [ main ]
     paths:
       - '.github/workflows/heavy-data-processing.yml'
-      - 'scripts/process_data.py'
   workflow_dispatch:
 
 jobs:
-  ubuntu-rdp:
+  ubuntu-desktop:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 355
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
 
-      - name: System Optimize
-        run: |
-          sudo swapoff -a
-          echo 0 | sudo tee /proc/sys/vm/swappiness
-          sudo systemctl stop snapd 2>/dev/null || true
-          sudo systemctl stop unattended-upgrades 2>/dev/null || true
-          sudo systemctl stop apt-daily.timer 2>/dev/null || true
-          echo "RAM: $(free -h | grep Mem | awk '{print $2}') | Done!"
+      - name: 🗂️ Setup output folder
+        run: mkdir -p output
 
-      - name: Install XFCE + XRDP
+      - name: 📦 Install XFCE Desktop + XRDP
         run: |
-          export DEBIAN_FRONTEND=noninteractive
+          LOG="output/runtimelogs.txt"
+          echo "[$(date -u '+%H:%M:%S')] 🚀 Starting Desktop setup..." | tee -a "$LOG"
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
-            xfce4 xfce4-terminal xfce4-goodies \
-            xrdp dbus-x11 dbus-user-session x11-xserver-utils xorgxrdp \
-            fonts-noto papirus-icon-theme arc-theme \
-            wget curl git unzip firefox \
-            xfce4-taskmanager neofetch
-          echo "Done!"
+          echo "[$(date -u '+%H:%M:%S')] 📦 Installing XFCE4 + XRDP..." | tee -a "$LOG"
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            xfce4 xfce4-goodies xrdp dbus-x11 x11-xserver-utils \
+            --no-install-recommends -qq
+          echo "[$(date -u '+%H:%M:%S')] ✅ Desktop + XRDP installed!" | tee -a "$LOG"
 
-      - name: Setup XFCE for BOTH runner + cyberpunk user
+      - name: 👤 Create RDP User
         run: |
-          # cyberpunk user banao
-          sudo useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
-          echo "cyberpunk:Cyber@2025!" | sudo chpasswd
-          sudo usermod -aG sudo cyberpunk
+          LOG="output/runtimelogs.txt"
+          sudo useradd -m -s /bin/bash rdpuser
+          echo "rdpuser:Desktop@123" | sudo chpasswd
+          sudo usermod -aG sudo rdpuser
+          sudo -u rdpuser bash -c 'echo "startxfce4" > ~/.xsession && chmod +x ~/.xsession'
+          echo "[$(date -u '+%H:%M:%S')] ✅ User ready! Username: rdpuser | Pass: Desktop@123" | tee -a "$LOG"
 
-          # BOTH users ke liye config setup karo
-          for USER_HOME in /home/runner /home/cyberpunk; do
-            sudo mkdir -p $USER_HOME/.config/xfce4/xfconf/xfce-perchannel-xml
-            sudo mkdir -p $USER_HOME/.config/gtk-3.0
-            sudo mkdir -p $USER_HOME/.config/caja
-
-            sudo tee $USER_HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml > /dev/null << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <channel name="xfwm4" version="1.0">
-            <property name="general" type="empty">
-              <property name="theme" type="string" value="Arc-Dark"/>
-              <property name="use_compositing" type="bool" value="false"/>
-              <property name="animate_mouse" type="bool" value="false"/>
-              <property name="box_move" type="bool" value="false"/>
-              <property name="box_resize" type="bool" value="false"/>
-            </property>
-          </channel>
-          EOF
-
-            sudo tee $USER_HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml > /dev/null << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <channel name="xsettings" version="1.0">
-            <property name="Net" type="empty">
-              <property name="ThemeName" type="string" value="Arc-Dark"/>
-              <property name="IconThemeName" type="string" value="Papirus-Dark"/>
-            </property>
-            <property name="Gtk" type="empty">
-              <property name="FontName" type="string" value="Noto Sans 10"/>
-              <property name="EnableAnimations" type="bool" value="false"/>
-            </property>
-          </channel>
-          EOF
-
-            sudo tee $USER_HOME/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
-          [Settings]
-          gtk-theme-name=Arc-Dark
-          gtk-icon-theme-name=Papirus-Dark
-          gtk-font-name=Noto Sans 10
-          gtk-enable-animations=0
-          EOF
-
-            sudo tee $USER_HOME/.gtkrc-2.0 > /dev/null << 'EOF'
-          gtk-theme-name="Arc-Dark"
-          gtk-icon-theme-name="Papirus-Dark"
-          gtk-font-name="Noto Sans 10"
-          gtk-enable-animations=0
-          EOF
-          done
-
-          # runner user ko sudo de do
-          sudo usermod -aG sudo runner 2>/dev/null || true
-          echo "runner:Runner@2025!" | sudo chpasswd
-
-          sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
-          sudo chown -R runner:runner /home/runner/ 2>/dev/null || true
-          echo "Both users configured!"
-
-      - name: Configure XRDP - DBUS FIX
+      - name: ⚙️ Configure & Start XRDP
         run: |
-          sudo adduser xrdp ssl-cert 2>/dev/null || true
-          sudo sed -i 's/^autorun=$/autorun=Xorg/' /etc/xrdp/xrdp.ini
-          sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
-
-          # KEY FIX: eval dbus-launch --sh-syntax use karo
-          # dbus-run-session DBUS_ADDRESS properly export nahi karta!
-          sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
-          #!/bin/sh
-          unset DBUS_SESSION_BUS_ADDRESS
-          unset XDG_RUNTIME_DIR
-          export XDG_CONFIG_DIRS=/etc/xdg:/etc
-          export XDG_DATA_DIRS=/usr/local/share:/usr/share
-          eval $(dbus-launch --sh-syntax --exit-with-session)
-          export DBUS_SESSION_BUS_ADDRESS
-          exec startxfce4
-          EOF
-          sudo chmod +x /etc/xrdp/startwm.sh
-
-          sudo systemctl restart xrdp
+          LOG="output/runtimelogs.txt"
+          echo "startxfce4" | sudo tee /etc/skel/.xsession
+          sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini || true
+          sudo bash -c 'cat > /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla << EOF
+[Allow Colord all Users]
+Identity=unix-user:*
+Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
+ResultAny=no
+ResultInactive=no
+ResultActive=yes
+EOF'
+          sudo systemctl enable xrdp
+          sudo systemctl start xrdp
           sleep 3
-          sudo systemctl status xrdp --no-pager | head -5
-          echo "XRDP Ready!"
+          STATUS=$(sudo systemctl is-active xrdp)
+          echo "[$(date -u '+%H:%M:%S')] 🖥️ XRDP Status: $STATUS" | tee -a "$LOG"
 
-      - name: Start bore tunnel with Auto-Reconnect
+      - name: 🌐 Install & Start bore.pub Tunnel
+        run: |
+          LOG="output/runtimelogs.txt"
+          echo "[$(date -u '+%H:%M:%S')] 📥 bore install ho raha hai..." | tee -a "$LOG"
+          curl -sSL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz \
+            -o /tmp/bore.tar.gz
+          tar -xzf /tmp/bore.tar.gz -C /tmp/
+          sudo mv /tmp/bore /usr/local/bin/bore
+          sudo chmod +x /usr/local/bin/bore
+          echo "[$(date -u '+%H:%M:%S')] 🌐 Tunnel start ho raha hai..." | tee -a "$LOG"
+          nohup bore local 3389 --to bore.pub > /tmp/bore_output.txt 2>&1 &
+          echo $! > /tmp/bore.pid
+          sleep 10
+          BORE_LINE=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
+          if [ -n "$BORE_LINE" ]; then
+            echo "[$(date -u '+%H:%M:%S')] 🎉 TUNNEL READY!" | tee -a "$LOG"
+            echo "╔══════════════════════════════════════╗" | tee -a "$LOG"
+            echo "║     🖥️  RDP CONNECTION INFO  🖥️      ║" | tee -a "$LOG"
+            echo "╠══════════════════════════════════════╣" | tee -a "$LOG"
+            echo "║  🌐 Host:     $BORE_LINE              " | tee -a "$LOG"
+            echo "║  👤 Username: rdpuser                 " | tee -a "$LOG"
+            echo "║  🔑 Password: Desktop@123             " | tee -a "$LOG"
+            echo "╚══════════════════════════════════════╝" | tee -a "$LOG"
+          else
+            echo "[$(date -u '+%H:%M:%S')] ⚠️ Tunnel URL nahi mila! bore output:" | tee -a "$LOG"
+            cat /tmp/bore_output.txt | tee -a "$LOG"
+          fi
+
+      - name: 💾 Push Connection Info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p output
-          wget -q "https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz" -O bore.tar.gz
-          tar -xzf bore.tar.gz
-          chmod +x bore
-
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
+          git add output/
+          git diff --staged --quiet || git commit -m "🖥️ Desktop live! RDP ready"
+          git pull --rebase origin main
+          git push
 
-          attempt=0
+      - name: ⏳ Keep Alive (5.5 hours)
+        run: |
+          LOG="output/runtimelogs.txt"
+          BORE_LINE=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
+          echo "[$(date -u '+%H:%M:%S')] ⏳ Session alive - max 5.5 ghante | Host: $BORE_LINE" | tee -a "$LOG"
+          COUNT=0
           while true; do
-            attempt=$((attempt + 1))
-            echo "=== Tunnel attempt #$attempt ==="
-            ./bore local 3389 --to bore.pub > output/bore_out.txt 2>&1 &
-            BORE_PID=$!
-            sleep 8
-            PORT=$(grep -oP 'listening at bore\.pub:\K\d+' output/bore_out.txt 2>/dev/null)
-            if [ -n "$PORT" ]; then
-              echo "TUNNEL LIVE! bore.pub:$PORT"
-              cat > output/rdp_credentials.txt << CREDS
-          USERNAME: cyberpunk  (ya runner)
-          PASSWORD: Cyber@2025! (ya Runner@2025!)
-          ADDRESS:  bore.pub:$PORT
-          ATTEMPT:  $attempt
-          CREDS
-              git add output/
-              git diff --staged --quiet || (git commit -m "Ubuntu RDP LIVE bore.pub:$PORT" && \
-                for i in 1 2 3 4 5; do
-                  git pull --rebase origin main && git push && break
-                  sleep 2
-                done)
-              wait $BORE_PID
-              echo "Bore exited! Reconnecting..."
-              sleep 5
-            else
-              kill $BORE_PID 2>/dev/null || true
-              sleep 5
+            sleep 300
+            COUNT=$((COUNT + 5))
+            XRDP_STATUS=$(sudo systemctl is-active xrdp)
+            BORE_PID=$(cat /tmp/bore.pid 2>/dev/null)
+            BORE_ALIVE=$(kill -0 $BORE_PID 2>/dev/null && echo "✅ alive" || echo "❌ dead")
+            echo "[$(date -u '+%H:%M:%S')] [$COUNT min] XRDP: $XRDP_STATUS | bore: $BORE_ALIVE | $BORE_LINE" | tee -a "$LOG"
+            if echo "$BORE_ALIVE" | grep -q "dead"; then
+              echo "[$(date -u '+%H:%M:%S')] 🔄 bore restart..." | tee -a "$LOG"
+              nohup bore local 3389 --to bore.pub > /tmp/bore_output.txt 2>&1 &
+              echo $! > /tmp/bore.pid
+              sleep 10
+              NEW_LINE=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
+              echo "[$(date -u '+%H:%M:%S')] 🆕 New Host: $NEW_LINE" | tee -a "$LOG"
+              BORE_LINE=$NEW_LINE
+            fi
+            if [ $COUNT -ge 330 ]; then
+              echo "[$(date -u '+%H:%M:%S')] ⏰ 5.5hr complete - session khatam!" | tee -a "$LOG"
+              break
             fi
           done
