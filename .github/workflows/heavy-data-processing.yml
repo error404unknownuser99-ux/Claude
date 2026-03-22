@@ -31,7 +31,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             xfce4 xfce4-terminal xfce4-goodies \
-            xrdp dbus-x11 x11-xserver-utils xorgxrdp \
+            xrdp dbus-x11 dbus-user-session x11-xserver-utils xorgxrdp \
             fonts-noto fonts-firacode \
             papirus-icon-theme arc-theme \
             wget curl git unzip firefox \
@@ -92,32 +92,31 @@ jobs:
           sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
           echo "User + themes configured!"
 
-      - name: Configure XRDP - Black Screen Fix
+      - name: Configure XRDP - DBUS Fix
         run: |
           sudo adduser xrdp ssl-cert 2>/dev/null || true
 
-          # FIX 1: autorun=Xorg - Xvnc nahi Xorg use karo!
+          # FIX 1: autorun=Xorg
           sudo sed -i 's/^autorun=$/autorun=Xorg/' /etc/xrdp/xrdp.ini
 
-          # FIX 2: startwm.sh - /etc/X11/Xsession ke through startxfce4
+          # FIX 2: Performance
+          sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
+
+          # FIX 3: startwm.sh - dbus-run-session + XDG_CONFIG_DIRS fix!
           sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
           #!/bin/sh
           unset DBUS_SESSION_BUS_ADDRESS
           unset XDG_RUNTIME_DIR
-          exec /etc/X11/Xsession "startxfce4"
+          export XDG_CONFIG_DIRS=/etc/xdg:/etc
+          export PATH=/usr/lib/x86_64-linux-gnu/xfce4/xfconf:$PATH
+          exec dbus-run-session -- startxfce4
           EOF
           sudo chmod +x /etc/xrdp/startwm.sh
 
-          # FIX 3: Performance tuning
-          sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
-
-          # FIX 4: x-session-manager verify
-          update-alternatives --display x-session-manager | head -3
-
           sudo systemctl restart xrdp
           sleep 4
-          sudo systemctl status xrdp --no-pager | head -10
-          echo "XRDP configured with BLACK SCREEN FIX!"
+          sudo systemctl status xrdp --no-pager | head -8
+          echo "XRDP + DBUS configured!"
 
       - name: Start bore tunnel with Auto-Reconnect
         env:
@@ -135,30 +134,24 @@ jobs:
           while true; do
             attempt=$((attempt + 1))
             echo "=== Tunnel attempt #$attempt ==="
-
             ./bore local 3389 --to bore.pub > output/bore_out.txt 2>&1 &
             BORE_PID=$!
             sleep 8
-
             PORT=$(grep -oP 'listening at bore\.pub:\K\d+' output/bore_out.txt 2>/dev/null)
-
             if [ -n "$PORT" ]; then
               echo "TUNNEL LIVE! bore.pub:$PORT"
-
               cat > output/rdp_credentials.txt << CREDS
           USERNAME: cyberpunk
           PASSWORD: Cyber@2025!
           ADDRESS:  bore.pub:$PORT
           ATTEMPT:  $attempt
           CREDS
-
               git add output/
               git diff --staged --quiet || (git commit -m "Ubuntu RDP LIVE bore.pub:$PORT" && \
                 for i in 1 2 3 4 5; do
                   git pull --rebase origin main && git push && break
                   sleep 2
                 done)
-
               wait $BORE_PID
               echo "Bore exited! Reconnecting in 5s..."
               sleep 5
