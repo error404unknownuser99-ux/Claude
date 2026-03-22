@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/heavy-data-processing.yml'
+      - 'scripts/process_data.py'
   workflow_dispatch:
 
 jobs:
@@ -15,98 +16,26 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 📦 Install heavy Python libraries
+      - name: Install heavy Python libraries
         run: |
-          mkdir -p output/logs
-          echo "📦 Installing libraries..." | tee output/processing_log.txt
-          echo "Start: $(date)" | tee -a output/processing_log.txt
-
-          pip install numpy pandas scipy scikit-learn matplotlib seaborn 2>&1 | tee -a output/processing_log.txt
-
+          mkdir -p output
+          echo "📦 Installing... $(date)" | tee output/processing_log.txt
+          pip install -q numpy pandas scipy scikit-learn matplotlib seaborn
           echo "✅ Install complete: $(date)" | tee -a output/processing_log.txt
+          pip list | grep -E "numpy|pandas|scipy|scikit|matplotlib|seaborn" | tee -a output/processing_log.txt
 
-      - name: 🧪 Generate + Process CSV data with numpy/pandas
+      - name: Run data processing script
         run: |
-          python3 << 'PYEOF'
-import numpy as np
-import pandas as pd
-from scipy import stats
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LinearRegression
-import json
+          echo "🚀 Script chala rahe hain: $(date)" | tee -a output/processing_log.txt
+          python scripts/process_data.py 2>&1 | tee -a output/processing_log.txt
+          echo "✅ Script done: $(date)" | tee -a output/processing_log.txt
 
-print("🚀 Data processing shuru...")
-
-# ── 1. Random dataset generate karo ──────────────────────
-np.random.seed(42)
-n = 1000
-
-data = {
-    "id":          np.arange(1, n+1),
-    "age":         np.random.randint(18, 65, n),
-    "salary":      np.random.normal(50000, 15000, n).round(2),
-    "experience":  np.random.randint(0, 40, n),
-    "score":       np.random.uniform(0, 100, n).round(2),
-    "category":    np.random.choice(["A", "B", "C", "D"], n)
-}
-df = pd.DataFrame(data)
-df.to_csv("output/raw_data.csv", index=False)
-print(f"✅ Raw CSV saved: {len(df)} rows")
-
-# ── 2. Basic stats ────────────────────────────────────────
-stats_data = {
-    "total_rows":   int(len(df)),
-    "avg_salary":   round(float(df["salary"].mean()), 2),
-    "max_salary":   round(float(df["salary"].max()), 2),
-    "min_salary":   round(float(df["salary"].min()), 2),
-    "avg_age":      round(float(df["age"].mean()), 2),
-    "avg_score":    round(float(df["score"].mean()), 2),
-    "category_counts": df["category"].value_counts().to_dict()
-}
-print(f"📊 Stats: avg_salary={stats_data['avg_salary']}, avg_age={stats_data['avg_age']}")
-
-# ── 3. Scipy - correlation ────────────────────────────────
-corr, pval = stats.pearsonr(df["experience"], df["salary"])
-stats_data["exp_salary_correlation"] = round(float(corr), 4)
-stats_data["p_value"]                = round(float(pval), 6)
-print(f"📈 Correlation (exp vs salary): {corr:.4f}, p-value: {pval:.6f}")
-
-# ── 4. ML - Linear Regression ────────────────────────────
-scaler = StandardScaler()
-X = scaler.fit_transform(df[["age", "experience", "score"]])
-y = df["salary"].values
-
-model = LinearRegression()
-model.fit(X, y)
-r2    = model.score(X, y)
-stats_data["ml_r2_score"] = round(float(r2), 4)
-print(f"🤖 ML R² score: {r2:.4f}")
-
-# ── 5. Filtered CSV ───────────────────────────────────────
-high_earners = df[df["salary"] > 60000].sort_values("salary", ascending=False)
-high_earners.to_csv("output/high_earners.csv", index=False)
-stats_data["high_earners_count"] = int(len(high_earners))
-print(f"💰 High earners (>60k): {len(high_earners)}")
-
-# ── 6. Save summary JSON ──────────────────────────────────
-with open("output/summary.json", "w") as f:
-    json.dump(stats_data, f, indent=2)
-print("✅ summary.json saved!")
-
-# ── 7. Log append ─────────────────────────────────────────
-with open("output/processing_log.txt", "a") as f:
-    f.write(f"\n📊 Stats Summary:\n{json.dumps(stats_data, indent=2)}\n")
-    f.write(f"\n✅ Processing complete!\n")
-
-print("🎉 Sab kuch complete!")
-PYEOF
-
-      - name: 📁 Show output files
+      - name: Show output files
         run: |
           echo "--- Output files ---"
           ls -lh output/
@@ -124,23 +53,22 @@ PYEOF
           path: output/
 
       - name: Commit output to repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
           git diff --staged --quiet || git commit -m "🤖 Data processing output [$(date '+%Y-%m-%d %H:%M:%S')]"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📡 Hit Monitor /full
+      - name: Hit Monitor /full
         run: |
-          echo "📡 Monitor API /full hit kar rahe hain..."
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" https://track-workflow.onrender.com/full)
-          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
-          echo "Monitor API HTTP Status: $HTTP_STATUS"
-          if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Monitor /full successfully triggered!"
+          echo "📡 Monitor /full hit kar rahe hain..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://track-workflow.onrender.com/full)
+          echo "Monitor HTTP Status: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Monitor triggered successfully!"
           else
-            echo "⚠️ Monitor API response: $HTTP_STATUS"
+            echo "⚠️ Monitor status: $STATUS"
           fi
