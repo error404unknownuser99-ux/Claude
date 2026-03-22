@@ -42,6 +42,13 @@ jobs:
           name: hello-world-output
           path: output/output.txt
 
+      - name: Hit Monitor API 🔍
+        run: |
+          echo "📡 Monitor API ko request maar rahe hain..." | tee -a output/output.txt
+          RESPONSE=$(curl -s https://track-workflow.onrender.com/full)
+          echo "$RESPONSE" | tee -a output/output.txt
+          echo "✅ Monitor API hit complete!" | tee -a output/output.txt
+
       - name: Commit output to repo
         run: |
           git config user.name "error404unknownuser99-ux"
