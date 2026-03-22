@@ -1,0 +1,18 @@
+{
+  "total_rows": 1000,
+  "avg_salary": 51238.06,
+  "max_salary": 89485.73,
+  "min_salary": 6556.17,
+  "avg_age": 40.99,
+  "avg_score": 51.45,
+  "category_counts": {
+    "C": 256,
+    "D": 256,
+    "B": 253,
+    "A": 235
+  },
+  "exp_salary_correlation": -0.0016,
+  "p_value": 0.959066,
+  "ml_r2_score": 0.0083,
+  "high_earners_count": 266
+}
