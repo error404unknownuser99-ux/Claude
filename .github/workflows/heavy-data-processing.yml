@@ -16,25 +16,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: 🧹 Cleanup output/ (logs/ ko chhodke)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "🧹 output/ folder clean kar rahe hain (logs/ safe hai)..."
-          git config user.name "error404unknownuser99-ux"
-          git config user.email "error404unknownuser99@users.noreply.github.com"
-
-          # output/ ke andar sab delete karo except logs/
-          find output/ -mindepth 1 -maxdepth 1 ! -name 'logs' -exec rm -rf {} +
-
-          # Git mein bhi reflect karo
-          git add -A
-          git diff --staged --quiet || git commit -m "🧹 Cleanup output/ before new run [$(date '+%Y-%m-%d %H:%M:%S')]"
-          git pull --rebase origin main
-          git push
-
-          echo "✅ Cleanup done! output/logs/ safe hai."
-
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -55,13 +36,8 @@ jobs:
 
       - name: Show results
         run: |
-          echo "--- Output files ---"
           ls -lh output/
-          echo ""
-          echo "--- summary.json ---"
           cat output/summary.json
-          echo ""
-          echo "--- Top repos (first 5) ---"
           head -6 output/top_python_repos.csv
 
       - name: Upload artifact
