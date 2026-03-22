@@ -1,0 +1,18 @@
+[18:26:28] 🚀 Setup shuru...
+[18:26:59] ✅ Desktop installed!
+[18:27:07] ✅ Virtual display ready!
+[18:27:12] 📥 RustDesk install...
+[18:27:22] ✅ RustDesk installed!
+[18:27:22] ✅ Config likha!
+[18:27:22] Config content:
+permanent-password = "Pass1234"
+[18:27:24] ✅ Headless enabled!
+[18:27:32] ✅ Service started!
+[18:27:32] Config after service start:
+permanent-password = "Pass1234"
+
+[18:27:32] 🎉🎉 RUSTDESK READY!
+================================================
+   🔢 ID:       499678905
+   🔑 Password: Pass1234
+================================================
