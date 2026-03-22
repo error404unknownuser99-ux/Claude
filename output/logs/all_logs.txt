@@ -1,16 +1,180 @@
 ============================================================
 🤖 Monitor Bot — Auto Update
-Timestamp  : 2026-03-22 10:15:33 UTC
+Timestamp  : 2026-03-22 10:15:42 UTC
 Run ID     : 23400901226
 Workflow   : GitChat - Live Chat Server 💬
-Status     : in_progress
-Conclusion : None
+Status     : completed
+Conclusion : failure
 URL        : https://github.com/error404unknownuser99-ux/Claude/actions/runs/23400901226
 ============================================================
 
 
---- JOB: gitchat-server | status:in_progress | conclusion:None ---
-[Log fetch failed HTTP 404]
+--- JOB: gitchat-server | status:completed | conclusion:failure ---
+ï»¿2026-03-22T10:15:33.1466257Z Current runner version: '2.332.0'
+2026-03-22T10:15:33.1489819Z ##[group]Runner Image Provisioner
+2026-03-22T10:15:33.1490680Z Hosted Compute Agent
+2026-03-22T10:15:33.1491289Z Version: 20260213.493
+2026-03-22T10:15:33.1492148Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-03-22T10:15:33.1493056Z Build Date: 2026-02-13T00:28:41Z
+2026-03-22T10:15:33.1493737Z Worker ID: {8554039e-1e74-4f46-b7e4-160d3eaf4986}
+2026-03-22T10:15:33.1494403Z Azure Region: northcentralus
+2026-03-22T10:15:33.1495061Z ##[endgroup]
+2026-03-22T10:15:33.1496449Z ##[group]Operating System
+2026-03-22T10:15:33.1497065Z Ubuntu
+2026-03-22T10:15:33.1497623Z 24.04.3
+2026-03-22T10:15:33.1498162Z LTS
+2026-03-22T10:15:33.1498639Z ##[endgroup]
+2026-03-22T10:15:33.1499224Z ##[group]Runner Image
+2026-03-22T10:15:33.1499801Z Image: ubuntu-24.04
+2026-03-22T10:15:33.1500297Z Version: 20260309.50.1
+2026-03-22T10:15:33.1501542Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260309.50/images/ubuntu/Ubuntu2404-Readme.md
+2026-03-22T10:15:33.1503287Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260309.50
+2026-03-22T10:15:33.1504276Z ##[endgroup]
+2026-03-22T10:15:33.1506929Z ##[group]GITHUB_TOKEN Permissions
+2026-03-22T10:15:33.1508856Z Actions: write
+2026-03-22T10:15:33.1509548Z ArtifactMetadata: write
+2026-03-22T10:15:33.1510124Z Attestations: write
+2026-03-22T10:15:33.1510599Z Checks: write
+2026-03-22T10:15:33.1511171Z Contents: write
+2026-03-22T10:15:33.1511662Z Deployments: write
+2026-03-22T10:15:33.1512500Z Discussions: write
+2026-03-22T10:15:33.1513077Z Issues: write
+2026-03-22T10:15:33.1513591Z Metadata: read
+2026-03-22T10:15:33.1514064Z Models: read
+2026-03-22T10:15:33.1514621Z Packages: write
+2026-03-22T10:15:33.1515142Z Pages: write
+2026-03-22T10:15:33.1515733Z PullRequests: write
+2026-03-22T10:15:33.1516343Z RepositoryProjects: write
+2026-03-22T10:15:33.1516936Z SecurityEvents: write
+2026-03-22T10:15:33.1517486Z Statuses: write
+2026-03-22T10:15:33.1518019Z ##[endgroup]
+2026-03-22T10:15:33.1520076Z Secret source: Actions
+2026-03-22T10:15:33.1520836Z Prepare workflow directory
+2026-03-22T10:15:33.1972311Z Prepare all required actions
+2026-03-22T10:15:33.2028234Z Getting action download info
+2026-03-22T10:15:33.5176118Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-03-22T10:15:33.7403979Z Complete job name: gitchat-server
+2026-03-22T10:15:33.8231503Z ##[group]Run actions/checkout@v4
+2026-03-22T10:15:33.8232491Z with:
+2026-03-22T10:15:33.8232934Z   repository: error404unknownuser99-ux/Claude
+2026-03-22T10:15:33.8233663Z   token: ***
+2026-03-22T10:15:33.8234028Z   ssh-strict: true
+2026-03-22T10:15:33.8234413Z   ssh-user: git
+2026-03-22T10:15:33.8234800Z   persist-credentials: true
+2026-03-22T10:15:33.8235235Z   clean: true
+2026-03-22T10:15:33.8235624Z   sparse-checkout-cone-mode: true
+2026-03-22T10:15:33.8236104Z   fetch-depth: 1
+2026-03-22T10:15:33.8236503Z   fetch-tags: false
+2026-03-22T10:15:33.8236899Z   show-progress: true
+2026-03-22T10:15:33.8237304Z   lfs: false
+2026-03-22T10:15:33.8237715Z   submodules: false
+2026-03-22T10:15:33.8238113Z   set-safe-directory: true
+2026-03-22T10:15:33.8238736Z ##[endgroup]
+2026-03-22T10:15:33.9324446Z Syncing repository: error404unknownuser99-ux/Claude
+2026-03-22T10:15:33.9326169Z ##[group]Getting Git version info
+2026-03-22T10:15:33.9326877Z Working directory is '/home/runner/work/Claude/Claude'
+2026-03-22T10:15:33.9327743Z [command]/usr/bin/git version
+2026-03-22T10:15:33.9424442Z git version 2.53.0
+2026-03-22T10:15:33.9451235Z ##[endgroup]
+2026-03-22T10:15:33.9475608Z Temporarily overriding HOME='/home/runner/work/_temp/df752016-b878-44cf-92f0-8537aa6bdbc1' before making global git config changes
+2026-03-22T10:15:33.9477928Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T10:15:33.9482217Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Claude/Claude
+2026-03-22T10:15:33.9523656Z Deleting the contents of '/home/runner/work/Claude/Claude'
+2026-03-22T10:15:33.9527294Z ##[group]Initializing the repository
+2026-03-22T10:15:33.9531645Z [command]/usr/bin/git init /home/runner/work/Claude/Claude
+2026-03-22T10:15:33.9659171Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-03-22T10:15:33.9660330Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-03-22T10:15:33.9661414Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-03-22T10:15:33.9662523Z hint: call:
+2026-03-22T10:15:33.9662944Z hint:
+2026-03-22T10:15:33.9663493Z hint: 	git config --global init.defaultBranch <name>
+2026-03-22T10:15:33.9664449Z hint:
+2026-03-22T10:15:33.9665507Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-03-22T10:15:33.9667052Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-03-22T10:15:33.9667911Z hint:
+2026-03-22T10:15:33.9668341Z hint: 	git branch -m <name>
+2026-03-22T10:15:33.9668846Z hint:
+2026-03-22T10:15:33.9669557Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-03-22T10:15:33.9670954Z Initialized empty Git repository in /home/runner/work/Claude/Claude/.git/
+2026-03-22T10:15:33.9676859Z [command]/usr/bin/git remote add origin https://github.com/error404unknownuser99-ux/Claude
+2026-03-22T10:15:33.9712793Z ##[endgroup]
+2026-03-22T10:15:33.9714013Z ##[group]Disabling automatic garbage collection
+2026-03-22T10:15:33.9717875Z [command]/usr/bin/git config --local gc.auto 0
+2026-03-22T10:15:33.9748070Z ##[endgroup]
+2026-03-22T10:15:33.9749248Z ##[group]Setting up auth
+2026-03-22T10:15:33.9756152Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T10:15:33.9788776Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-22T10:15:34.0163991Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T10:15:34.0195384Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-22T10:15:34.0433951Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T10:15:34.0466904Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-22T10:15:34.0711617Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-03-22T10:15:34.0750437Z ##[endgroup]
+2026-03-22T10:15:34.0751365Z ##[group]Fetching the repository
+2026-03-22T10:15:34.0759695Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0461f0df5e34afe812e55b7cdfc0214fb090c429:refs/remotes/origin/main
+2026-03-22T10:15:34.3443917Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-22T10:15:34.3444957Z  * [new ref]         0461f0df5e34afe812e55b7cdfc0214fb090c429 -> origin/main
+2026-03-22T10:15:34.3479240Z ##[endgroup]
+2026-03-22T10:15:34.3479941Z ##[group]Determining the checkout info
+2026-03-22T10:15:34.3481547Z ##[endgroup]
+2026-03-22T10:15:34.3486982Z [command]/usr/bin/git sparse-checkout disable
+2026-03-22T10:15:34.3531648Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-03-22T10:15:34.3559350Z ##[group]Checking out the ref
+2026-03-22T10:15:34.3564141Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-03-22T10:15:34.3611820Z Switched to a new branch 'main'
+2026-03-22T10:15:34.3615103Z branch 'main' set up to track 'origin/main'.
+2026-03-22T10:15:34.3621555Z ##[endgroup]
+2026-03-22T10:15:34.3656526Z [command]/usr/bin/git log -1 --format=%H
+2026-03-22T10:15:34.3679715Z 0461f0df5e34afe812e55b7cdfc0214fb090c429
+2026-03-22T10:15:34.3867771Z ##[group]Run mkdir -p output
+2026-03-22T10:15:34.3868345Z [36;1mmkdir -p output[0m
+2026-03-22T10:15:34.3869069Z [36;1mecho "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ð GitChat setup shuru..." >> output/runtimelogs.txt[0m
+2026-03-22T10:15:34.3869854Z [36;1mcat output/runtimelogs.txt[0m
+2026-03-22T10:15:34.3923779Z shell: /usr/bin/bash -e {0}
+2026-03-22T10:15:34.3924280Z ##[endgroup]
+2026-03-22T10:15:34.4049281Z [2026-03-22 10:15:34 UTC] ð GitChat setup shuru...
+2026-03-22T10:15:34.4089180Z ##[group]Run echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ð¦ bore install ho raha hai..." >> output/runtimelogs.txt
+2026-03-22T10:15:34.4090312Z [36;1mecho "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ð¦ bore install ho raha hai..." >> output/runtimelogs.txt[0m
+2026-03-22T10:15:34.4091587Z [36;1mcurl -sL https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz -o bore.tar.gz[0m
+2026-03-22T10:15:34.4092924Z [36;1mtar xzf bore.tar.gz[0m
+2026-03-22T10:15:34.4093388Z [36;1msudo mv bore /usr/local/bin/bore[0m
+2026-03-22T10:15:34.4093908Z [36;1mbore --version[0m
+2026-03-22T10:15:34.4094575Z [36;1mecho "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] â bore install ho gaya!" >> output/runtimelogs.txt[0m
+2026-03-22T10:15:34.4139399Z shell: /usr/bin/bash -e {0}
+2026-03-22T10:15:34.4139864Z ##[endgroup]
+2026-03-22T10:15:34.7059443Z bore-cli 0.5.1
+2026-03-22T10:15:34.7117450Z ##[group]Run echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ð Python chat server start ho raha hai port 8080 pe..." >> output/runtimelogs.txt
+2026-03-22T10:15:34.7119012Z [36;1mecho "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ð Python chat server start ho raha hai port 8080 pe..." >> output/runtimelogs.txt[0m
+2026-03-22T10:15:34.7119997Z [36;1mpython3 scripts/chat_server.py &[0m
+2026-03-22T10:15:34.7120551Z [36;1mecho $! > /tmp/server.pid[0m
+2026-03-22T10:15:34.7121048Z [36;1msleep 3[0m
+2026-03-22T10:15:34.7121594Z [36;1mif curl -s http://localhost:8080 > /dev/null; then[0m
+2026-03-22T10:15:34.7122850Z [36;1m  echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] â Chat server chal raha hai port 8080 pe!" >> output/runtimelogs.txt[0m
+2026-03-22T10:15:34.7123753Z [36;1melse[0m
+2026-03-22T10:15:34.7124418Z [36;1m  echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] â Server start nahi hua!" >> output/runtimelogs.txt[0m
+2026-03-22T10:15:34.7125184Z [36;1m  exit 1[0m
+2026-03-22T10:15:34.7125606Z [36;1mfi[0m
+2026-03-22T10:15:34.7176102Z shell: /usr/bin/bash -e {0}
+2026-03-22T10:15:34.7176619Z ##[endgroup]
+2026-03-22T10:15:34.7402721Z python3: can't open file '/home/runner/work/Claude/Claude/scripts/chat_server.py': [Errno 2] No such file or directory
+2026-03-22T10:15:37.7374410Z ##[error]Process completed with exit code 1.
+2026-03-22T10:15:37.7498143Z Post job cleanup.
+2026-03-22T10:15:37.8459394Z [command]/usr/bin/git version
+2026-03-22T10:15:37.8497487Z git version 2.53.0
+2026-03-22T10:15:37.8543165Z Temporarily overriding HOME='/home/runner/work/_temp/6dec14b8-cd33-44a6-ae8b-84ff7be50635' before making global git config changes
+2026-03-22T10:15:37.8544698Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T10:15:37.8549874Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Claude/Claude
+2026-03-22T10:15:37.8594694Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T10:15:37.8630703Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-22T10:15:37.8877342Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T10:15:37.8900978Z http.https://github.com/.extraheader
+2026-03-22T10:15:37.8913861Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T10:15:37.8945323Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-22T10:15:37.9184461Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T10:15:37.9217771Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-22T10:15:37.9578469Z Cleaning up orphan processes
+2026-03-22T10:15:37.9955481Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
 --- END JOB ---
 
 
@@ -21,4 +185,4 @@ YAML VALIDATION:
 
 CONCURRENCY: ✅ 0/5 running — sab theek!
 
-⏰ Last updated: 2026-03-22 10:15:33 UTC
+⏰ Last updated: 2026-03-22 10:15:42 UTC
