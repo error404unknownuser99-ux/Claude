@@ -1,4 +1,4 @@
-name: Ubuntu XFCE Cyberpunk RDP
+name: Ubuntu MATE Cyberpunk RDP
 
 on:
   push:
@@ -25,55 +25,30 @@ jobs:
           sudo systemctl stop apt-daily.timer 2>/dev/null || true
           echo "RAM: $(free -h | grep Mem | awk '{print $2}') | Optimized!"
 
-      - name: Install XFCE + XRDP + Themes
+      - name: Install MATE + XRDP
         run: |
           export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            xfce4 xfce4-terminal xfce4-goodies \
-            xrdp dbus-x11 dbus-user-session x11-xserver-utils xorgxrdp \
-            fonts-noto fonts-firacode \
+            mate-desktop-environment-core \
+            mate-terminal mate-system-monitor \
+            xrdp dbus-x11 x11-xserver-utils xorgxrdp \
             papirus-icon-theme arc-theme \
+            fonts-noto fonts-firacode \
             wget curl git unzip firefox \
-            xfce4-taskmanager neofetch
+            neofetch
           echo "Packages installed!"
 
-      - name: Create User + Theme Config
+      - name: Create User + Dark Theme
         run: |
           sudo useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
           echo "cyberpunk:Cyber@2025!" | sudo chpasswd
           sudo usermod -aG sudo cyberpunk
 
-          sudo mkdir -p /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml
           sudo mkdir -p /home/cyberpunk/.config/gtk-3.0
+          sudo mkdir -p /home/cyberpunk/.config/dconf
 
-          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml > /dev/null << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <channel name="xfwm4" version="1.0">
-            <property name="general" type="empty">
-              <property name="theme" type="string" value="Arc-Dark"/>
-              <property name="use_compositing" type="bool" value="false"/>
-              <property name="animate_mouse" type="bool" value="false"/>
-              <property name="box_move" type="bool" value="false"/>
-              <property name="box_resize" type="bool" value="false"/>
-            </property>
-          </channel>
-          EOF
-
-          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml > /dev/null << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <channel name="xsettings" version="1.0">
-            <property name="Net" type="empty">
-              <property name="ThemeName" type="string" value="Arc-Dark"/>
-              <property name="IconThemeName" type="string" value="Papirus-Dark"/>
-            </property>
-            <property name="Gtk" type="empty">
-              <property name="FontName" type="string" value="Noto Sans 10"/>
-              <property name="EnableAnimations" type="bool" value="false"/>
-            </property>
-          </channel>
-          EOF
-
+          # Arc-Dark theme for MATE
           sudo tee /home/cyberpunk/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
           [Settings]
           gtk-theme-name=Arc-Dark
@@ -90,33 +65,33 @@ jobs:
           EOF
 
           sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
-          echo "User + themes configured!"
+          echo "User configured!"
 
-      - name: Configure XRDP - DBUS Fix
+      - name: Configure XRDP - MATE
         run: |
           sudo adduser xrdp ssl-cert 2>/dev/null || true
 
-          # FIX 1: autorun=Xorg
+          # autorun=Xorg - Xvnc nahi!
           sudo sed -i 's/^autorun=$/autorun=Xorg/' /etc/xrdp/xrdp.ini
-
-          # FIX 2: Performance
           sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
 
-          # FIX 3: startwm.sh - dbus-run-session + XDG_CONFIG_DIRS fix!
+          # PROVEN WORKING startwm.sh - MATE + proper runtime dir
           sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
           #!/bin/sh
           unset DBUS_SESSION_BUS_ADDRESS
           unset XDG_RUNTIME_DIR
           export XDG_CONFIG_DIRS=/etc/xdg:/etc
-          export PATH=/usr/lib/x86_64-linux-gnu/xfce4/xfconf:$PATH
-          exec dbus-run-session -- startxfce4
+          export XDG_RUNTIME_DIR=/tmp/xdg-runtime-$(id -u)
+          mkdir -p $XDG_RUNTIME_DIR
+          chmod 700 $XDG_RUNTIME_DIR
+          exec dbus-run-session -- mate-session
           EOF
           sudo chmod +x /etc/xrdp/startwm.sh
 
           sudo systemctl restart xrdp
           sleep 4
           sudo systemctl status xrdp --no-pager | head -8
-          echo "XRDP + DBUS configured!"
+          echo "XRDP + MATE configured!"
 
       - name: Start bore tunnel with Auto-Reconnect
         env:
@@ -147,7 +122,7 @@ jobs:
           ATTEMPT:  $attempt
           CREDS
               git add output/
-              git diff --staged --quiet || (git commit -m "Ubuntu RDP LIVE bore.pub:$PORT" && \
+              git diff --staged --quiet || (git commit -m "MATE RDP LIVE bore.pub:$PORT" && \
                 for i in 1 2 3 4 5; do
                   git pull --rebase origin main && git push && break
                   sleep 2
