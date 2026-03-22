@@ -1,0 +1,2 @@
+[2m2026-03-22T15:49:32.681209Z[0m [32m INFO[0m [2mbore_cli::client[0m[2m:[0m connected to server [3mremote_port[0m[2m=[0m43190
+[2m2026-03-22T15:49:32.681247Z[0m [32m INFO[0m [2mbore_cli::client[0m[2m:[0m listening at bore.pub:43190
