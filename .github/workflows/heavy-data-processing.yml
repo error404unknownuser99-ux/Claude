@@ -1,141 +1,46 @@
-name: GitChat Server
+name: JS Library CDN Download Test
 
 on:
-  workflow_dispatch:
   push:
-    branches: [main]
+    branches: [ main ]
     paths:
       - '.github/workflows/heavy-data-processing.yml'
-      - 'scripts/chat_server.js'
-      - 'scripts/chat_app.html'
-
-permissions:
-  contents: write
+      - 'scripts/process_data.py'
+  workflow_dispatch:
 
 jobs:
-  gitchat:
+  data-processing:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
-    if: "github.event_name == 'workflow_dispatch' || !startsWith(github.event.head_commit.message, '\U0001F916')"
-
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Git config + init data files
+      - name: Download lodash from CDN
         run: |
-          git config user.name "error404unknownuser99-ux"
-          git config user.email "error404unknownuser99@users.noreply.github.com"
-          mkdir -p output data
-          [ -f data/users.json ]    || echo '[]' > data/users.json
-          [ -f data/messages.json ] || echo '{}' > data/messages.json
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] Environment ready" >> output/runtimelogs.txt
+          mkdir -p output
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚀 Starting CDN download test..." >> output/runtimelogs.txt
+          
+          # Download lodash from cdnjs
+          curl -o output/lodash.min.js https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js
+          
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ lodash.min.js downloaded!" >> output/runtimelogs.txt
+          
+          # File size check
+          SIZE=$(wc -c < output/lodash.min.js)
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📦 File size: $SIZE bytes" >> output/runtimelogs.txt
+          
+          # Show first line
+          HEAD=$(head -c 100 output/lodash.min.js)
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📄 Preview: $HEAD" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🎉 Test complete!" >> output/runtimelogs.txt
 
-      - name: Install Express
-        run: |
-          npm install express
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] express installed" >> output/runtimelogs.txt
-
-      - name: Install bore tunnel
-        run: |
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] Fetching bore binary..." >> output/runtimelogs.txt
-
-          BORE_DL=$(curl -sL https://api.github.com/repos/ekzhang/bore/releases/latest \
-            | python3 -c "
-          import json,sys
-          try:
-            d = json.load(sys.stdin)
-            for a in d.get('assets',[]):
-              n = a.get('name','')
-              if 'x86_64-unknown-linux-musl' in n and n.endswith('.tar.gz'):
-                print(a['browser_download_url']); break
-          except: pass
-          " 2>/dev/null)
-
-          BORE_OK=false
-          if [ -n "$BORE_DL" ]; then
-            curl -sL "$BORE_DL" | tar xz 2>/dev/null
-            BORE_BIN=$(find . -maxdepth 1 -name 'bore*' -type f 2>/dev/null | head -1)
-            if [ -n "$BORE_BIN" ]; then
-              chmod +x "$BORE_BIN"
-              sudo cp "$BORE_BIN" /usr/local/bin/bore
-              command -v bore && BORE_OK=true
-            fi
-          fi
-
-          if [ "$BORE_OK" = "false" ]; then
-            echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] Compiling bore-cli from source..." >> output/runtimelogs.txt
-            cargo install bore-cli 2>&1 | tail -4
-          fi
-
-          bore --version && echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] bore ready" >> output/runtimelogs.txt
-
-      - name: Launch GitChat
+      - name: Commit output
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          bore local 3000 --to bore.pub > /tmp/bore.log 2>&1 &
-          BORE_PID=$!
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] bore tunnel launching..." >> output/runtimelogs.txt
-          sleep 8
-
-          BORE_ADDR=$(grep -oP 'bore\.pub:\d+' /tmp/bore.log | head -1)
-          if [ -z "$BORE_ADDR" ]; then
-            cat /tmp/bore.log
-            BORE_ADDR="bore.pub:UNKNOWN"
-          fi
-
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] ============================================" >> output/runtimelogs.txt
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] GitChat IS LIVE!" >> output/runtimelogs.txt
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] URL: http://${BORE_ADDR}" >> output/runtimelogs.txt
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] Share this with friends!" >> output/runtimelogs.txt
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] ============================================" >> output/runtimelogs.txt
-
-          git add output/runtimelogs.txt data/
-          git diff --staged --quiet || {
-            git commit -m "GitChat live http://${BORE_ADDR}"
-            git pull --rebase origin main
-            git push
-            echo "URL pushed to repo"
-          }
-
-          echo ""
-          echo "======================================================"
-          echo "  GITCHAT URL = http://${BORE_ADDR}"
-          echo "======================================================"
-
-          node scripts/chat_server.js &
-          SERVER_PID=$!
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] Node server started PID=$SERVER_PID" >> output/runtimelogs.txt
-          sleep 4
-
-          PING=$(curl -s http://localhost:3000/api/ping || echo "warming up")
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] Ping: $PING" >> output/runtimelogs.txt
-
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] Keep-alive started..." >> output/runtimelogs.txt
-
-          while true; do
-            sleep 60
-            S=$(kill -0 $SERVER_PID 2>/dev/null && echo yes || echo no)
-            B=$(kill -0 $BORE_PID   2>/dev/null && echo yes || echo no)
-            if [ "$S" = "no" ] || [ "$B" = "no" ]; then
-              echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [WARN] Process died server=$S bore=$B" >> output/runtimelogs.txt
-              break
-            fi
-          done
-
-          echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] [INFO] Session ended" >> output/runtimelogs.txt
-          git add output/runtimelogs.txt data/ || true
-          git diff --staged --quiet || {
-            git commit -m "GitChat session ended"
-            git pull --rebase origin main
-            git push || true
-          }
+          git config user.name "error404unknownuser99-ux"
+          git config user.email "error404unknownuser99@users.noreply.github.com"
+          git add output/
+          git diff --staged --quiet || git commit -m "🤖 CDN download output [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git pull --rebase origin main
+          git push
