@@ -18,18 +18,18 @@ jobs:
 
       - name: System Optimize
         run: |
-          sudo swapoff -a
-          echo 0 | sudo tee /proc/sys/vm/swappiness
-          sudo systemctl stop snapd 2>/dev/null || true
-          sudo systemctl stop unattended-upgrades 2>/dev/null || true
-          sudo systemctl stop apt-daily.timer 2>/dev/null || true
-          echo "Optimized! RAM: $(free -h | grep Mem | awk '{print $2}')"
+          swapoff -a 2>/dev/null || true
+          echo 0 > /proc/sys/vm/swappiness 2>/dev/null || true
+          systemctl stop snapd 2>/dev/null || true
+          systemctl stop unattended-upgrades 2>/dev/null || true
+          systemctl stop apt-daily.timer 2>/dev/null || true
+          echo "RAM: $(free -h | grep Mem | awk '{print $2}')"
 
-      - name: Install XFCE + XRDP + Themes
+      - name: Install XFCE + XRDP
         run: |
           export DEBIAN_FRONTEND=noninteractive
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
             xfce4 xfce4-terminal xfce4-goodies \
             xrdp dbus-x11 x11-xserver-utils xorgxrdp \
             fonts-noto fonts-firacode \
@@ -38,18 +38,17 @@ jobs:
             xfce4-taskmanager neofetch
           echo "Packages installed!"
 
-      - name: Create User + Fix Black Screen
+      - name: Create User + Setup XFCE
         run: |
-          sudo useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
-          echo "cyberpunk:Cyber@2025!" | sudo chpasswd
-          sudo usermod -aG sudo cyberpunk
+          useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
+          echo "cyberpunk:Cyber@2025!" | chpasswd
+          usermod -aG sudo cyberpunk
 
-          # Directories pehle banao
-          sudo mkdir -p /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml
-          sudo mkdir -p /home/cyberpunk/.config/gtk-3.0
+          mkdir -p /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml
+          mkdir -p /home/cyberpunk/.config/gtk-3.0
 
-          # BLACK SCREEN FIX 1: .xsession proper shebang ke saath
-          sudo tee /home/cyberpunk/.xsession > /dev/null << 'EOF'
+          # .xsession - EXECUTABLE + proper env
+          cat > /home/cyberpunk/.xsession << 'EOF'
           #!/bin/bash
           unset DBUS_SESSION_BUS_ADDRESS
           unset XDG_RUNTIME_DIR
@@ -58,17 +57,10 @@ jobs:
           export XDG_SESSION_DESKTOP=xfce
           exec startxfce4
           EOF
-          sudo chmod +x /home/cyberpunk/.xsession
+          chmod +x /home/cyberpunk/.xsession
 
-          # BLACK SCREEN FIX 2: .xsessionrc
-          sudo tee /home/cyberpunk/.xsessionrc > /dev/null << 'EOF'
-          export XDG_SESSION_DESKTOP=xfce
-          export XDG_CURRENT_DESKTOP=XFCE
-          export XDG_SESSION_TYPE=x11
-          EOF
-
-          # Theme configs
-          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml > /dev/null << 'EOF'
+          # Dark theme configs
+          cat > /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <channel name="xfwm4" version="1.0">
             <property name="general" type="empty">
@@ -81,7 +73,7 @@ jobs:
           </channel>
           EOF
 
-          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml > /dev/null << 'EOF'
+          cat > /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <channel name="xsettings" version="1.0">
             <property name="Net" type="empty">
@@ -95,7 +87,7 @@ jobs:
           </channel>
           EOF
 
-          sudo tee /home/cyberpunk/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
+          cat > /home/cyberpunk/.config/gtk-3.0/settings.ini << 'EOF'
           [Settings]
           gtk-theme-name=Arc-Dark
           gtk-icon-theme-name=Papirus-Dark
@@ -103,22 +95,21 @@ jobs:
           gtk-enable-animations=0
           EOF
 
-          sudo tee /home/cyberpunk/.gtkrc-2.0 > /dev/null << 'EOF'
+          cat > /home/cyberpunk/.gtkrc-2.0 << 'EOF'
           gtk-theme-name="Arc-Dark"
           gtk-icon-theme-name="Papirus-Dark"
-          gtk-font-name="Noto Sans 10"
           gtk-enable-animations=0
           EOF
 
-          sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
-          echo "User + config done!"
+          chown -R cyberpunk:cyberpunk /home/cyberpunk/
+          echo "User setup done!"
 
-      - name: Configure XRDP - Black Screen Fix
+      - name: Configure XRDP - Fix Black Screen
         run: |
-          sudo adduser xrdp ssl-cert 2>/dev/null || true
+          adduser xrdp ssl-cert 2>/dev/null || true
 
-          # BLACK SCREEN FIX 3: startwm.sh
-          sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
+          # FIX 1: startwm.sh
+          cat > /etc/xrdp/startwm.sh << 'EOF'
           #!/bin/sh
           unset DBUS_SESSION_BUS_ADDRESS
           unset XDG_RUNTIME_DIR
@@ -127,19 +118,53 @@ jobs:
           export XDG_SESSION_DESKTOP=xfce
           exec startxfce4
           EOF
-          sudo chmod +x /etc/xrdp/startwm.sh
+          chmod +x /etc/xrdp/startwm.sh
 
-          # BLACK SCREEN FIX 4: sesman.ini - Xorg use karo (better than Xvnc!)
-          sudo sed -i 's/^param=Xvnc/param=Xorg/' /etc/xrdp/sesman.ini 2>/dev/null || true
+          # FIX 2: xorg.conf - YE THA ASLI PROBLEM! EMPTY THA!
+          cat > /etc/xrdp/xorg.conf << 'EOF'
+          Section "Module"
+              Load "fb"
+              Load "shadow"
+              Load "xrdpdev"
+              Load "xrdpkeyb"
+              Load "xrdpmouse"
+          EndSection
+          Section "Device"
+              Identifier "xrdpdev"
+              Driver "xrdpdev"
+          EndSection
+          Section "Screen"
+              Identifier "Screen0"
+              Device "xrdpdev"
+              DefaultDepth 24
+              SubSection "Display"
+                  Depth 24
+                  Modes "1920x1080" "1280x720" "1024x768"
+              EndSubSection
+          EndSection
+          Section "ServerLayout"
+              Identifier "Layout0"
+              Screen "Screen0"
+              InputDevice "xrdpkeyb" "CoreKeyboard"
+              InputDevice "xrdpmouse" "CorePointer"
+          EndSection
+          Section "InputDevice"
+              Identifier "xrdpkeyb"
+              Driver "xrdpkeyb"
+          EndSection
+          Section "InputDevice"
+              Identifier "xrdpmouse"
+              Driver "xrdpmouse"
+          EndSection
+          EOF
 
-          # Performance tune
-          sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
-          sudo sed -i 's/#tcp_send_buffer_bytes=32768/tcp_send_buffer_bytes=4194304/' /etc/xrdp/xrdp.ini 2>/dev/null || true
+          # FIX 3: Performance tune
+          sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
 
-          sudo systemctl restart xrdp
-          sleep 4
-          sudo systemctl status xrdp --no-pager
-          echo "XRDP ready!"
+          systemctl restart xrdp
+          sleep 3
+          systemctl status xrdp --no-pager
+          echo "XRDP configured!"
 
       - name: Start bore tunnel with Auto-Reconnect
         env:
@@ -166,21 +191,18 @@ jobs:
 
             if [ -n "$PORT" ]; then
               echo "TUNNEL LIVE! bore.pub:$PORT"
-
               cat > output/rdp_credentials.txt << CREDS
           USERNAME: cyberpunk
           PASSWORD: Cyber@2025!
           ADDRESS:  bore.pub:$PORT
           ATTEMPT:  $attempt
           CREDS
-
               git add output/
               git diff --staged --quiet || (git commit -m "Ubuntu RDP LIVE bore.pub:$PORT" && \
                 for i in 1 2 3 4 5; do
                   git pull --rebase origin main && git push && break
                   sleep 2
                 done)
-
               wait $BORE_PID
               echo "Bore exited! Reconnecting in 5s..."
               sleep 5
