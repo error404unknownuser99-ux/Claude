@@ -11,6 +11,7 @@ on:
 jobs:
   data-processing:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
 
     steps:
       - name: Checkout repo
@@ -21,29 +22,72 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install libraries
+      - name: Install bore tunnel
+        run: |
+          echo "📦 Installing bore..."
+          curl -fsSL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz \
+            -o /tmp/bore.tar.gz
+          tar -xzf /tmp/bore.tar.gz -C /tmp/
+          sudo mv /tmp/bore /usr/local/bin/bore
+          bore --version
+
+      - name: Start web server
         run: |
           mkdir -p output
-          echo "📦 Installing... $(date)" | tee output/processing_log.txt
-          pip install -q requests
-          echo "✅ Done: $(date)" | tee -a output/processing_log.txt
+          echo "🚀 Starting Python web server on port 3000..."
+          nohup python scripts/process_data.py > output/server.log 2>&1 &
+          echo $! > /tmp/server.pid
+          sleep 2
+          echo "✅ Server PID: $(cat /tmp/server.pid)"
+          curl -s http://localhost:3000/api/ping | python3 -m json.tool
 
-      - name: Run GitHub API analysis
+      - name: Start bore tunnel & save URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "🚀 Script start: $(date)" | tee -a output/processing_log.txt
-          python scripts/process_data.py 2>&1 | tee -a output/processing_log.txt
-          echo "✅ Script done: $(date)" | tee -a output/processing_log.txt
+          echo "🌐 Starting bore tunnel..."
+          nohup bore local 3000 --to bore.pub > /tmp/bore.log 2>&1 &
+          echo $! > /tmp/bore.pid
+          sleep 5
 
-      - name: Show results
+          # Get bore URL
+          BORE_URL=$(grep -o 'bore.pub:[0-9]*' /tmp/bore.log | head -1)
+          echo "Bore log:"
+          cat /tmp/bore.log
+
+          if [ -z "$BORE_URL" ]; then
+            echo "❌ bore URL nahi mila! Retrying..."
+            sleep 5
+            BORE_URL=$(grep -o 'bore.pub:[0-9]*' /tmp/bore.log | head -1)
+          fi
+
+          FULL_URL="http://$BORE_URL"
+          echo "✅ LIVE URL: $FULL_URL"
+          echo "$FULL_URL" > output/live_url.txt
+          echo "Started at: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> output/live_url.txt
+          echo "Expires in ~30 minutes" >> output/live_url.txt
+
+          # Commit URL immediately
+          git config user.name "error404unknownuser99-ux"
+          git config user.email "error404unknownuser99@users.noreply.github.com"
+          git add output/
+          git diff --staged --quiet || git commit -m "🌐 Live at $FULL_URL"
+          git pull --rebase origin main
+          git push
+          echo "URL committed to repo! 🎉"
+
+      - name: Keep alive (30 min)
         run: |
-          ls -lh output/
-          cat output/speed_results.json
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: github-analysis-output
-          path: output/
+          echo "⏳ Server live rakhne ke liye wait kar raha hoon..."
+          URL=$(cat output/live_url.txt | head -1)
+          echo "🌐 Visit karo: $URL"
+          
+          for i in $(seq 1 30); do
+            sleep 60
+            echo "⏱️ $i min done | Server alive check..."
+            curl -s http://localhost:3000/api/stats | python3 -m json.tool || echo "❌ Server down!"
+          done
+          echo "✅ 30 min complete! Server shutting down."
 
       - name: Commit output to repo
         env:
@@ -52,7 +96,7 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 GitHub API analysis output [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git diff --staged --quiet || git commit -m "🤖 Final output [$(date '+%Y-%m-%d %H:%M:%S')]"
           git pull --rebase origin main
           git push
 
