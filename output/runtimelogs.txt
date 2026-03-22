@@ -1,0 +1,5 @@
+[2026-03-22 11:23:06 UTC] [INFO] 🚀 APK download start...
+[2026-03-22 11:24:54 UTC] [INFO] ✅ Download done!
+[2026-03-22 11:24:54 UTC] [INFO] 📦 Size: 7643556 bytes (~7.28 MB)
+[2026-03-22 11:24:54 UTC] [INFO] 🔍 Magic bytes: 00000000: 504b 0304 0000 0000 0800 2108 2102 a334  PK........!.!..4
+[2026-03-22 11:24:54 UTC] [INFO] 🎉 APK ready!
