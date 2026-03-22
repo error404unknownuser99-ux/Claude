@@ -173,7 +173,7 @@ def generate():
     prompt = data.get('prompt', '')
     log(f"🎨 Generate request: '{prompt}'")
     try:
-        api_url = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+        api_url = "https://router.huggingface.co/hf-inference/models/runwayml/stable-diffusion-v1-5"
         headers = {"Content-Type": "application/json"}
         payload = {"inputs": prompt, "options": {"wait_for_model": True}}
         response = req.post(api_url, headers=headers, json=payload, timeout=120)
