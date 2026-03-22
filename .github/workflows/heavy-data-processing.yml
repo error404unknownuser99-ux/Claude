@@ -1,4 +1,4 @@
-name: Windows Desktop RDP + ngrok
+name: Windows Desktop RDP + bore.pub
 
 on:
   push:
@@ -17,10 +17,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Optimize + RDP + ngrok
+      - name: Optimize + RDP + bore.pub
         shell: powershell
-        env:
-          NGROK_TOKEN: 3BJQSr9d5pNOmSTJO9Ci576O5NY_3hCpqUn3VgWzc9ygdEfkP
         run: |
           New-Item -ItemType Directory -Force -Path "output" | Out-Null
           $LOG = "output\runtimelogs.txt"
@@ -28,7 +26,6 @@ jobs:
           # === 1. OPTIMIZE ===
           "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Optimization start..." | Tee-Object -FilePath $LOG -Append
 
-          # Visual FX - Best Performance (animations off)
           $vfxPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"
           New-Item -Path $vfxPath -Force | Out-Null
           Set-ItemProperty -Path $vfxPath -Name VisualFXSetting -Value 2
@@ -37,52 +34,46 @@ jobs:
           Set-ItemProperty -Path $advPath -Name ListviewShadow -Value 0 -ErrorAction SilentlyContinue
           Set-ItemProperty -Path $advPath -Name ListviewAlphaSelect -Value 0 -ErrorAction SilentlyContinue
 
-          # Unnecessary services stop
           @("SysMain","WSearch","DiagTrack","wuauserv","BITS","TabletInputService") | ForEach-Object {
             Stop-Service -Name $_ -Force -ErrorAction SilentlyContinue
             Set-Service -Name $_ -StartupType Disabled -ErrorAction SilentlyContinue
           }
-
-          # High Performance power plan
           powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
-
           "[$(Get-Date -Format 'HH:mm:ss')] [OK] Optimization done!" | Tee-Object -FilePath $LOG -Append
 
           # === 2. ENABLE RDP ===
           "[$(Get-Date -Format 'HH:mm:ss')] [INFO] RDP enable..." | Tee-Object -FilePath $LOG -Append
-
           Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop" -ErrorAction SilentlyContinue
-          # NLA off - easy connect
           Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "UserAuthentication" -Value 0
-          # 16-bit color
           Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 2 -ErrorAction SilentlyContinue
           net user runneradmin "RDP@Pass123" 2>$null
           Add-LocalGroupMember -Group "Remote Desktop Users" -Member "runneradmin" -ErrorAction SilentlyContinue
           Restart-Service TermService -Force -ErrorAction SilentlyContinue
-
           "[$(Get-Date -Format 'HH:mm:ss')] [OK] RDP ready! User:runneradmin Pass:RDP@Pass123" | Tee-Object -FilePath $LOG -Append
 
-          # === 3. NGROK TUNNEL ===
-          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] ngrok download..." | Tee-Object -FilePath $LOG -Append
-
-          Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -OutFile "C:\ngrok.zip" -UseBasicParsing
-          Expand-Archive -Path "C:\ngrok.zip" -DestinationPath "C:\" -Force
-          C:\ngrok.exe config add-authtoken $env:NGROK_TOKEN
+          # === 3. BORE TUNNEL ===
+          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] bore download..." | Tee-Object -FilePath $LOG -Append
+          Invoke-WebRequest -Uri "https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-pc-windows-msvc.exe" -OutFile "C:\bore.exe" -UseBasicParsing
 
           "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Tunnel start port 3389..." | Tee-Object -FilePath $LOG -Append
-
-          $proc = Start-Process -FilePath "C:\ngrok.exe" `
-            -ArgumentList "tcp 3389 --log=stdout" `
-            -RedirectStandardOutput "C:\ngrok_out.txt" `
+          $proc = Start-Process -FilePath "C:\bore.exe" `
+            -ArgumentList "local 3389 --to bore.pub" `
+            -RedirectStandardOutput "C:\bore_out.txt" `
+            -RedirectStandardError "C:\bore_err.txt" `
             -PassThru -WindowStyle Hidden
-          $proc.Id | Out-File "C:\ngrok_pid.txt"
+          $proc.Id | Out-File "C:\bore_pid.txt"
 
-          Start-Sleep -Seconds 15
+          Start-Sleep -Seconds 12
 
-          try {
-            $api = Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels" -ErrorAction Stop
-            $tunnel = $api.tunnels[0].public_url -replace "tcp://", ""
+          $boreOut = (Get-Content "C:\bore_out.txt" -ErrorAction SilentlyContinue) -join " "
+          $boreErr = (Get-Content "C:\bore_err.txt" -ErrorAction SilentlyContinue) -join " "
+          $allOut = "$boreOut $boreErr"
+          $match = [regex]::Match($allOut, "bore\.pub:(\d+)")
+
+          if ($match.Success) {
+            $port = $match.Groups[1].Value
+            $tunnel = "bore.pub:$port"
             "" | Tee-Object -FilePath $LOG -Append
             "[$(Get-Date -Format 'HH:mm:ss')] [READY] TUNNEL READY!" | Tee-Object -FilePath $LOG -Append
             "================================================" | Tee-Object -FilePath $LOG -Append
@@ -93,9 +84,8 @@ jobs:
             "  Password: RDP@Pass123" | Tee-Object -FilePath $LOG -Append
             "  Color:    16-bit optimized" | Tee-Object -FilePath $LOG -Append
             "================================================" | Tee-Object -FilePath $LOG -Append
-          } catch {
-            "[$(Get-Date -Format 'HH:mm:ss')] [WARN] API nahi mila!" | Tee-Object -FilePath $LOG -Append
-            Get-Content "C:\ngrok_out.txt" -ErrorAction SilentlyContinue | Tee-Object -FilePath $LOG -Append
+          } else {
+            "[$(Get-Date -Format 'HH:mm:ss')] [WARN] Port nahi mila! Output: $allOut" | Tee-Object -FilePath $LOG -Append
           }
 
       - name: Push Info
@@ -105,7 +95,7 @@ jobs:
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
           $diff = git diff --staged --name-only
-          if ($diff) { git commit -m "Windows RDP live!" }
+          if ($diff) { git commit -m "Windows RDP live - bore.pub!" }
           git pull --rebase origin main
           git push origin main
 
@@ -113,27 +103,30 @@ jobs:
         shell: powershell
         run: |
           $LOG = "output\runtimelogs.txt"
-          try {
-            $api = Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels" -ErrorAction Stop
-            $tunnel = $api.tunnels[0].public_url -replace "tcp://", ""
-          } catch { $tunnel = "unknown" }
+          $boreErr = (Get-Content "C:\bore_err.txt" -ErrorAction SilentlyContinue) -join " "
+          $boreOut = (Get-Content "C:\bore_out.txt" -ErrorAction SilentlyContinue) -join " "
+          $match = [regex]::Match("$boreOut $boreErr", "bore\.pub:(\d+)")
+          $tunnel = if ($match.Success) { "bore.pub:$($match.Groups[1].Value)" } else { "unknown" }
 
-          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Alive! Host:$tunnel Pass:RDP@Pass123" | Tee-Object -FilePath $LOG -Append
+          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Alive! Host:$tunnel" | Tee-Object -FilePath $LOG -Append
 
           $count = 0
           while ($true) {
             Start-Sleep -Seconds 300
             $count += 5
-            $ngrokPid = Get-Content "C:\ngrok_pid.txt" -ErrorAction SilentlyContinue
-            $alive = if (Get-Process -Id $ngrokPid -ErrorAction SilentlyContinue) { "alive" } else { "dead" }
+            $borePid = Get-Content "C:\bore_pid.txt" -ErrorAction SilentlyContinue
+            $alive = if (Get-Process -Id $borePid -ErrorAction SilentlyContinue) { "alive" } else { "dead" }
             $rdp = (Get-Service TermService -ErrorAction SilentlyContinue).Status
-            "[$(Get-Date -Format 'HH:mm:ss')] [${count}min] ngrok:$alive RDP:$rdp" | Tee-Object -FilePath $LOG -Append
+            "[$(Get-Date -Format 'HH:mm:ss')] [${count}min] bore:$alive RDP:$rdp Host:$tunnel" | Tee-Object -FilePath $LOG -Append
 
             if ($alive -eq "dead") {
-              "[$(Get-Date -Format 'HH:mm:ss')] [INFO] ngrok restart..." | Tee-Object -FilePath $LOG -Append
-              $proc = Start-Process -FilePath "C:\ngrok.exe" -ArgumentList "tcp 3389 --log=stdout" -RedirectStandardOutput "C:\ngrok_out.txt" -PassThru -WindowStyle Hidden
-              $proc.Id | Out-File "C:\ngrok_pid.txt"
+              $proc = Start-Process -FilePath "C:\bore.exe" -ArgumentList "local 3389 --to bore.pub" -RedirectStandardOutput "C:\bore_out.txt" -RedirectStandardError "C:\bore_err.txt" -PassThru -WindowStyle Hidden
+              $proc.Id | Out-File "C:\bore_pid.txt"
               Start-Sleep -Seconds 12
+              $newErr = (Get-Content "C:\bore_err.txt" -ErrorAction SilentlyContinue) -join " "
+              $newMatch = [regex]::Match($newErr, "bore\.pub:(\d+)")
+              if ($newMatch.Success) { $tunnel = "bore.pub:$($newMatch.Groups[1].Value)" }
+              "[$(Get-Date -Format 'HH:mm:ss')] [INFO] bore restarted! New host:$tunnel" | Tee-Object -FilePath $LOG -Append
             }
             if ($count -ge 330) {
               "[$(Get-Date -Format 'HH:mm:ss')] [INFO] 5.5hr done!" | Tee-Object -FilePath $LOG -Append
