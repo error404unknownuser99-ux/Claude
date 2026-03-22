@@ -1,98 +1,91 @@
-name: Calculator on bore.pub
+name: GitChat - Live Chat Server 💬
 
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/heavy-data-processing.yml'
-      - 'scripts/process_data.py'
-      - 'scripts/calculator.html'
+      - 'scripts/chat_server.py'
   workflow_dispatch:
 
 jobs:
-  serve-calculator:
+  gitchat-server:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 340
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup output folder
         run: |
-          mkdir -p output/logs
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚀 Workflow started!" >> output/runtimelogs.txt
+          mkdir -p output
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚀 GitChat setup shuru..." >> output/runtimelogs.txt
+          cat output/runtimelogs.txt
 
-      - name: Install bore
+      - name: Install bore tunnel
         run: |
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📦 Installing bore..." >> output/runtimelogs.txt
-          curl -sL https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz \
-            | tar xz -C /usr/local/bin/ bore
-          chmod +x /usr/local/bin/bore
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📦 bore install ho raha hai..." >> output/runtimelogs.txt
+          curl -sL https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz -o bore.tar.gz
+          tar xzf bore.tar.gz
+          sudo mv bore /usr/local/bin/bore
           bore --version
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ bore installed!" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ bore install ho gaya!" >> output/runtimelogs.txt
 
-      - name: Setup web server folder
+      - name: Start GitChat Python server
         run: |
-          mkdir -p /tmp/www
-          cp scripts/calculator.html /tmp/www/index.html
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📁 Calculator HTML ready" >> output/runtimelogs.txt
-
-      - name: Start HTTP server + bore tunnel
-        run: |
-          cd /tmp/www && python3 -m http.server 8080 > /tmp/http.log 2>&1 &
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🌐 HTTP server started on port 8080" >> output/runtimelogs.txt
-
-          bore local 8080 --to bore.pub > /tmp/bore.log 2>&1 &
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🕳️  bore tunnel starting..." >> output/runtimelogs.txt
-
-          sleep 8
-
-          PORT=$(grep -oP '(?<=bore\.pub:)\d+' /tmp/bore.log | head -1)
-          echo "[$(date -u)] bore log: $(cat /tmp/bore.log)" >> output/runtimelogs.txt
-
-          if [ -n "$PORT" ]; then
-            URL="http://bore.pub:$PORT"
-            echo "$URL" > output/url.txt
-            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Calculator LIVE at: $URL" >> output/runtimelogs.txt
-            echo "======================================"
-            echo "🔥 Calculator URL: $URL"
-            echo "======================================"
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🐍 Python chat server start ho raha hai port 8080 pe..." >> output/runtimelogs.txt
+          python3 scripts/chat_server.py &
+          echo $! > /tmp/server.pid
+          sleep 3
+          if curl -s http://localhost:8080 > /dev/null; then
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ Chat server chal raha hai port 8080 pe!" >> output/runtimelogs.txt
           else
-            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [ERROR] ❌ Could not extract bore port!" >> output/runtimelogs.txt
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ❌ Server start nahi hua!" >> output/runtimelogs.txt
             exit 1
           fi
 
-          git config user.name "error404unknownuser99-ux"
-          git config user.email "error404unknownuser99@users.noreply.github.com"
-          git add output/
-          git diff --staged --quiet || git commit -m "🔗 Calculator URL: $URL"
-          git pull --rebase origin main
-          git push
-
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📌 URL pushed to output/url.txt!" >> output/runtimelogs.txt
-
-      - name: Keep alive 30 minutes
+      - name: Open bore tunnel & broadcast URL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ⏳ Server alive for 30 min..." >> output/runtimelogs.txt
-          for i in 1 2 3 4 5 6; do
-            sleep 300
-            MIN=$((i * 5))
-            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Still running... ${MIN}/30 min" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🌐 bore tunnel khol raha hai..." >> output/runtimelogs.txt
+
+          bore local 8080 --to bore.pub 2>&1 | tee /tmp/bore.log &
+          BORE_PID=$!
+          sleep 10
+
+          BORE_ADDR=$(grep -oE 'bore\.pub:[0-9]+' /tmp/bore.log | head -1)
+
+          if [ -n "$BORE_ADDR" ]; then
+            CHAT_URL="http://${BORE_ADDR}"
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🎉 CHAT APP LIVE HAI!" >> output/runtimelogs.txt
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🔗 URL: ${CHAT_URL}" >> output/runtimelogs.txt
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 👇 Is URL pe jao, naam dalo, join ho jao!" >> output/runtimelogs.txt
+
+            echo "${CHAT_URL}" > output/chat_url.txt
+
             git config user.name "error404unknownuser99-ux"
             git config user.email "error404unknownuser99@users.noreply.github.com"
+            git add output/
+            git diff --staged --quiet || git commit -m "💬 GitChat LIVE: ${CHAT_URL}"
+            git pull --rebase origin main
+            git push
+
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ URL repo mein push ho gaya! output/chat_url.txt dekho" >> output/runtimelogs.txt
+          else
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ❌ bore URL nahi mila!" >> output/runtimelogs.txt
+            cat /tmp/bore.log >> output/runtimelogs.txt
+            exit 1
+          fi
+
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ⏳ Server live hai! Cancel karo tab band hoga." >> output/runtimelogs.txt
+
+          while kill -0 $BORE_PID 2>/dev/null; do
+            sleep 300
+            USERS_COUNT=$(curl -s http://localhost:8080/api/users 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d))" 2>/dev/null || echo "?")
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💓 Heartbeat — Online users: ${USERS_COUNT} | URL: ${CHAT_URL}" >> output/runtimelogs.txt
             git add output/runtimelogs.txt
-            git diff --staged --quiet || git commit -m "⏰ Alive ${MIN}min"
+            git diff --staged --quiet || git commit -m "💓 GitChat heartbeat"
             git pull --rebase origin main
             git push
           done
-
-      - name: Final commit
-        if: always()
-        run: |
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🏁 Workflow ending" >> output/runtimelogs.txt
-          git config user.name "error404unknownuser99-ux"
-          git config user.email "error404unknownuser99@users.noreply.github.com"
-          git add output/
-          git diff --staged --quiet || git commit -m "🏁 Done"
-          git pull --rebase origin main
-          git push
