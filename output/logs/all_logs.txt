@@ -1,0 +1,231 @@
+============================================================
+Monitor Run : 2026-03-22 06:38:43 UTC
+Run ID      : 23397321396
+Workflow    : Hello World Test 🧪
+Status      : completed
+Conclusion  : success
+URL         : https://github.com/error404unknownuser99-ux/Claude/actions/runs/23397321396
+============================================================
+
+
+--- JOB: hello-world | completed | success ---
+ï»¿2026-03-22T06:25:11.1146080Z Current runner version: '2.332.0'
+2026-03-22T06:25:11.1170798Z ##[group]Runner Image Provisioner
+2026-03-22T06:25:11.1171722Z Hosted Compute Agent
+2026-03-22T06:25:11.1172261Z Version: 20260213.493
+2026-03-22T06:25:11.1172927Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-03-22T06:25:11.1173602Z Build Date: 2026-02-13T00:28:41Z
+2026-03-22T06:25:11.1174305Z Worker ID: {ab6dc2f9-60dc-4dcd-a4d2-3c2a292c9cfe}
+2026-03-22T06:25:11.1175033Z Azure Region: westus
+2026-03-22T06:25:11.1175556Z ##[endgroup]
+2026-03-22T06:25:11.1176989Z ##[group]Operating System
+2026-03-22T06:25:11.1177539Z Ubuntu
+2026-03-22T06:25:11.1178160Z 24.04.3
+2026-03-22T06:25:11.1178581Z LTS
+2026-03-22T06:25:11.1179021Z ##[endgroup]
+2026-03-22T06:25:11.1179555Z ##[group]Runner Image
+2026-03-22T06:25:11.1180503Z Image: ubuntu-24.04
+2026-03-22T06:25:11.1181031Z Version: 20260309.50.1
+2026-03-22T06:25:11.1182319Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260309.50/images/ubuntu/Ubuntu2404-Readme.md
+2026-03-22T06:25:11.1183690Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260309.50
+2026-03-22T06:25:11.1184645Z ##[endgroup]
+2026-03-22T06:25:11.1187319Z ##[group]GITHUB_TOKEN Permissions
+2026-03-22T06:25:11.1189621Z Actions: write
+2026-03-22T06:25:11.1190437Z ArtifactMetadata: write
+2026-03-22T06:25:11.1191054Z Attestations: write
+2026-03-22T06:25:11.1191700Z Checks: write
+2026-03-22T06:25:11.1192214Z Contents: write
+2026-03-22T06:25:11.1192771Z Deployments: write
+2026-03-22T06:25:11.1193367Z Discussions: write
+2026-03-22T06:25:11.1193988Z Issues: write
+2026-03-22T06:25:11.1194493Z Metadata: read
+2026-03-22T06:25:11.1195080Z Models: read
+2026-03-22T06:25:11.1195602Z Packages: write
+2026-03-22T06:25:11.1196149Z Pages: write
+2026-03-22T06:25:11.1196886Z PullRequests: write
+2026-03-22T06:25:11.1197465Z RepositoryProjects: write
+2026-03-22T06:25:11.1198089Z SecurityEvents: write
+2026-03-22T06:25:11.1198610Z Statuses: write
+2026-03-22T06:25:11.1199253Z ##[endgroup]
+2026-03-22T06:25:11.1201523Z Secret source: Actions
+2026-03-22T06:25:11.1202209Z Prepare workflow directory
+2026-03-22T06:25:11.1548191Z Prepare all required actions
+2026-03-22T06:25:11.1611099Z Getting action download info
+2026-03-22T06:25:11.6010784Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-03-22T06:25:11.7608742Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-03-22T06:25:12.0234720Z Complete job name: hello-world
+2026-03-22T06:25:12.1019605Z ##[group]Run actions/checkout@v4
+2026-03-22T06:25:12.1020803Z with:
+2026-03-22T06:25:12.1021241Z   repository: error404unknownuser99-ux/Claude
+2026-03-22T06:25:12.1021951Z   token: ***
+2026-03-22T06:25:12.1022318Z   ssh-strict: true
+2026-03-22T06:25:12.1022698Z   ssh-user: git
+2026-03-22T06:25:12.1023087Z   persist-credentials: true
+2026-03-22T06:25:12.1023518Z   clean: true
+2026-03-22T06:25:12.1023940Z   sparse-checkout-cone-mode: true
+2026-03-22T06:25:12.1024456Z   fetch-depth: 1
+2026-03-22T06:25:12.1024913Z   fetch-tags: false
+2026-03-22T06:25:12.1025350Z   show-progress: true
+2026-03-22T06:25:12.1025784Z   lfs: false
+2026-03-22T06:25:12.1026190Z   submodules: false
+2026-03-22T06:25:12.1026634Z   set-safe-directory: true
+2026-03-22T06:25:12.1027310Z ##[endgroup]
+2026-03-22T06:25:12.2183614Z Syncing repository: error404unknownuser99-ux/Claude
+2026-03-22T06:25:12.2186269Z ##[group]Getting Git version info
+2026-03-22T06:25:12.2187404Z Working directory is '/home/runner/work/Claude/Claude'
+2026-03-22T06:25:12.2189082Z [command]/usr/bin/git version
+2026-03-22T06:25:12.2263782Z git version 2.53.0
+2026-03-22T06:25:12.2298457Z ##[endgroup]
+2026-03-22T06:25:12.2327170Z Temporarily overriding HOME='/home/runner/work/_temp/9576f84a-72fb-4f88-91c8-f32ead02b979' before making global git config changes
+2026-03-22T06:25:12.2331602Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T06:25:12.2334880Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Claude/Claude
+2026-03-22T06:25:12.2389427Z Deleting the contents of '/home/runner/work/Claude/Claude'
+2026-03-22T06:25:12.2393238Z ##[group]Initializing the repository
+2026-03-22T06:25:12.2397528Z [command]/usr/bin/git init /home/runner/work/Claude/Claude
+2026-03-22T06:25:12.2568976Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-03-22T06:25:12.2570705Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-03-22T06:25:12.2571913Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-03-22T06:25:12.2572826Z hint: call:
+2026-03-22T06:25:12.2573504Z hint:
+2026-03-22T06:25:12.2574554Z hint: 	git config --global init.defaultBranch <name>
+2026-03-22T06:25:12.2575825Z hint:
+2026-03-22T06:25:12.2577074Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-03-22T06:25:12.2579320Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-03-22T06:25:12.2581341Z hint:
+2026-03-22T06:25:12.2582229Z hint: 	git branch -m <name>
+2026-03-22T06:25:12.2583230Z hint:
+2026-03-22T06:25:12.2584716Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-03-22T06:25:12.2586320Z Initialized empty Git repository in /home/runner/work/Claude/Claude/.git/
+2026-03-22T06:25:12.2591130Z [command]/usr/bin/git remote add origin https://github.com/error404unknownuser99-ux/Claude
+2026-03-22T06:25:12.2631152Z ##[endgroup]
+2026-03-22T06:25:12.2632341Z ##[group]Disabling automatic garbage collection
+2026-03-22T06:25:12.2636317Z [command]/usr/bin/git config --local gc.auto 0
+2026-03-22T06:25:12.2667345Z ##[endgroup]
+2026-03-22T06:25:12.2668528Z ##[group]Setting up auth
+2026-03-22T06:25:12.2675267Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T06:25:12.2708542Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-22T06:25:12.3119689Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T06:25:12.3152687Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-22T06:25:12.3388678Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T06:25:12.3424170Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-22T06:25:12.3663084Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-03-22T06:25:12.3700564Z ##[endgroup]
+2026-03-22T06:25:12.3701496Z ##[group]Fetching the repository
+2026-03-22T06:25:12.3711875Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +674ae249980a7ed7328de729e58ee0160ff410c3:refs/remotes/origin/main
+2026-03-22T06:25:12.7757682Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-22T06:25:12.7759206Z  * [new ref]         674ae249980a7ed7328de729e58ee0160ff410c3 -> origin/main
+2026-03-22T06:25:12.7792991Z ##[endgroup]
+2026-03-22T06:25:12.7794053Z ##[group]Determining the checkout info
+2026-03-22T06:25:12.7795429Z ##[endgroup]
+2026-03-22T06:25:12.7799698Z [command]/usr/bin/git sparse-checkout disable
+2026-03-22T06:25:12.7843136Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-03-22T06:25:12.7868712Z ##[group]Checking out the ref
+2026-03-22T06:25:12.7872315Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-03-22T06:25:12.7917007Z Switched to a new branch 'main'
+2026-03-22T06:25:12.7920770Z branch 'main' set up to track 'origin/main'.
+2026-03-22T06:25:12.7926945Z ##[endgroup]
+2026-03-22T06:25:12.7960817Z [command]/usr/bin/git log -1 --format=%H
+2026-03-22T06:25:12.7984365Z 674ae249980a7ed7328de729e58ee0160ff410c3
+2026-03-22T06:25:12.8175782Z ##[group]Run mkdir -p output
+2026-03-22T06:25:12.8176413Z [36;1mmkdir -p output[0m
+2026-03-22T06:25:12.8230902Z shell: /usr/bin/bash -e {0}
+2026-03-22T06:25:12.8231396Z ##[endgroup]
+2026-03-22T06:25:12.8381093Z ##[group]Run echo "========================================"  | tee output/output.txt
+2026-03-22T06:25:12.8381953Z [36;1mecho "========================================"  | tee output/output.txt[0m
+2026-03-22T06:25:12.8382759Z [36;1mecho "  Hello World! ð Test Run"              | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8383578Z [36;1mecho "  Time: $(date)"                         | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8384394Z [36;1mecho "  Runner: $RUNNER_NAME"                  | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8385227Z [36;1mecho "  Job: $GITHUB_JOB"                      | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8386057Z [36;1mecho "  Workflow: $GITHUB_WORKFLOW"            | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8386918Z [36;1mecho "  Run ID: $GITHUB_RUN_ID"                | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8387703Z [36;1mecho "========================================"  | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8388493Z [36;1mecho "â Test PASSED - Hello World successful!" | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8436683Z shell: /usr/bin/bash -e {0}
+2026-03-22T06:25:12.8437173Z ##[endgroup]
+2026-03-22T06:25:12.8522751Z ========================================
+2026-03-22T06:25:12.8537632Z   Hello World! ð Test Run
+2026-03-22T06:25:12.8554298Z   Time: Sun Mar 22 06:25:12 UTC 2026
+2026-03-22T06:25:12.8569012Z   Runner: GitHub Actions 1000000016
+2026-03-22T06:25:12.8582790Z   Job: hello-world
+2026-03-22T06:25:12.8596622Z   Workflow: Hello World Test ð§ª
+2026-03-22T06:25:12.8609692Z   Run ID: 23397321396
+2026-03-22T06:25:12.8623555Z ========================================
+2026-03-22T06:25:12.8637148Z â Test PASSED - Hello World successful!
+2026-03-22T06:25:12.8676463Z ##[group]Run echo ""                                        | tee -a output/output.txt
+2026-03-22T06:25:12.8677307Z [36;1mecho ""                                        | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8678059Z [36;1mecho "----------------------------------------" | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8678902Z [36;1mecho "ð¡ Monitor API hit kar rahe hain..."     | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8680197Z [36;1mecho "ð https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8681074Z [36;1m[0m
+2026-03-22T06:25:12.8681696Z [36;1mSTATUS=$(curl -s -o /dev/null -w "%{http_code}" https://track-workflow.onrender.com/)[0m
+2026-03-22T06:25:12.8682627Z [36;1mecho "ð Monitor API HTTP Status: $STATUS"     | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8683292Z [36;1m[0m
+2026-03-22T06:25:12.8683965Z [36;1mcurl -s https://track-workflow.onrender.com/latest > output/monitor_response.json[0m
+2026-03-22T06:25:12.8685107Z [36;1mecho "â Monitor response output/monitor_response.json mein save!" | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8686116Z [36;1mecho "----------------------------------------" | tee -a output/output.txt[0m
+2026-03-22T06:25:12.8686751Z [36;1m[0m
+2026-03-22T06:25:12.8687131Z [36;1mecho "--- Monitor API Response ---"[0m
+2026-03-22T06:25:12.8687657Z [36;1mcat output/monitor_response.json[0m
+2026-03-22T06:25:12.8735568Z shell: /usr/bin/bash -e {0}
+2026-03-22T06:25:12.8736020Z ##[endgroup]
+2026-03-22T06:25:12.8814630Z 
+2026-03-22T06:25:12.8828819Z ----------------------------------------
+2026-03-22T06:25:12.8842405Z ð¡ Monitor API hit kar rahe hain...
+2026-03-22T06:25:12.8856834Z ð https://github.com/error404unknownuser99-ux/Claude/actions/runs/23397321396
+2026-03-22T06:25:13.0383209Z ð Monitor API HTTP Status: 200
+2026-03-22T06:25:13.3901804Z â Monitor response output/monitor_response.json mein save!
+2026-03-22T06:25:13.3915211Z ----------------------------------------
+2026-03-22T06:25:13.3916986Z --- Monitor API Response ---
+2026-03-22T06:25:13.3929232Z {"conclusion":null,"created_at":"2026-03-22T06:25:06Z","run_id":23397321396,"status":"in_progress","updated_at":"2026-03-22T06:25:10Z","url":"https://github.com/error404unknownuser99-ux/Claude/actions/runs/23397321396","workflow":"Hello World Test \ud83e\uddea"}
+2026-03-22T06:25:13.4061972Z ##[group]Run actions/upload-artifact@v4
+2026-03-22T06:25:13.4063230Z with:
+2026-03-22T06:25:13.4064093Z   name: hello-world-output
+2026-03-22T06:25:13.4065125Z   path: output/
+2026-03-22T06:25:13.4066037Z   if-no-files-found: warn
+2026-03-22T06:25:13.4067068Z   compression-level: 6
+2026-03-22T06:25:13.4068033Z   overwrite: false
+2026-03-22T06:25:13.4068969Z   include-hidden-files: false
+2026-03-22T06:25:13.4070172Z ##[endgroup]
+2026-03-22T06:25:13.6295652Z With the provided path, there will be 2 files uploaded
+2026-03-22T06:25:13.6301072Z Artifact name is valid!
+2026-03-22T06:25:13.6302860Z Root directory input is valid!
+2026-03-22T06:25:13.9157982Z Beginning upload of artifact content to blob storage
+2026-03-22T06:25:14.2054233Z Uploaded bytes 785
+2026-03-22T06:25:14.2827852Z Finished uploading artifact content to blob storage!
+2026-03-22T06:25:14.2831918Z SHA256 digest of uploaded artifact zip is 8dcde8c558237ef8701718d8129bb84eb638af3be927ff02dc94a2db73db9a79
+2026-03-22T06:25:14.2833927Z Finalizing artifact upload
+2026-03-22T06:25:14.4230428Z Artifact hello-world-output.zip successfully finalized. Artifact ID 6044573191
+2026-03-22T06:25:14.4232116Z Artifact hello-world-output has been successfully uploaded! Final size is 785 bytes. Artifact ID is 6044573191
+2026-03-22T06:25:14.4240194Z Artifact download URL: https://github.com/error404unknownuser99-ux/Claude/actions/runs/23397321396/artifacts/6044573191
+2026-03-22T06:25:14.4351846Z ##[group]Run git config user.name "error404unknownuser99-ux"
+2026-03-22T06:25:14.4352286Z [36;1mgit config user.name "error404unknownuser99-ux"[0m
+2026-03-22T06:25:14.4352726Z [36;1mgit config user.email "error404unknownuser99@users.noreply.github.com"[0m
+2026-03-22T06:25:14.4353112Z [36;1mgit add output/[0m
+2026-03-22T06:25:14.4353577Z [36;1mgit diff --staged --quiet || git commit -m "ð¤ Auto: Hello World test output [$(date '+%Y-%m-%d %H:%M:%S')]"[0m
+2026-03-22T06:25:14.4354082Z [36;1mgit push[0m
+2026-03-22T06:25:14.4405597Z shell: /usr/bin/bash -e {0}
+2026-03-22T06:25:14.4405841Z env:
+2026-03-22T06:25:14.4406340Z   GITHUB_TOKEN: ***
+2026-03-22T06:25:14.4406542Z ##[endgroup]
+2026-03-22T06:25:14.4617378Z [main 4d8d9fa] ð¤ Auto: Hello World test output [2026-03-22 06:25:14]
+2026-03-22T06:25:14.4618146Z  2 files changed, 5 insertions(+), 5 deletions(-)
+2026-03-22T06:25:15.0807509Z To https://github.com/error404unknownuser99-ux/Claude
+2026-03-22T06:25:15.0808415Z    674ae24..4d8d9fa  main -> main
+2026-03-22T06:25:15.0964533Z Post job cleanup.
+2026-03-22T06:25:15.1922096Z [command]/usr/bin/git version
+2026-03-22T06:25:15.1960474Z git version 2.53.0
+2026-03-22T06:25:15.2003288Z Temporarily overriding HOME='/home/runner/work/_temp/f3502119-8f36-4c2a-a7b7-140d9653eab7' before making global git config changes
+2026-03-22T06:25:15.2004646Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T06:25:15.2008748Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Claude/Claude
+2026-03-22T06:25:15.2045384Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T06:25:15.2078801Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-22T06:25:15.2316340Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T06:25:15.2338664Z http.https://github.com/.extraheader
+2026-03-22T06:25:15.2351498Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T06:25:15.2383214Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-22T06:25:15.2616440Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T06:25:15.2649044Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-22T06:25:15.3006553Z Cleaning up orphan processes
+2026-03-22T06:25:15.3306440Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/upload-artifact@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
+--- END JOB ---
