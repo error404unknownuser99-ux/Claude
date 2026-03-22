@@ -1,24 +1,22 @@
 ============================================================
 🤖 Monitor Bot — Auto Update
-Timestamp  : 2026-03-22 08:36:01 UTC
-Run ID     : 23399300029
-Workflow   : 🔬 Heavy Data Processing
-Status     : in_progress
-Conclusion : None
-URL        : https://github.com/error404unknownuser99-ux/Claude/actions/runs/23399300029
+Timestamp  : 2026-03-22 08:43:27 UTC
+Run ID     : 23399416555
+Workflow   : .github/workflows/heavy-data-processing.yml
+Status     : completed
+Conclusion : failure
+URL        : https://github.com/error404unknownuser99-ux/Claude/actions/runs/23399416555
 ============================================================
-
-
---- JOB: data-processing | status:in_progress | conclusion:None ---
-[Log fetch failed HTTP 404]
---- END JOB ---
 
 
 ==================================================
 YAML VALIDATION:
-  ✅ heavy-data-processing.yml — Sahi hai!
+  ❌ heavy-data-processing.yml — YAML Syntax Error: mapping values are not allowed here
+  in "<unicode string>", line 112, column 46:
+     ... curl -s -o /dev/null -w "Monitor: %{http_code}" https://track-wo ... 
+                                         ^
 ==================================================
 
 CONCURRENCY: ✅ 1/5 running — sab theek!
 
-⏰ Last updated: 2026-03-22 08:36:01 UTC
+⏰ Last updated: 2026-03-22 08:43:27 UTC
