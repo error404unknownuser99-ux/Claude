@@ -1,4 +1,4 @@
-import os, time, base64, json, threading
+import os, base64, json
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template_string
 import requests as req
@@ -26,8 +26,7 @@ HTML_PAGE = """<!DOCTYPE html>
     background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     font-family: 'Segoe UI', sans-serif;
     display: flex; flex-direction: column; align-items: center;
-    padding: 40px 20px;
-    color: white;
+    padding: 40px 20px; color: white;
   }
   h1 {
     font-size: 2.5rem; font-weight: 800;
@@ -60,29 +59,22 @@ HTML_PAGE = """<!DOCTYPE html>
     background: linear-gradient(135deg, #7c3aed, #2563eb);
     border: none; border-radius: 12px;
     color: white; font-size: 1.1rem; font-weight: 700;
-    cursor: pointer; transition: all 0.3s; letter-spacing: 0.5px;
+    cursor: pointer; transition: all 0.3s;
   }
   button:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(124,58,237,0.5); }
   button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  .result-box {
-    margin-top: 30px; text-align: center;
-    display: none;
-  }
+  .result-box { margin-top: 30px; text-align: center; display: none; }
   .result-box img {
     width: 100%; border-radius: 16px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     border: 1px solid rgba(255,255,255,0.1);
   }
-  .loading {
-    display: none; text-align: center; margin-top: 25px;
-    color: #a78bfa; font-size: 1rem;
-  }
+  .loading { display: none; text-align: center; margin-top: 25px; color: #a78bfa; font-size: 1rem; }
   .spinner {
     display: inline-block; width: 28px; height: 28px;
     border: 3px solid rgba(167,139,250,0.3);
     border-top-color: #a78bfa; border-radius: 50%;
-    animation: spin 0.8s linear infinite; margin-right: 10px;
-    vertical-align: middle;
+    animation: spin 0.8s linear infinite; margin-right: 10px; vertical-align: middle;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   .error { color: #f87171; margin-top: 15px; font-size: 0.9rem; text-align: center; display: none; }
@@ -90,15 +82,10 @@ HTML_PAGE = """<!DOCTYPE html>
     display: none; margin-top: 15px; padding: 10px 25px;
     background: rgba(52,211,153,0.2); border: 1px solid #34d399;
     border-radius: 10px; color: #34d399; cursor: pointer;
-    font-size: 0.95rem; transition: all 0.3s; width: auto;
+    font-size: 0.95rem; width: auto;
   }
-  .download-btn:hover { background: rgba(52,211,153,0.35); }
-  .badge {
-    display: inline-block; padding: 4px 12px;
-    background: rgba(52,211,153,0.15); border: 1px solid #34d399;
-    border-radius: 20px; color: #34d399; font-size: 0.75rem;
-    margin-bottom: 25px;
-  }
+  .badge { display: inline-block; padding: 4px 12px; background: rgba(52,211,153,0.15); border: 1px solid #34d399; border-radius: 20px; color: #34d399; font-size: 0.75rem; margin-bottom: 25px; }
+  .timer { color: #fbbf24; font-size: 0.85rem; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -109,9 +96,7 @@ HTML_PAGE = """<!DOCTYPE html>
   <label>✏️ Describe your image</label>
   <textarea id="prompt" placeholder="e.g. a futuristic city at night, neon lights, cyberpunk style..."></textarea>
   <button id="genBtn" onclick="generate()">✨ Generate Image</button>
-  <div class="loading" id="loading">
-    <span class="spinner"></span> Generating your image... (20-40 sec)
-  </div>
+  <div class="loading" id="loading"><span class="spinner"></span> Generating... (20-40 sec)</div>
   <div class="error" id="errorMsg"></div>
   <div class="result-box" id="resultBox">
     <img id="resultImg" src="" alt="Generated Image"/>
@@ -138,9 +123,7 @@ async function generate() {
       document.getElementById('resultImg').src = 'data:image/png;base64,' + data.image;
       document.getElementById('resultBox').style.display = 'block';
       document.getElementById('dlBtn').style.display = 'inline-block';
-    } else {
-      throw new Error(data.error || 'Unknown error');
-    }
+    } else { throw new Error(data.error || 'Unknown error'); }
   } catch(e) {
     document.getElementById('errorMsg').textContent = '❌ Error: ' + e.message;
     document.getElementById('errorMsg').style.display = 'block';
@@ -173,16 +156,17 @@ def generate():
     prompt = data.get('prompt', '')
     log(f"🎨 Generate request: '{prompt}'")
     try:
+        # ✅ New HuggingFace router URL
         api_url = "https://router.huggingface.co/hf-inference/models/runwayml/stable-diffusion-v1-5"
         headers = {"Content-Type": "application/json"}
-        payload = {"inputs": prompt, "options": {"wait_for_model": True}}
+        payload = {"inputs": prompt}
         response = req.post(api_url, headers=headers, json=payload, timeout=120)
         if response.status_code == 200:
             img_b64 = base64.b64encode(response.content).decode('utf-8')
             log(f"✅ Image generated successfully!")
             return jsonify({"image": img_b64})
         else:
-            err = response.text[:200]
+            err = response.text[:300]
             log(f"❌ HF API error {response.status_code}: {err}", "ERROR")
             return jsonify({"error": f"API Error {response.status_code}: {err}"}), 500
     except Exception as e:

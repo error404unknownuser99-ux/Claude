@@ -11,7 +11,7 @@ on:
 jobs:
   data-processing:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 35
 
     steps:
       - name: Checkout repo
@@ -32,7 +32,7 @@ jobs:
       - name: Install bore tunnel
         run: |
           echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚇 Installing bore..." >> output/runtimelogs.txt
-          curl -L https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz -o bore.tar.gz
+          curl -sL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz -o bore.tar.gz
           tar xz -f bore.tar.gz
           chmod +x bore
           echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ bore installed!" >> output/runtimelogs.txt
@@ -42,23 +42,17 @@ jobs:
           echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚀 Starting Flask server..." >> output/runtimelogs.txt
           nohup python scripts/process_data.py > output/flask.log 2>&1 &
           sleep 3
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Flask server started!" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Flask started!" >> output/runtimelogs.txt
 
-      - name: Start bore tunnel & keep alive
+      - name: Start bore & commit URL
         run: |
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🌐 Starting bore tunnel..." >> output/runtimelogs.txt
           nohup ./bore local 5000 --to bore.pub > output/bore.log 2>&1 &
           sleep 5
-
-          # Get the bore port from logs
-          BORE_PORT=$(grep -o 'listening at.*:[0-9]*' output/bore.log | grep -o '[0-9]*$' | head -1)
+          BORE_PORT=$(grep -o 'remote_port=[0-9]*' output/bore.log | grep -o '[0-9]*$' | head -1)
           BORE_URL="http://bore.pub:${BORE_PORT}"
-
           echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🎉 LIVE URL: ${BORE_URL}" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🔗 Share karo yaar: ${BORE_URL}" >> output/runtimelogs.txt
           echo "BORE_URL=${BORE_URL}" >> output/runtimelogs.txt
 
-          # Commit the URL to output so we can read it
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
@@ -68,9 +62,11 @@ jobs:
             sleep 3
           done
 
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ⏳ Server alive for 8 minutes..." >> output/runtimelogs.txt
-          sleep 480
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ⏰ Time's up! Server stopping." >> output/runtimelogs.txt
+      - name: Keep alive 30 minutes
+        run: |
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ⏳ Server alive for 30 minutes..." >> output/runtimelogs.txt
+          sleep 1800
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ⏰ Done!" >> output/runtimelogs.txt
 
       - name: Final commit
         if: always()
@@ -80,7 +76,7 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 Final output saved"
+          git diff --staged --quiet || git commit -m "🤖 Final output"
           for i in 1 2 3; do
             git pull --rebase origin main && git push && break
             sleep 3
