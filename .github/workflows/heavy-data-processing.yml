@@ -54,7 +54,7 @@ jobs:
 
           # === 3. BORE TUNNEL ===
           "[$(Get-Date -Format 'HH:mm:ss')] [INFO] bore download..." | Tee-Object -FilePath $LOG -Append
-          Invoke-WebRequest -Uri "https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-pc-windows-msvc.exe" -OutFile "C:\bore.exe" -UseBasicParsing
+          curl.exe -L --retry 5 --retry-delay 3 -o "C:\\bore.exe" "https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-pc-windows-msvc.exe"
 
           "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Tunnel start port 3389..." | Tee-Object -FilePath $LOG -Append
           $proc = Start-Process -FilePath "C:\bore.exe" `
