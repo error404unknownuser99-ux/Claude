@@ -1,4 +1,4 @@
-name: Ubuntu MATE Cyberpunk RDP
+name: Android Emulator + RDP
 
 on:
   push:
@@ -9,91 +9,68 @@ on:
   workflow_dispatch:
 
 jobs:
-  ubuntu-rdp:
+  android-rdp:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 350
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: System Optimize
+      - name: Enable KVM
         run: |
-          sudo swapoff -a
-          echo 0 | sudo tee /proc/sys/vm/swappiness
-          sudo systemctl stop snapd 2>/dev/null || true
-          sudo systemctl stop unattended-upgrades 2>/dev/null || true
-          sudo systemctl stop apt-daily.timer 2>/dev/null || true
-          echo "RAM: $(free -h | grep Mem | awk '{print $2}') | Optimized!"
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
-      - name: Install MATE + XRDP
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Download F-Droid APK
+        run: |
+          curl -L https://f-droid.org/F-Droid.apk -o fdroid.apk
+          echo "F-Droid Downloaded!"
+
+      - name: Install XFCE + XRDP + bore
         run: |
           export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            mate-desktop-environment-core \
-            mate-terminal mate-system-monitor \
-            xrdp dbus-x11 x11-xserver-utils xorgxrdp \
-            papirus-icon-theme arc-theme \
-            fonts-noto fonts-firacode \
-            wget curl git unzip firefox \
-            neofetch
+            xfce4 xfce4-terminal xfce4-goodies \
+            xrdp dbus-x11 dbus-user-session x11-xserver-utils xorgxrdp \
+            wget curl
           echo "Packages installed!"
 
-      - name: Create User + Dark Theme
+      - name: Create User + Configure XRDP
         run: |
           sudo useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
           echo "cyberpunk:Cyber@2025!" | sudo chpasswd
           sudo usermod -aG sudo cyberpunk
 
-          sudo mkdir -p /home/cyberpunk/.config/gtk-3.0
-          sudo mkdir -p /home/cyberpunk/.config/dconf
-
-          # Arc-Dark theme for MATE
-          sudo tee /home/cyberpunk/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
-          [Settings]
-          gtk-theme-name=Arc-Dark
-          gtk-icon-theme-name=Papirus-Dark
-          gtk-font-name=Noto Sans 10
-          gtk-enable-animations=0
-          EOF
-
-          sudo tee /home/cyberpunk/.gtkrc-2.0 > /dev/null << 'EOF'
-          gtk-theme-name="Arc-Dark"
-          gtk-icon-theme-name="Papirus-Dark"
-          gtk-font-name="Noto Sans 10"
-          gtk-enable-animations=0
-          EOF
-
-          sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
-          echo "User configured!"
-
-      - name: Configure XRDP - MATE
-        run: |
           sudo adduser xrdp ssl-cert 2>/dev/null || true
 
-          # autorun=Xorg - Xvnc nahi!
+          # autorun=Xorg - black screen fix
           sudo sed -i 's/^autorun=$/autorun=Xorg/' /etc/xrdp/xrdp.ini
           sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
 
-          # PROVEN WORKING startwm.sh - MATE + proper runtime dir
+          # startwm.sh - dbus fix
           sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
           #!/bin/sh
           unset DBUS_SESSION_BUS_ADDRESS
           unset XDG_RUNTIME_DIR
           export XDG_CONFIG_DIRS=/etc/xdg:/etc
-          export XDG_RUNTIME_DIR=/tmp/xdg-runtime-$(id -u)
-          mkdir -p $XDG_RUNTIME_DIR
-          chmod 700 $XDG_RUNTIME_DIR
-          exec dbus-run-session -- mate-session
+          export PATH=/usr/lib/x86_64-linux-gnu/xfce4/xfconf:$PATH
+          exec dbus-run-session -- startxfce4
           EOF
           sudo chmod +x /etc/xrdp/startwm.sh
 
           sudo systemctl restart xrdp
-          sleep 4
-          sudo systemctl status xrdp --no-pager | head -8
-          echo "XRDP + MATE configured!"
+          sleep 3
+          echo "XRDP Ready!"
 
-      - name: Start bore tunnel with Auto-Reconnect
+      - name: Start bore tunnel + Save Port
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -105,34 +82,43 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
 
-          attempt=0
-          while true; do
-            attempt=$((attempt + 1))
-            echo "=== Tunnel attempt #$attempt ==="
-            ./bore local 3389 --to bore.pub > output/bore_out.txt 2>&1 &
-            BORE_PID=$!
-            sleep 8
-            PORT=$(grep -oP 'listening at bore\.pub:\K\d+' output/bore_out.txt 2>/dev/null)
-            if [ -n "$PORT" ]; then
-              echo "TUNNEL LIVE! bore.pub:$PORT"
-              cat > output/rdp_credentials.txt << CREDS
+          # Bore tunnel start karo background mein
+          ./bore local 3389 --to bore.pub > output/bore_out.txt 2>&1 &
+          sleep 8
+
+          PORT=$(grep -oP 'listening at bore\.pub:\K\d+' output/bore_out.txt 2>/dev/null)
+          echo "PORT: $PORT"
+
+          cat > output/rdp_credentials.txt << CREDS
           USERNAME: cyberpunk
           PASSWORD: Cyber@2025!
           ADDRESS:  bore.pub:$PORT
-          ATTEMPT:  $attempt
           CREDS
-              git add output/
-              git diff --staged --quiet || (git commit -m "MATE RDP LIVE bore.pub:$PORT" && \
-                for i in 1 2 3 4 5; do
-                  git pull --rebase origin main && git push && break
-                  sleep 2
-                done)
-              wait $BORE_PID
-              echo "Bore exited! Reconnecting in 5s..."
-              sleep 5
-            else
-              echo "Port not found, retrying..."
-              kill $BORE_PID 2>/dev/null || true
-              sleep 5
-            fi
-          done
+
+          git add output/
+          git diff --staged --quiet || (git commit -m "Android RDP LIVE bore.pub:$PORT" && \
+            for i in 1 2 3 4 5; do
+              git pull --rebase origin main && git push && break
+              sleep 2
+            done)
+
+          echo "Tunnel LIVE at bore.pub:$PORT"
+
+      - name: Android Emulator - RDP Display Pe
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          DISPLAY: :10.0
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          ram-size: 4096M
+          emulator-options: -no-snapshot-save -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            echo "Emulator chal raha hai!"
+            adb install fdroid.apk || true
+            echo "F-Droid Installed!"
+            adb shell monkey -p org.fdroid.fdroid 1 || true
+            echo "Session alive - RDP se connect karo!"
+            sleep 18000
