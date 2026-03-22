@@ -1,4 +1,4 @@
-name: GitHub Speed Test
+name: VNC Desktop Server
 
 on:
   push:
@@ -11,38 +11,82 @@ on:
 jobs:
   data-processing:
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Speed Test
+      - name: Install XFCE Desktop + VNC
         run: |
           mkdir -p output
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚀 Speed test start!" > output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📦 Installing desktop environment..." > output/runtimelogs.txt
+          git config user.name "error404unknownuser99-ux"
+          git config user.email "error404unknownuser99@users.noreply.github.com"
 
-          # Ubuntu ISO from fast mirror - real heavy file!
-          curl -L -o /dev/null \
-            --max-time 20 \
-            -w "Downloaded: %{size_download} bytes\nSpeed: %{speed_download} bytes/sec\nTime: %{time_total}s\n" \
-            "http://releases.ubuntu.com/22.04/ubuntu-22.04.5-desktop-amd64.iso" 2>/dev/null | tee -a output/runtimelogs.txt
+          sudo apt-get update -q
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            xfce4 xfce4-goodies \
+            tigervnc-standalone-server tigervnc-common \
+            dbus-x11 x11-utils \
+            curl wget
 
-          SPEED_BPS=$(grep "Speed:" output/runtimelogs.txt | awk '{print $2}' | cut -d. -f1)
-          SPEED_MBPS=$(echo "scale=2; $SPEED_BPS / 1048576" | bc)
-          SIZE_BYTES=$(grep "Downloaded:" output/runtimelogs.txt | awk '{print $2}')
-          SIZE_MB=$(echo "scale=2; $SIZE_BYTES / 1048576" | bc)
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ Desktop installed!" >> output/runtimelogs.txt
 
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📊 Speed: ${SPEED_MBPS} MB/s" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📦 Downloaded in 20s: ${SIZE_MB} MB" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🎉 Done!" >> output/runtimelogs.txt
-          cat output/runtimelogs.txt
-
-      - name: Commit output
+      - name: Setup VNC + bore tunnel
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "error404unknownuser99-ux"
-          git config user.email "error404unknownuser99@users.noreply.github.com"
+          # VNC password set karo
+          mkdir -p ~/.vnc
+          echo "vnc12345" | vncpasswd -f > ~/.vnc/passwd
+          chmod 600 ~/.vnc/passwd
+
+          # XFCE startup script
+          echo "startxfce4" > ~/.vnc/xstartup
+          chmod +x ~/.vnc/xstartup
+
+          # VNC server start karo
+          vncserver :1 -geometry 1280x800 -depth 24 --I-really-want-to-run-as-root 2>/dev/null || \
+          vncserver :1 -geometry 1280x800 -depth 24
+          sleep 3
+
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ VNC Server started on :1 (port 5901)!" >> output/runtimelogs.txt
+
+          # bore.pub download karo
+          curl -sL https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin/
+          chmod +x /usr/local/bin/bore
+
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚇 Starting bore tunnel..." >> output/runtimelogs.txt
+
+          # bore tunnel background mein chalaao aur port capture karo
+          bore local 5901 --to bore.pub > /tmp/bore_output.txt 2>&1 &
+          BORE_PID=$!
+
+          sleep 5
+
+          # Port capture karo bore output se
+          BORE_ADDR=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
+
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🌐 Tunnel Address: ${BORE_ADDR}" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🔑 VNC Password: vnc12345" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💻 Connect: Open VNC viewer → ${BORE_ADDR}" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ⏰ Server 6 ghante tak live rahega!" >> output/runtimelogs.txt
+
+          # Push initial info
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 Speed test result [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git diff --staged --quiet || git commit -m "🖥️ VNC Desktop Live!"
           git pull --rebase origin main
           git push
+
+          # Har 5 min mein status update karo
+          COUNT=0
+          while kill -0 $BORE_PID 2>/dev/null; do
+            sleep 300
+            COUNT=$((COUNT + 5))
+            BORE_ADDR=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💚 Still alive! ${COUNT} min | ${BORE_ADDR}" >> output/runtimelogs.txt
+            git add output/runtimelogs.txt
+            git diff --staged --quiet || git commit -m "💚 VNC alive [${COUNT}min]"
+            git pull --rebase origin main
+            git push
+          done
