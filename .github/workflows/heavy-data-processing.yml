@@ -21,20 +21,18 @@ jobs:
           sudo swapoff -a
           echo 0 | sudo tee /proc/sys/vm/swappiness
           sudo sysctl -w vm.vfs_cache_pressure=50
-          sudo sysctl -w net.core.rmem_max=134217728
-          sudo sysctl -w net.core.wmem_max=134217728
           for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
             echo performance | sudo tee $cpu 2>/dev/null || true
           done
-          echo "RAM before:"
-          free -h
           sudo systemctl stop snapd 2>/dev/null || true
           sudo systemctl stop unattended-upgrades 2>/dev/null || true
           sudo systemctl stop apt-daily.timer 2>/dev/null || true
           sudo systemctl stop apt-daily-upgrade.timer 2>/dev/null || true
+          echo "RAM:"
+          free -h
           echo "Optimization done!"
 
-      - name: Install XFCE + XRDP + Cyberpunk Theme
+      - name: Install XFCE + XRDP + Themes
         run: |
           export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update -qq
@@ -47,37 +45,36 @@ jobs:
             wget curl git unzip \
             firefox \
             xfce4-taskmanager \
-            thunar-archive-plugin \
             neofetch
-          echo "All packages installed!"
+          echo "Packages installed!"
 
-      - name: Configure XFCE Cyberpunk Theme + Kill ALL Animations
+      - name: Create User + Fix XFCE Config
         run: |
           sudo useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
           echo "cyberpunk:Cyber@2025!" | sudo chpasswd
           sudo usermod -aG sudo cyberpunk
 
-          sudo -u cyberpunk bash << 'USEREOF'
-          mkdir -p /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml
+          # Fix: directories pehle banao!
+          sudo mkdir -p /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml
+          sudo mkdir -p /home/cyberpunk/.config/gtk-3.0
+          sudo mkdir -p /home/cyberpunk/.config/autostart
 
-          cat > /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml << 'EOF'
+          # xfwm4 - animations off, arc-dark theme
+          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml > /dev/null << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <channel name="xfwm4" version="1.0">
             <property name="general" type="empty">
               <property name="theme" type="string" value="Arc-Dark"/>
               <property name="use_compositing" type="bool" value="false"/>
-              <property name="frame_opacity" type="int" value="100"/>
-              <property name="show_frame_shadow" type="bool" value="false"/>
               <property name="animate_mouse" type="bool" value="false"/>
               <property name="box_move" type="bool" value="false"/>
               <property name="box_resize" type="bool" value="false"/>
-              <property name="snap_windows" type="bool" value="true"/>
-              <property name="wrap_windows" type="bool" value="false"/>
             </property>
           </channel>
           EOF
 
-          cat > /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml << 'EOF'
+          # xsettings - dark theme
+          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml > /dev/null << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <channel name="xsettings" version="1.0">
             <property name="Net" type="empty">
@@ -86,83 +83,61 @@ jobs:
             </property>
             <property name="Gtk" type="empty">
               <property name="FontName" type="string" value="Noto Sans 10"/>
-              <property name="MonospaceFontName" type="string" value="FiraCode 10"/>
               <property name="EnableAnimations" type="bool" value="false"/>
-              <property name="CursorThemeName" type="string" value="Adwaita"/>
             </property>
           </channel>
           EOF
 
-          cat > /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <channel name="xfce4-desktop" version="1.0">
-            <property name="backdrop" type="empty">
-              <property name="screen0" type="empty">
-                <property name="monitorVNC-0" type="empty">
-                  <property name="workspace0" type="empty">
-                    <property name="color-style" type="int" value="0"/>
-                    <property name="rgba1" type="array">
-                      <value type="double" value="0.02"/>
-                      <value type="double" value="0.008"/>
-                      <value type="double" value="0.09"/>
-                      <value type="double" value="1"/>
-                    </property>
-                    <property name="rgba2" type="array">
-                      <value type="double" value="0"/>
-                      <value type="double" value="0.8"/>
-                      <value type="double" value="1"/>
-                      <value type="double" value="1"/>
-                    </property>
-                    <property name="image-style" type="int" value="0"/>
-                  </property>
-                </property>
-              </property>
-            </property>
-          </channel>
-          EOF
-
-          cat > /home/cyberpunk/.config/gtk-3.0/settings.ini << 'EOF'
+          # gtk3 settings
+          sudo tee /home/cyberpunk/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
           [Settings]
           gtk-theme-name=Arc-Dark
           gtk-icon-theme-name=Papirus-Dark
           gtk-font-name=Noto Sans 10
           gtk-enable-animations=0
-          gtk-primary-button-warps-slider=false
           EOF
-          mkdir -p /home/cyberpunk/.config/gtk-3.0
 
-          cat > /home/cyberpunk/.gtkrc-2.0 << 'EOF'
+          # gtk2 settings
+          sudo tee /home/cyberpunk/.gtkrc-2.0 > /dev/null << 'EOF'
           gtk-theme-name="Arc-Dark"
           gtk-icon-theme-name="Papirus-Dark"
           gtk-font-name="Noto Sans 10"
           gtk-enable-animations=0
           EOF
-          USEREOF
-          echo "XFCE Cyberpunk theme configured!"
+
+          # FIX: startxfce4 use karo - black screen fix!
+          echo "startxfce4" | sudo tee /home/cyberpunk/.xsession
+          echo "startxfce4" | sudo tee /home/cyberpunk/.Xclients
+          sudo chmod +x /home/cyberpunk/.xsession
+          sudo chmod +x /home/cyberpunk/.Xclients
+
+          # Ownership fix
+          sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
+
+          echo "User + XFCE config done!"
 
       - name: Configure XRDP
         run: |
           sudo adduser xrdp ssl-cert 2>/dev/null || true
-          echo "xfce4-session" | sudo tee /home/cyberpunk/.xsession
-          sudo chown cyberpunk:cyberpunk /home/cyberpunk/.xsession
 
+          # xrdp config - performance tuned
           sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
-          sudo sed -i 's/xserverbpp=24/xserverbpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
 
-          sudo bash -c 'cat >> /etc/xrdp/xrdp.ini << EOF
+          # startwm.sh fix
+          sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
+          #!/bin/sh
+          unset DBUS_SESSION_BUS_ADDRESS
+          unset XDG_RUNTIME_DIR
+          exec startxfce4
+          EOF
+          sudo chmod +x /etc/xrdp/startwm.sh
 
-          [Globals]
-          tcp_send_buffer_bytes=4194304
-          tcp_recv_buffer_bytes=4194304
-          EOF'
-
-          sudo systemctl enable xrdp
-          sudo systemctl start xrdp
+          sudo systemctl restart xrdp
           sleep 3
           sudo systemctl status xrdp --no-pager
           echo "XRDP configured!"
 
-      - name: Download bore and Start Tunnel with Auto-Reconnect
+      - name: Start bore tunnel with Auto-Reconnect
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -170,7 +145,6 @@ jobs:
           wget -q "https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz" -O bore.tar.gz
           tar -xzf bore.tar.gz
           chmod +x bore
-          echo "bore downloaded!"
 
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
@@ -194,7 +168,6 @@ jobs:
           PASSWORD: Cyber@2025!
           ADDRESS:  bore.pub:$PORT
           ATTEMPT:  $attempt
-          CONNECT:  Microsoft RDP App -> bore.pub:$PORT
           CREDS
 
               git add output/
