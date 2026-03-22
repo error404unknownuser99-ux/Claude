@@ -1,4 +1,0 @@
-  File "/home/runner/work/Claude/Claude/scripts/process_data.py", line 24
-    log(f"🖥️  CPU Model   : {run('cat /proc/cpuinfo | grep \"model name\" | head -1 | cut -d: -f2')}")
-                                                                                                          ^
-SyntaxError: f-string expression part cannot include a backslash
