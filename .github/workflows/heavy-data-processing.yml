@@ -21,29 +21,34 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install heavy Python libraries
+      - name: Install libraries
         run: |
           mkdir -p output
           echo "📦 Installing... $(date)" | tee output/processing_log.txt
-          pip install -q numpy pandas scipy scikit-learn matplotlib seaborn
-          echo "✅ Install complete: $(date)" | tee -a output/processing_log.txt
-          pip list | grep -E "numpy|pandas|scipy|scikit|matplotlib|seaborn" | tee -a output/processing_log.txt
+          pip install -q requests
+          echo "✅ Done: $(date)" | tee -a output/processing_log.txt
 
-      - name: Run data processing script
+      - name: Run GitHub API analysis
         run: |
-          echo "🚀 Script: $(date)" | tee -a output/processing_log.txt
+          echo "🚀 Script start: $(date)" | tee -a output/processing_log.txt
           python scripts/process_data.py 2>&1 | tee -a output/processing_log.txt
           echo "✅ Script done: $(date)" | tee -a output/processing_log.txt
 
-      - name: Show output files
+      - name: Show results
         run: |
+          echo "--- Output files ---"
           ls -lh output/
+          echo ""
+          echo "--- summary.json ---"
           cat output/summary.json
+          echo ""
+          echo "--- Top repos (first 5) ---"
+          head -6 output/top_python_repos.csv
 
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: data-processing-output
+          name: github-analysis-output
           path: output/
 
       - name: Commit output to repo
@@ -53,11 +58,11 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 Data processing output [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git diff --staged --quiet || git commit -m "🤖 GitHub API analysis output [$(date '+%Y-%m-%d %H:%M:%S')]"
           git pull --rebase origin main
           git push
 
       - name: Hit Monitor /full
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://track-workflow.onrender.com/full)
-          echo "Monitor HTTP Status: $STATUS"
+          echo "✅ Monitor hit: $STATUS"
