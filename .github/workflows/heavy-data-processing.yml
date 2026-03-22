@@ -23,7 +23,7 @@ jobs:
           sudo systemctl stop snapd 2>/dev/null || true
           sudo systemctl stop unattended-upgrades 2>/dev/null || true
           sudo systemctl stop apt-daily.timer 2>/dev/null || true
-          echo "RAM: $(free -h | grep Mem | awk '{print $2}') | Optimized!"
+          echo "RAM: $(free -h | grep Mem | awk '{print $2}') | Done!"
 
       - name: Install XFCE + XRDP
         run: |
@@ -32,23 +32,25 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             xfce4 xfce4-terminal xfce4-goodies \
             xrdp dbus-x11 dbus-user-session x11-xserver-utils xorgxrdp \
-            fonts-noto fonts-firacode \
-            papirus-icon-theme arc-theme \
+            fonts-noto papirus-icon-theme arc-theme \
             wget curl git unzip firefox \
             xfce4-taskmanager neofetch
-          echo "Packages installed!"
+          echo "Done!"
 
-      - name: Create User + Theme Config
+      - name: Setup XFCE for BOTH runner + cyberpunk user
         run: |
+          # cyberpunk user banao
           sudo useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
           echo "cyberpunk:Cyber@2025!" | sudo chpasswd
           sudo usermod -aG sudo cyberpunk
 
-          sudo mkdir -p /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml
-          sudo mkdir -p /home/cyberpunk/.config/gtk-3.0
-          sudo mkdir -p /home/cyberpunk/.config/caja
+          # BOTH users ke liye config setup karo
+          for USER_HOME in /home/runner /home/cyberpunk; do
+            sudo mkdir -p $USER_HOME/.config/xfce4/xfconf/xfce-perchannel-xml
+            sudo mkdir -p $USER_HOME/.config/gtk-3.0
+            sudo mkdir -p $USER_HOME/.config/caja
 
-          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml > /dev/null << 'EOF'
+            sudo tee $USER_HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml > /dev/null << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <channel name="xfwm4" version="1.0">
             <property name="general" type="empty">
@@ -61,7 +63,7 @@ jobs:
           </channel>
           EOF
 
-          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml > /dev/null << 'EOF'
+            sudo tee $USER_HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml > /dev/null << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <channel name="xsettings" version="1.0">
             <property name="Net" type="empty">
@@ -75,7 +77,7 @@ jobs:
           </channel>
           EOF
 
-          sudo tee /home/cyberpunk/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
+            sudo tee $USER_HOME/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
           [Settings]
           gtk-theme-name=Arc-Dark
           gtk-icon-theme-name=Papirus-Dark
@@ -83,34 +85,45 @@ jobs:
           gtk-enable-animations=0
           EOF
 
-          sudo tee /home/cyberpunk/.gtkrc-2.0 > /dev/null << 'EOF'
+            sudo tee $USER_HOME/.gtkrc-2.0 > /dev/null << 'EOF'
           gtk-theme-name="Arc-Dark"
           gtk-icon-theme-name="Papirus-Dark"
           gtk-font-name="Noto Sans 10"
           gtk-enable-animations=0
           EOF
+          done
+
+          # runner user ko sudo de do
+          sudo usermod -aG sudo runner 2>/dev/null || true
+          echo "runner:Runner@2025!" | sudo chpasswd
 
           sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
-          echo "User + themes configured!"
+          sudo chown -R runner:runner /home/runner/ 2>/dev/null || true
+          echo "Both users configured!"
 
-      - name: Configure XRDP
+      - name: Configure XRDP - DBUS FIX
         run: |
           sudo adduser xrdp ssl-cert 2>/dev/null || true
           sudo sed -i 's/^autorun=$/autorun=Xorg/' /etc/xrdp/xrdp.ini
           sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
 
+          # KEY FIX: eval dbus-launch --sh-syntax use karo
+          # dbus-run-session DBUS_ADDRESS properly export nahi karta!
           sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
           #!/bin/sh
           unset DBUS_SESSION_BUS_ADDRESS
           unset XDG_RUNTIME_DIR
           export XDG_CONFIG_DIRS=/etc/xdg:/etc
-          export PATH=/usr/lib/x86_64-linux-gnu/xfce4/xfconf:$PATH
-          exec dbus-run-session -- startxfce4
+          export XDG_DATA_DIRS=/usr/local/share:/usr/share
+          eval $(dbus-launch --sh-syntax --exit-with-session)
+          export DBUS_SESSION_BUS_ADDRESS
+          exec startxfce4
           EOF
           sudo chmod +x /etc/xrdp/startwm.sh
 
           sudo systemctl restart xrdp
           sleep 3
+          sudo systemctl status xrdp --no-pager | head -5
           echo "XRDP Ready!"
 
       - name: Start bore tunnel with Auto-Reconnect
@@ -136,8 +149,8 @@ jobs:
             if [ -n "$PORT" ]; then
               echo "TUNNEL LIVE! bore.pub:$PORT"
               cat > output/rdp_credentials.txt << CREDS
-          USERNAME: cyberpunk
-          PASSWORD: Cyber@2025!
+          USERNAME: cyberpunk  (ya runner)
+          PASSWORD: Cyber@2025! (ya Runner@2025!)
           ADDRESS:  bore.pub:$PORT
           ATTEMPT:  $attempt
           CREDS
@@ -148,10 +161,9 @@ jobs:
                   sleep 2
                 done)
               wait $BORE_PID
-              echo "Bore exited! Reconnecting in 5s..."
+              echo "Bore exited! Reconnecting..."
               sleep 5
             else
-              echo "Port not found, retrying..."
               kill $BORE_PID 2>/dev/null || true
               sleep 5
             fi
