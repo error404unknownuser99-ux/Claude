@@ -1,0 +1,43 @@
+📦 Installing... Sun Mar 22 08:24:20 UTC 2026
+✅ Done: Sun Mar 22 08:24:22 UTC 2026
+🚀 Script start: Sun Mar 22 08:24:22 UTC 2026
+🚀 GitHub Actions Internet Speed Test Starting...
+==================================================
+
+📥 Download Speed Test...
+...... ........ ........ ........ 87% 27.7M 1s
+ 89088K ........ ........ ........ ........ ........ ........ 90% 31.8M 1s
+ 92160K ........ ........ ........ ........ ........ ........ 93% 30.4M 1s
+ 95232K ........ ........ ........ ........ ........ ........ 96% 32.2M 0s
+ 98304K ........ ........ ........ ........ ........ ........ 99% 33.0M 0s
+101376K ........ ........                                    100% 61.0M=7.1s
+
+2026-03-22 08:24:29 (14.2 MB/s) - ‘/dev/null’ saved [104857600/104857600]
+
+
+✅ Download Speed: 113.60 Mbps (14.2 MB/s)
+
+⚡ Ping Test (8.8.8.8)...
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+
+--- 8.8.8.8 ping statistics ---
+5 packets transmitted, 0 received, 100% packet loss, time 4081ms
+
+
+
+🔍 DNS Resolution Speed...
+✅ DNS: 176.13 ms
+
+🌐 TTFB Test (google.com)...
+TTFB: 0.071567s
+Total: 0.075811s
+Speed: 1042632 bytes/s
+
+==================================================
+📊 FINAL RESULTS:
+  📥 Download: 113.6 Mbps
+  ⚡ Ping:     N/A ms
+  🔍 DNS:      176.13 ms
+==================================================
+✅ Results saved!
+✅ Script done: Sun Mar 22 08:24:44 UTC 2026
