@@ -3,9 +3,6 @@ name: 🔬 Heavy Data Processing
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - 'output/**'    # Monitor ke pushes pe trigger mat ho!
-      - '**.md'
     paths:
       - '.github/workflows/heavy-data-processing.yml'
       - 'scripts/process_data.py'
