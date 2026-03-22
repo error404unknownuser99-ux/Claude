@@ -19,7 +19,7 @@ log("🌐 Target: https://example.com")
 
 try:
     log("📡 Sending GET request to example.com...")
-    response = requests.get("https://example.com", timeout=10)
+    response = requests.get("https://example.com", timeout=10, verify=False)
     log(f"✅ Response received! Status code: {response.status_code}")
 
     soup = BeautifulSoup(response.text, "html.parser")
