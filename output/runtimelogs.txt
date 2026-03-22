@@ -1,0 +1,8 @@
+[2026-03-22 11:39:45 UTC] 📦 Installing desktop environment...
+[2026-03-22 11:41:07 UTC] ✅ Desktop installed!
+[2026-03-22 11:41:14 UTC] ✅ VNC Server started on :1 (port 5901)!
+[2026-03-22 11:41:14 UTC] 🚇 Starting bore tunnel...
+[2026-03-22 11:41:19 UTC] 🌐 Tunnel Address: bore.pub:30121
+[2026-03-22 11:41:19 UTC] 🔑 VNC Password: vnc12345
+[2026-03-22 11:41:19 UTC] 💻 Connect: Open VNC viewer → bore.pub:30121
+[2026-03-22 11:41:19 UTC] ⏰ Server 6 ghante tak live rahega!
