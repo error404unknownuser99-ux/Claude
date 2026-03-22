@@ -23,69 +23,31 @@ jobs:
           net user liveuser $pass /add
           net localgroup administrators liveuser /add
           net localgroup "Remote Desktop Users" liveuser /add
-
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' `
-            -Name "fDenyTSConnections" -Value 0
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
-            -Name "UserAuthentication" -Value 0
-
-          Write-Host "✅ RDP Enabled!"
-          Write-Host "👤 Username : liveuser"
-          Write-Host "🔑 Password : BoreRDP@2025!"
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
+          Write-Host "RDP Enabled! User: liveuser | Pass: BoreRDP@2025!"
 
       - name: Download bore and Start Tunnel
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path output | Out-Null
-
-          Write-Host "📥 Downloading bore..."
-          $boreUrl = "https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-pc-windows-msvc.zip"
-          Invoke-WebRequest -Uri $boreUrl -OutFile bore.zip -UseBasicParsing
+          Write-Host "Downloading bore..."
+          Invoke-WebRequest -Uri "https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-pc-windows-msvc.zip" -OutFile bore.zip -UseBasicParsing
           Expand-Archive bore.zip -DestinationPath . -Force
-
-          Write-Host "🚇 Starting bore tunnel on port 3389..."
-          Start-Process -FilePath ".\bore.exe" `
-            -ArgumentList "local 3389 --to bore.pub" `
-            -RedirectStandardError "output\bore_url.txt" `
-            -RedirectStandardOutput "output\bore_stdout.txt" `
-            -NoNewWindow -PassThru | Out-Null
-
-          Start-Sleep -Seconds 10
-
-          $boreOut = Get-Content "output\bore_url.txt" -Raw -ErrorAction SilentlyContinue
-          $boreStd = Get-Content "output\bore_stdout.txt" -Raw -ErrorAction SilentlyContinue
-
-          Write-Host "=== bore stderr ==="
-          Write-Host $boreOut
-          Write-Host "=== bore stdout ==="
-          Write-Host $boreStd
-
-          $creds = @"
-======================================
-  Windows RDP LIVE SESSION
-======================================
-Bore stderr:
-$boreOut
-
-Bore stdout:
-$boreStd
-
-CREDENTIALS:
-  Username : liveuser
-  Password : BoreRDP@2025!
-
-Connect karo:
-  1. bore.pub:PORT dhundho upar logs mein
-  2. mstsc.exe kholo (Windows) ya Microsoft Remote Desktop (Mac)
-  3. Computer: bore.pub:XXXXX
-  4. Username: liveuser / Password: BoreRDP@2025!
-
-Session max 6 ghante chalega!
-======================================
-"@
-          $creds | Out-File output\rdp_credentials.txt -Encoding UTF8
-          Write-Host $creds
+          Write-Host "Starting bore tunnel on port 3389..."
+          Start-Process -FilePath ".\bore.exe" -ArgumentList "local 3389 --to bore.pub" -RedirectStandardError "output\bore_err.txt" -RedirectStandardOutput "output\bore_out.txt" -NoNewWindow -PassThru | Out-Null
+          Start-Sleep -Seconds 12
+          $err = Get-Content "output\bore_err.txt" -Raw -ErrorAction SilentlyContinue
+          $out = Get-Content "output\bore_out.txt" -Raw -ErrorAction SilentlyContinue
+          Write-Host "BORE STDERR: $err"
+          Write-Host "BORE STDOUT: $out"
+          "USERNAME: liveuser" | Out-File output\rdp_credentials.txt -Encoding UTF8
+          "PASSWORD: BoreRDP@2025!" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+          "BORE STDERR: $err" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+          "BORE STDOUT: $out" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+          "HOW TO CONNECT: mstsc or Microsoft RDP app -> bore.pub:PORT" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+          Get-Content output\rdp_credentials.txt
 
       - name: Commit Credentials
         shell: pwsh
@@ -97,7 +59,7 @@ Session max 6 ghante chalega!
           git add output/
           git diff --staged --quiet
           if ($LASTEXITCODE -ne 0) {
-            git commit -m "RDP Session Live - check rdp_credentials.txt"
+            git commit -m "RDP credentials ready"
             for ($i = 0; $i -lt 5; $i++) {
               git pull --rebase origin main
               git push
@@ -109,6 +71,6 @@ Session max 6 ghante chalega!
       - name: Keep Session Alive
         shell: pwsh
         run: |
-          Write-Host "Session alive - 5.5 ghante wait karunga..."
-          Write-Host "Jab tak ye step chal raha hai RDP connect kar sakte ho!"
+          Write-Host "Session alive - connect karo RDP se!"
+          Write-Host "User: liveuser | Pass: BoreRDP@2025!"
           Start-Sleep -Seconds 19800
