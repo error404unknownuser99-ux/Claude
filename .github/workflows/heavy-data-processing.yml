@@ -1,4 +1,4 @@
-name: JS Library CDN Download Test
+name: APK Download Test
 
 on:
   push:
@@ -15,24 +15,25 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Download lodash from CDN
+      - name: Download APK
         run: |
           mkdir -p output
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚀 Starting CDN download test..." >> output/runtimelogs.txt
-          
-          # Download lodash from cdnjs
-          curl -o output/lodash.min.js https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js
-          
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ lodash.min.js downloaded!" >> output/runtimelogs.txt
-          
-          # File size check
-          SIZE=$(wc -c < output/lodash.min.js)
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📦 File size: $SIZE bytes" >> output/runtimelogs.txt
-          
-          # Show first line
-          HEAD=$(head -c 100 output/lodash.min.js)
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📄 Preview: $HEAD" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🎉 Test complete!" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚀 APK download start..." >> output/runtimelogs.txt
+
+          # Simple Flashlight - open source APK from F-Droid
+          curl -L -o output/simple-flashlight.apk \
+            "https://f-droid.org/repo/com.simplemobiletools.flashlight_57.apk"
+
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Download done!" >> output/runtimelogs.txt
+
+          SIZE=$(wc -c < output/simple-flashlight.apk)
+          SIZE_MB=$(echo "scale=2; $SIZE/1048576" | bc)
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📦 Size: $SIZE bytes (~${SIZE_MB} MB)" >> output/runtimelogs.txt
+
+          # APK verification - check PK header (ZIP magic bytes)
+          MAGIC=$(xxd output/simple-flashlight.apk | head -1)
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🔍 Magic bytes: $MAGIC" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🎉 APK ready!" >> output/runtimelogs.txt
 
       - name: Commit output
         env:
@@ -41,6 +42,6 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 CDN download output [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git diff --staged --quiet || git commit -m "🤖 APK download output [$(date '+%Y-%m-%d %H:%M:%S')]"
           git pull --rebase origin main
           git push
