@@ -1,0 +1,9 @@
+[2026-03-22 09:38:10 UTC] [INFO] 🚀 Workflow started!
+[2026-03-22 09:38:10 UTC] [INFO] 📦 Installing bore...
+[2026-03-22 09:38:11 UTC] [INFO] ✅ bore installed!
+[2026-03-22 09:38:11 UTC] [INFO] 📁 Calculator HTML ready
+[2026-03-22 09:38:11 UTC] [INFO] 🌐 HTTP server started on port 8080
+[2026-03-22 09:38:11 UTC] [INFO] 🕳️  bore tunnel starting...
+[Sun Mar 22 09:38:19 UTC 2026] bore log: [2m2026-03-22T09:38:11.579536Z[0m [32m INFO[0m [2mbore_cli::client[0m[2m:[0m connected to server [3mremote_port[0m[2m=[0m62601
+[2m2026-03-22T09:38:11.579574Z[0m [32m INFO[0m [2mbore_cli::client[0m[2m:[0m listening at bore.pub:62601
+[2026-03-22 09:38:19 UTC] [INFO] ✅ Calculator LIVE at: http://bore.pub:62601
