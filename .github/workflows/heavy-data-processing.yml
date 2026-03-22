@@ -25,7 +25,6 @@ jobs:
           LOG="output/runtimelogs.txt"
           echo "[$(date -u '+%H:%M:%S')] 🚀 Setup shuru..." | tee -a "$LOG"
           sudo apt-get update -qq
-          echo "[$(date -u '+%H:%M:%S')] 📦 XFCE4 + Xvfb install..." | tee -a "$LOG"
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
             xfce4 xfce4-goodies xvfb dbus-x11 \
             xserver-xorg-video-dummy x11-xserver-utils \
@@ -39,7 +38,7 @@ jobs:
           sleep 3
           DISPLAY=:10 dbus-launch --exit-with-session startxfce4 &
           sleep 5
-          echo "[$(date -u '+%H:%M:%S')] ✅ Virtual display :10 ready!" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] ✅ Virtual display ready!" | tee -a "$LOG"
 
       - name: 📥 Install RustDesk
         run: |
@@ -49,57 +48,29 @@ jobs:
           sudo dpkg -i /tmp/rustdesk.deb || sudo apt-get install -f -y -qq
           echo "[$(date -u '+%H:%M:%S')] ✅ RustDesk installed!" | tee -a "$LOG"
 
-      - name: 🔑 Set Permanent Password via Config
+      - name: 🔑 Set Password + Start RustDesk
         run: |
           LOG="output/runtimelogs.txt"
           FIXED_PASS="Pass1234"
 
-          # RustDesk config folders banao
           mkdir -p /root/.config/rustdesk
           mkdir -p /home/runner/.config/rustdesk
 
-          # RustDesk2.toml mein permanent-password seedha likhte hain
-          cat > /root/.config/rustdesk/RustDesk2.toml << EOF
-permanent-password = "$FIXED_PASS"
-EOF
-          cat > /home/runner/.config/rustdesk/RustDesk2.toml << EOF
-permanent-password = "$FIXED_PASS"
-EOF
+          echo "permanent-password = \"$FIXED_PASS\"" > /root/.config/rustdesk/RustDesk2.toml
+          echo "permanent-password = \"$FIXED_PASS\"" > /home/runner/.config/rustdesk/RustDesk2.toml
 
-          echo "[$(date -u '+%H:%M:%S')] 🔑 Password config mein likha: $FIXED_PASS" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 🔑 Config likha: $(cat /root/.config/rustdesk/RustDesk2.toml)" | tee -a "$LOG"
 
-      - name: 🚀 Start RustDesk + Get ID
-        run: |
-          LOG="output/runtimelogs.txt"
-          echo "[$(date -u '+%H:%M:%S')] 🚀 RustDesk start ho raha hai..." | tee -a "$LOG"
           export DISPLAY=:10
-
-          # Service mode start
           sudo rustdesk --service &
           sleep 5
-
-          # GUI mode bhi start karo
           DISPLAY=:10 rustdesk &
           sleep 12
 
-          # Real ID nikalo
           RUSTDESK_ID=$(rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
-          echo "[$(date -u '+%H:%M:%S')] 🔢 ID: $RUSTDESK_ID" | tee -a "$LOG"
-
-          # Config verify karo
-          echo "[$(date -u '+%H:%M:%S')] --- Config Check ---" | tee -a "$LOG"
-          cat /root/.config/rustdesk/RustDesk2.toml 2>/dev/null | tee -a "$LOG" || echo "root config nahi mila"
-          cat /home/runner/.config/rustdesk/RustDesk2.toml 2>/dev/null | tee -a "$LOG" || echo "runner config nahi mila"
-
-          echo "" | tee -a "$LOG"
-          echo "[$(date -u '+%H:%M:%S')] 🎉🎉 RUSTDESK READY! 🎉🎉" | tee -a "$LOG"
-          echo "================================================" | tee -a "$LOG"
-          echo "   🖥️  RUSTDESK CONNECTION INFO" | tee -a "$LOG"
-          echo "================================================" | tee -a "$LOG"
-          echo "   🔢 ID:       $RUSTDESK_ID" | tee -a "$LOG"
-          echo "   🔑 Password: Pass1234" | tee -a "$LOG"
-          echo "   📱 App:      rustdesk.com/download" | tee -a "$LOG"
-          echo "================================================" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 🎉 RUSTDESK READY!" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 🔢 ID:       $RUSTDESK_ID" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 🔑 Password: $FIXED_PASS" | tee -a "$LOG"
 
       - name: 💾 Push Info
         env:
@@ -108,11 +79,11 @@ EOF
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🖥️ RustDesk live - fixed password"
+          git diff --staged --quiet || git commit -m "🖥️ RustDesk live"
           git pull --rebase origin main
           git push
 
-      - name: ⏳ Keep Alive (5.5 hours)
+      - name: ⏳ Keep Alive
         run: |
           LOG="output/runtimelogs.txt"
           RUSTDESK_ID=$(rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
@@ -122,7 +93,7 @@ EOF
             sleep 300
             COUNT=$((COUNT + 5))
             RD_ALIVE=$(pgrep -x rustdesk > /dev/null && echo "alive" || echo "dead")
-            echo "[$(date -u '+%H:%M:%S')] [${COUNT}min] RustDesk:$RD_ALIVE" | tee -a "$LOG"
+            echo "[$(date -u '+%H:%M:%S')] [${COUNT}min] RustDesk:$RD_ALIVE ID:$RUSTDESK_ID" | tee -a "$LOG"
             if [ "$RD_ALIVE" = "dead" ]; then
               export DISPLAY=:10
               DISPLAY=:10 rustdesk &
