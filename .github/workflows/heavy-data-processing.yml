@@ -142,4 +142,4 @@ jobs:
               "[$(Get-Date -Format 'HH:mm:ss')] ⏰ 5.5hr done!" | Tee-Object -FilePath $LOG -Append
               break
             }
-          }
+          } 
