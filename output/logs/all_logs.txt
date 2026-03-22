@@ -1,6 +1,6 @@
 ============================================================
 🤖 Monitor Bot — Auto Update
-Timestamp  : 2026-03-22 18:26:35 UTC
+Timestamp  : 2026-03-22 18:26:57 UTC
 Run ID     : 23409552649
 Workflow   : 🖥️ Ubuntu Desktop - RustDesk
 Status     : in_progress
@@ -19,7 +19,6 @@ YAML VALIDATION:
   ✅ heavy-data-processing.yml — Sahi hai!
 ==================================================
 
-CONCURRENCY: ⚠️ 1 purane workflows cancel kiye!
-  🚫 Cancelled: 🖥️ Ubuntu Desktop via XRDP + bore.pub (run 23408378130)
+CONCURRENCY: ✅ 5/5 running — sab theek!
 
-⏰ Last updated: 2026-03-22 18:26:35 UTC
+⏰ Last updated: 2026-03-22 18:26:57 UTC
