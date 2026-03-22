@@ -1,6 +1,6 @@
 ============================================================
 🤖 Monitor Bot — Auto Update
-Timestamp  : 2026-03-22 16:04:58 UTC
+Timestamp  : 2026-03-22 16:05:07 UTC
 Run ID     : 23406949938
 Workflow   : Ubuntu XFCE Cyberpunk RDP
 Status     : in_progress
@@ -19,7 +19,6 @@ YAML VALIDATION:
   ✅ heavy-data-processing.yml — Sahi hai!
 ==================================================
 
-CONCURRENCY: ⚠️ 1 purane workflows cancel kiye!
-  🚫 Cancelled: Windows RDP via bore.pub (run 23405148401)
+CONCURRENCY: ✅ 5/5 running — sab theek!
 
-⏰ Last updated: 2026-03-22 16:04:58 UTC
+⏰ Last updated: 2026-03-22 16:05:07 UTC
