@@ -1,55 +1,24 @@
-📦 Installing... Sun Mar 22 07:36:39 UTC 2026
-✅ Install complete: Sun Mar 22 07:37:00 UTC 2026
-matplotlib      3.10.8
-numpy           2.4.3
-pandas          3.0.1
-scikit-learn    1.8.0
-scipy           1.17.1
-seaborn         0.13.2
-🚀 Script: Sun Mar 22 07:37:00 UTC 2026
-
-📊 Stats:
+📦 Installing... Sun Mar 22 07:45:27 UTC 2026
+✅ Done: Sun Mar 22 07:45:29 UTC 2026
+🚀 Script start: Sun Mar 22 07:45:29 UTC 2026
+🚀 GitHub Trending Repos Analysis shuru...
+📡 GitHub API se data fetch kar rahe hain...
+✅ 30 repos mila!
+✅ top_python_repos.csv saved!
+📊 Summary:
 {
-  "total_rows": 1000,
-  "avg_salary": 51238.06,
-  "max_salary": 89485.73,
-  "min_salary": 6556.17,
-  "avg_age": 40.99,
-  "avg_score": 51.45,
-  "category_counts": {
-    "C": 256,
-    "D": 256,
-    "B": 253,
-    "A": 235
-  },
-  "exp_salary_correlation": -0.0016,
-  "p_value": 0.959066,
-  "ml_r2_score": 0.0083,
-  "high_earners_count": 266
+  "fetched_at": "2026-03-22 07:45:30 UTC",
+  "total_repos": 30,
+  "total_stars": 4463390,
+  "total_forks": 671953,
+  "avg_stars": 148780,
+  "top_3_repos": [
+    "public-apis/public-apis",
+    "EbookFoundation/free-programming-books",
+    "donnemartin/system-design-primer"
+  ],
+  "most_starred": "public-apis/public-apis",
+  "max_stars": 413272
 }
-✅ Done!
-🚀 Data processing shuru...
-✅ Raw CSV saved: 1000 rows
-📈 Correlation: -0.0016, p-value: 0.959066
-🤖 ML R² score: 0.0083
-💰 High earners (>60k): 266
 🎉 Sab complete!
-{
-  "total_rows": 1000,
-  "avg_salary": 51238.06,
-  "max_salary": 89485.73,
-  "min_salary": 6556.17,
-  "avg_age": 40.99,
-  "avg_score": 51.45,
-  "category_counts": {
-    "C": 256,
-    "D": 256,
-    "B": 253,
-    "A": 235
-  },
-  "exp_salary_correlation": -0.0016,
-  "p_value": 0.959066,
-  "ml_r2_score": 0.0083,
-  "high_earners_count": 266
-}
-✅ Script done: Sun Mar 22 07:37:02 UTC 2026
+✅ Script done: Sun Mar 22 07:45:30 UTC 2026
