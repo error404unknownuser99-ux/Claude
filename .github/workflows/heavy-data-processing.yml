@@ -109,4 +109,6 @@ jobs:
           git push
 
       - name: Hit Monitor
-        run: curl -s -o /dev/null -w "Monitor: %{http_code}" https://track-workflow.onrender.com/full
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://track-workflow.onrender.com/full)
+          echo "Monitor hit: $STATUS"
