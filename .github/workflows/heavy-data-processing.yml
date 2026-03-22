@@ -1,4 +1,4 @@
-name: AI Image Generator - Live Server
+name: Runner Specs - Full Check
 
 on:
   push:
@@ -9,48 +9,117 @@ on:
   workflow_dispatch:
 
 jobs:
-  data-processing:
+  check-ubuntu:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Check Runner Specs
+      - name: Ubuntu Specs
         run: |
           mkdir -p output
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🔍 GitHub Actions Runner Specs" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ================================================" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🖥️  CPU Model   : $(cat /proc/cpuinfo | grep 'model name' | head -1 | cut -d: -f2 | xargs)" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🖥️  CPU Cores   : $(nproc)" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💾 Total RAM   : $(free -h | grep Mem | awk '{print $2}')" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💾 Free RAM    : $(free -h | grep Mem | awk '{print $4}')" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💾 Used RAM    : $(free -h | grep Mem | awk '{print $3}')" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💿 Total Disk  : $(df -h / | tail -1 | awk '{print $2}')" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💿 Free Disk   : $(df -h / | tail -1 | awk '{print $4}')" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💿 Used Disk   : $(df -h / | tail -1 | awk '{print $3}')" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🐧 OS          : $(lsb_release -d | cut -d: -f2 | xargs)" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🐧 Kernel      : $(uname -r)" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🌐 Public IP   : $(curl -s ifconfig.me)" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ================================================" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ Done!" >> output/runtimelogs.txt
-          cat output/runtimelogs.txt
+          LOG="output/runtimelogs.txt"
+          echo "====== 🐧 UBUNTU RUNNER ======" >> $LOG
+          echo "🖥️  CPU Model  : $(cat /proc/cpuinfo | grep 'model name' | head -1 | cut -d: -f2 | xargs)" >> $LOG
+          echo "🖥️  CPU Cores  : $(nproc)" >> $LOG
+          echo "💾 Total RAM  : $(free -h | grep Mem | awk '{print $2}')" >> $LOG
+          echo "💾 Free RAM   : $(free -h | grep Mem | awk '{print $4}')" >> $LOG
+          echo "💿 Total Disk : $(df -h / | tail -1 | awk '{print $2}')" >> $LOG
+          echo "💿 Free Disk  : $(df -h / | tail -1 | awk '{print $4}')" >> $LOG
+          echo "🐧 OS         : $(lsb_release -d | cut -d: -f2 | xargs)" >> $LOG
+          echo "🌐 Public IP  : $(curl -s ifconfig.me)" >> $LOG
+          echo "⚡ CPU Speed  : $(cat /proc/cpuinfo | grep 'cpu MHz' | head -1 | cut -d: -f2 | xargs) MHz" >> $LOG
+          echo "🧵 Threads    : $(cat /proc/cpuinfo | grep processor | wc -l)" >> $LOG
+          echo "🔄 Swap       : $(free -h | grep Swap | awk '{print $2}')" >> $LOG
+          echo "==============================" >> $LOG
+          cat $LOG
 
-      - name: Commit output
+      - name: Commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🔍 Runner specs output"
-          for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
-            sleep 3
-          done
+          git diff --staged --quiet || git commit -m "📊 Ubuntu specs"
+          for i in 1 2 3; do git pull --rebase origin main && git push && break; sleep 3; done
+
+  check-windows:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Windows Specs
+        shell: pwsh
+        run: |
+          $log = "output/windows_specs.txt"
+          New-Item -ItemType Directory -Force -Path output | Out-Null
+          $cpu = Get-WmiObject Win32_Processor | Select-Object -First 1
+          $ram = Get-WmiObject Win32_ComputerSystem
+          $disk = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='C:'"
+          $totalRAM = [math]::Round($ram.TotalPhysicalMemory / 1GB, 2)
+          $freeRAM = [math]::Round((Get-WmiObject Win32_OperatingSystem).FreePhysicalMemory / 1MB, 2)
+          $totalDisk = [math]::Round($disk.Size / 1GB, 2)
+          $freeDisk = [math]::Round($disk.FreeSpace / 1GB, 2)
+          "====== 🪟 WINDOWS RUNNER ======" | Out-File $log
+          "🖥️  CPU Model  : $($cpu.Name)" | Out-File $log -Append
+          "🖥️  CPU Cores  : $($cpu.NumberOfCores)" | Out-File $log -Append
+          "🧵 Threads    : $($cpu.NumberOfLogicalProcessors)" | Out-File $log -Append
+          "💾 Total RAM  : ${totalRAM} GB" | Out-File $log -Append
+          "💾 Free RAM   : ${freeRAM} GB" | Out-File $log -Append
+          "💿 Total Disk : ${totalDisk} GB" | Out-File $log -Append
+          "💿 Free Disk  : ${freeDisk} GB" | Out-File $log -Append
+          "🪟 OS         : $((Get-WmiObject Win32_OperatingSystem).Caption)" | Out-File $log -Append
+          "==============================" | Out-File $log -Append
+          Get-Content $log
+
+      - name: Commit Windows specs
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        run: |
+          git config user.name "error404unknownuser99-ux"
+          git config user.email "error404unknownuser99@users.noreply.github.com"
+          git add output/
+          git diff --staged --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "📊 Windows specs"
+            for ($i=0; $i -lt 3; $i++) {
+              git pull --rebase origin main
+              git push
+              if ($LASTEXITCODE -eq 0) { break }
+              Start-Sleep -Seconds 3
+            }
+          }
+
+  check-macos:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: macOS Specs
+        run: |
+          mkdir -p output
+          LOG="output/macos_specs.txt"
+          echo "====== 🍎 MACOS RUNNER ======" >> $LOG
+          echo "🖥️  CPU Model  : $(sysctl -n machdep.cpu.brand_string)" >> $LOG
+          echo "🖥️  CPU Cores  : $(sysctl -n hw.physicalcpu)" >> $LOG
+          echo "🧵 Threads    : $(sysctl -n hw.logicalcpu)" >> $LOG
+          echo "💾 Total RAM  : $(sysctl -n hw.memsize | awk '{printf \"%.1f GB\", $1/1073741824}')" >> $LOG
+          echo "💿 Total Disk : $(df -h / | tail -1 | awk '{print $2}')" >> $LOG
+          echo "💿 Free Disk  : $(df -h / | tail -1 | awk '{print $4}')" >> $LOG
+          echo "🍎 OS         : $(sw_vers -productName) $(sw_vers -productVersion)" >> $LOG
+          echo "=============================" >> $LOG
+          cat $LOG
+
+      - name: Commit macOS specs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "error404unknownuser99-ux"
+          git config user.email "error404unknownuser99@users.noreply.github.com"
+          git add output/
+          git diff --staged --quiet || git commit -m "📊 macOS specs"
+          for i in 1 2 3; do git pull --rebase origin main && git push && break; sleep 3; done
