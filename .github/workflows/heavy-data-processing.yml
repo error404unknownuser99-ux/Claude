@@ -20,7 +20,7 @@ jobs:
       - name: 🗂️ Setup folders
         run: mkdir -p output scripts
 
-      - name: 📦 Install Desktop + Xvfb
+      - name: 📦 Install Desktop + Xvfb + Dummy Driver
         run: |
           LOG="output/runtimelogs.txt"
           echo "[$(date -u '+%H:%M:%S')] 🚀 Setup shuru..." | tee -a "$LOG"
@@ -29,7 +29,7 @@ jobs:
             xfce4 xfce4-goodies xvfb dbus-x11 \
             xserver-xorg-video-dummy x11-xserver-utils \
             --no-install-recommends -qq
-          echo "[$(date -u '+%H:%M:%S')] ✅ Desktop installed!" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] ✅ Desktop + drivers installed!" | tee -a "$LOG"
 
       - name: 🖥️ Start Virtual Display + XFCE
         run: |
@@ -38,39 +38,54 @@ jobs:
           sleep 3
           DISPLAY=:10 dbus-launch --exit-with-session startxfce4 &
           sleep 5
-          echo "[$(date -u '+%H:%M:%S')] ✅ Virtual display ready!" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] ✅ Virtual display :10 ready!" | tee -a "$LOG"
 
       - name: 📥 Install RustDesk
         run: |
           LOG="output/runtimelogs.txt"
-          echo "[$(date -u '+%H:%M:%S')] 📥 RustDesk download..." | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 📥 RustDesk download ho raha hai..." | tee -a "$LOG"
           wget -q "https://github.com/rustdesk/rustdesk/releases/download/1.3.8/rustdesk-1.3.8-x86_64.deb" -O /tmp/rustdesk.deb
           sudo dpkg -i /tmp/rustdesk.deb || sudo apt-get install -f -y -qq
           echo "[$(date -u '+%H:%M:%S')] ✅ RustDesk installed!" | tee -a "$LOG"
 
-      - name: 🔑 Set Password + Start RustDesk
+      - name: 🚀 Configure + Start RustDesk (Official Way)
         run: |
           LOG="output/runtimelogs.txt"
           FIXED_PASS="Pass1234"
+          echo "[$(date -u '+%H:%M:%S')] ⚙️ Headless mode enable kar raha hun..." | tee -a "$LOG"
 
-          mkdir -p /root/.config/rustdesk
-          mkdir -p /home/runner/.config/rustdesk
+          # Step 1: Headless mode enable (OFFICIAL FIX!)
+          sudo rustdesk --option allow-linux-headless Y
+          sleep 2
 
-          echo "permanent-password = \"$FIXED_PASS\"" > /root/.config/rustdesk/RustDesk2.toml
-          echo "permanent-password = \"$FIXED_PASS\"" > /home/runner/.config/rustdesk/RustDesk2.toml
-
-          echo "[$(date -u '+%H:%M:%S')] 🔑 Config likha: $(cat /root/.config/rustdesk/RustDesk2.toml)" | tee -a "$LOG"
-
-          export DISPLAY=:10
+          # Step 2: Service start karo
           sudo rustdesk --service &
-          sleep 5
-          DISPLAY=:10 rustdesk &
-          sleep 12
+          sleep 6
+          echo "[$(date -u '+%H:%M:%S')] ✅ Service started!" | tee -a "$LOG"
 
-          RUSTDESK_ID=$(rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
-          echo "[$(date -u '+%H:%M:%S')] 🎉 RUSTDESK READY!" | tee -a "$LOG"
-          echo "[$(date -u '+%H:%M:%S')] 🔢 ID:       $RUSTDESK_ID" | tee -a "$LOG"
-          echo "[$(date -u '+%H:%M:%S')] 🔑 Password: $FIXED_PASS" | tee -a "$LOG"
+          # Step 3: Password set karo (SUDO se - official way!)
+          sudo rustdesk --password "$FIXED_PASS"
+          sleep 2
+          echo "[$(date -u '+%H:%M:%S')] 🔑 Password set: $FIXED_PASS" | tee -a "$LOG"
+
+          # Step 4: ID nikalo (SUDO se!)
+          RUSTDESK_ID=$(sudo rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
+          echo "[$(date -u '+%H:%M:%S')] 🔢 ID: $RUSTDESK_ID" | tee -a "$LOG"
+
+          # Step 5: GUI bhi start karo display pe
+          export DISPLAY=:10
+          DISPLAY=:10 rustdesk &
+          sleep 5
+
+          echo "" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 🎉🎉 RUSTDESK READY! 🎉🎉" | tee -a "$LOG"
+          echo "================================================" | tee -a "$LOG"
+          echo "   🖥️  RUSTDESK CONNECTION INFO" | tee -a "$LOG"
+          echo "================================================" | tee -a "$LOG"
+          echo "   🔢 ID:       $RUSTDESK_ID" | tee -a "$LOG"
+          echo "   🔑 Password: $FIXED_PASS" | tee -a "$LOG"
+          echo "   📱 App:      rustdesk.com/download" | tee -a "$LOG"
+          echo "================================================" | tee -a "$LOG"
 
       - name: 💾 Push Info
         env:
@@ -79,14 +94,14 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🖥️ RustDesk live"
+          git diff --staged --quiet || git commit -m "🖥️ RustDesk live - headless fixed!"
           git pull --rebase origin main
           git push
 
-      - name: ⏳ Keep Alive
+      - name: ⏳ Keep Alive (5.5 hours)
         run: |
           LOG="output/runtimelogs.txt"
-          RUSTDESK_ID=$(rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
+          RUSTDESK_ID=$(sudo rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
           echo "[$(date -u '+%H:%M:%S')] ⏳ Alive! ID:$RUSTDESK_ID Pass:Pass1234" | tee -a "$LOG"
           COUNT=0
           while true; do
@@ -95,9 +110,12 @@ jobs:
             RD_ALIVE=$(pgrep -x rustdesk > /dev/null && echo "alive" || echo "dead")
             echo "[$(date -u '+%H:%M:%S')] [${COUNT}min] RustDesk:$RD_ALIVE ID:$RUSTDESK_ID" | tee -a "$LOG"
             if [ "$RD_ALIVE" = "dead" ]; then
+              sudo rustdesk --service &
+              sleep 3
               export DISPLAY=:10
               DISPLAY=:10 rustdesk &
               sleep 5
+              echo "[$(date -u '+%H:%M:%S')] 🔄 RustDesk restarted!" | tee -a "$LOG"
             fi
             if [ "$COUNT" -ge 330 ]; then
               echo "[$(date -u '+%H:%M:%S')] ⏰ 5.5hr done!" | tee -a "$LOG"
