@@ -1,0 +1,29 @@
+📦 Installing... Sun Mar 22 08:22:16 UTC 2026
+✅ Done: Sun Mar 22 08:22:19 UTC 2026
+🚀 Script start: Sun Mar 22 08:22:19 UTC 2026
+🚀 GitHub Actions Internet Speed Test Starting...
+==================================================
+
+📥 Download Speed Test (100MB file)...
+✅ Download Speed: 0.00 Mbps
+   Time taken: 0.05s
+
+📤 Upload Speed Test (10MB)...
+✅ Upload Speed: 0.04 Mbps
+
+⚡ Latency Test (ping to google.com)...
+❌ Ping failed
+
+🔍 DNS Resolution Speed...
+✅ DNS Resolution: 193.20 ms
+
+==================================================
+📊 FINAL RESULTS:
+  📥 Download: 0.0 Mbps
+  📤 Upload:   0.04 Mbps
+  ⚡ Ping:     N/A ms
+  🔍 DNS:      193.2 ms
+==================================================
+
+✅ Results saved to output/speed_results.json
+✅ Script done: Sun Mar 22 08:22:36 UTC 2026
