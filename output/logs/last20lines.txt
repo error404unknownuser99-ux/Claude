@@ -1,3 +1,22 @@
-[Log fetch failed HTTP 404]
+2026-03-22T07:37:03.8254420Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+2026-03-22T07:37:03.8254725Z ##[endgroup]
+2026-03-22T07:37:07.8787848Z Monitor HTTP Status: 200
+2026-03-22T07:37:07.8857486Z Post job cleanup.
+2026-03-22T07:37:08.0500770Z Post job cleanup.
+2026-03-22T07:37:08.1466613Z [command]/usr/bin/git version
+2026-03-22T07:37:08.1503116Z git version 2.53.0
+2026-03-22T07:37:08.1547141Z Temporarily overriding HOME='/home/runner/work/_temp/fec8efac-f4b3-4e61-a8ae-fb0dbd1b816b' before making global git config changes
+2026-03-22T07:37:08.1548543Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T07:37:08.1554043Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Claude/Claude
+2026-03-22T07:37:08.1593473Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T07:37:08.1628214Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-22T07:37:08.1869447Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T07:37:08.1891623Z http.https://github.com/.extraheader
+2026-03-22T07:37:08.1905146Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T07:37:08.1938495Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-22T07:37:08.2176765Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T07:37:08.2207352Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-22T07:37:08.2553001Z Cleaning up orphan processes
+2026-03-22T07:37:08.2844248Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
 
-⏰ Updated: 2026-03-22 07:37:03
+⏰ Updated: 2026-03-22 07:37:11
