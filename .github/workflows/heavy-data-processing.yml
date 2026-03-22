@@ -1,4 +1,4 @@
-name: 🖥️ Ubuntu Desktop - RustDesk
+name: 🪟 Windows Desktop - RDP + bore.pub
 
 on:
   push:
@@ -9,110 +9,172 @@ on:
   workflow_dispatch:
 
 jobs:
-  ubuntu-desktop:
-    runs-on: ubuntu-latest
+  windows-desktop:
+    runs-on: windows-2019
     timeout-minutes: 355
 
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: 🗂️ Setup folders
-        run: mkdir -p output scripts
-
-      - name: 📦 Install Desktop + Xvfb
+      - name: ⚡ Optimize Windows - Performance Mode
+        shell: powershell
         run: |
-          LOG="output/runtimelogs.txt"
-          echo "[$(date -u '+%H:%M:%S')] 🚀 Setup shuru..." | tee -a "$LOG"
-          sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            xfce4 xfce4-goodies xvfb dbus-x11 \
-            xserver-xorg-video-dummy x11-xserver-utils \
-            --no-install-recommends -qq
-          echo "[$(date -u '+%H:%M:%S')] ✅ Desktop installed!" | tee -a "$LOG"
+          # ── Visual Effects → Best Performance (animations/shadows off) ──
+          $path = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"
+          if (!(Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
+          Set-ItemProperty -Path $path -Name VisualFXSetting -Value 2
 
-      - name: 🖥️ Start Virtual Display + XFCE
+          # All visual effects off
+          $advPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+          Set-ItemProperty -Path $advPath -Name TaskbarAnimations -Value 0
+          Set-ItemProperty -Path $advPath -Name ListviewShadow -Value 0
+          Set-ItemProperty -Path $advPath -Name ListviewAlphaSelect -Value 0
+
+          # ── 16-bit Color (reduces GPU/CPU load) ──
+          $dispPath = "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\Configuration"
+          Get-ChildItem $dispPath -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+            if ((Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).BitsPerPel) {
+              Set-ItemProperty -Path $_.PSPath -Name BitsPerPel -Value 16 -ErrorAction SilentlyContinue
+            }
+          }
+
+          # ── Disable Unnecessary Services ──
+          $services = @("SysMain","WSearch","DiagTrack","TabletInputService","Themes","wuauserv","BITS")
+          foreach ($svc in $services) {
+            Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
+            Set-Service -Name $svc -StartupType Disabled -ErrorAction SilentlyContinue
+          }
+
+          # ── Power Plan → High Performance ──
+          powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
+
+          # ── Free RAM - Stop background apps ──
+          Get-Process | Where-Object {
+            $_.Name -notmatch "svchost|System|lsass|csrss|winlogon|services|wininit|smss|dwm|explorer|conhost|powershell|pwsh|cmd"
+          } | Stop-Process -Force -ErrorAction SilentlyContinue
+
+          Write-Host "✅ Windows optimized!"
+
+      - name: 🖥️ Setup RDP - Enable + Configure
+        shell: powershell
         run: |
-          LOG="output/runtimelogs.txt"
-          Xvfb :10 -screen 0 1920x1080x24 +extension RANDR +extension GLX &
-          sleep 3
-          DISPLAY=:10 dbus-launch --exit-with-session startxfce4 &
-          sleep 5
-          echo "[$(date -u '+%H:%M:%S')] ✅ Virtual display ready!" | tee -a "$LOG"
+          # Enable RDP
+          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop" -ErrorAction SilentlyContinue
 
-      - name: 📥 Install RustDesk
+          # Network Level Auth off (easy connect)
+          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "UserAuthentication" -Value 0
+
+          # RDP color depth = 16-bit
+          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 2
+
+          # Max connections
+          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "MaxInstanceCount" -Value 10
+
+          # Set password for runneradmin
+          net user runneradmin "RDP@Pass123" 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            $pass = ConvertTo-SecureString "RDP@Pass123" -AsPlainText -Force
+            New-LocalUser -Name "rdpuser" -Password $pass -FullName "RDP User" -PasswordNeverExpires -ErrorAction SilentlyContinue
+            Add-LocalGroupMember -Group "Administrators" -Member "rdpuser" -ErrorAction SilentlyContinue
+            Add-LocalGroupMember -Group "Remote Desktop Users" -Member "rdpuser" -ErrorAction SilentlyContinue
+            Write-Host "✅ New user rdpuser created!"
+          } else {
+            Add-LocalGroupMember -Group "Remote Desktop Users" -Member "runneradmin" -ErrorAction SilentlyContinue
+            Write-Host "✅ runneradmin password set!"
+          }
+
+          # Restart RDP service
+          Restart-Service TermService -Force -ErrorAction SilentlyContinue
+          Write-Host "✅ RDP configured!"
+
+      - name: 🌐 Install bore + Start Tunnel
+        shell: powershell
         run: |
-          LOG="output/runtimelogs.txt"
-          echo "[$(date -u '+%H:%M:%S')] 📥 RustDesk install..." | tee -a "$LOG"
-          wget -q "https://github.com/rustdesk/rustdesk/releases/download/1.3.8/rustdesk-1.3.8-x86_64.deb" -O /tmp/rustdesk.deb
-          sudo dpkg -i /tmp/rustdesk.deb || sudo apt-get install -f -y -qq
-          echo "[$(date -u '+%H:%M:%S')] ✅ RustDesk installed!" | tee -a "$LOG"
+          mkdir -p output | Out-Null
+          $LOG = "output\runtimelogs.txt"
 
-      - name: 🔑 Config PEHLE likho - PHIR service start karo!
-        run: |
-          LOG="output/runtimelogs.txt"
-          FIXED_PASS="Pass1234"
+          "[$(Get-Date -Format 'HH:mm:ss')] 📥 bore download ho raha hai..." | Tee-Object -FilePath $LOG -Append
 
-          # ✅ STEP 1: Config PEHLE likho (service start se pehle!)
-          sudo mkdir -p /root/.config/rustdesk
-          sudo bash -c "echo 'permanent-password = \"$FIXED_PASS\"' > /root/.config/rustdesk/RustDesk2.toml"
+          # bore Windows binary download
+          $boreUrl = "https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-pc-windows-msvc.exe"
+          Invoke-WebRequest -Uri $boreUrl -OutFile "C:\bore.exe" -UseBasicParsing
 
-          echo "[$(date -u '+%H:%M:%S')] ✅ Config likha!" | tee -a "$LOG"
-          echo "[$(date -u '+%H:%M:%S')] Config content:" | tee -a "$LOG"
-          sudo cat /root/.config/rustdesk/RustDesk2.toml | tee -a "$LOG"
+          "[$(Get-Date -Format 'HH:mm:ss')] 🌐 Tunnel start ho raha hai port 3389..." | Tee-Object -FilePath $LOG -Append
 
-          # ✅ STEP 2: Headless enable karo
-          sudo rustdesk --option allow-linux-headless Y
-          sleep 2
-          echo "[$(date -u '+%H:%M:%S')] ✅ Headless enabled!" | tee -a "$LOG"
+          # bore background mein start
+          $proc = Start-Process -FilePath "C:\bore.exe" -ArgumentList "local 3389 --to bore.pub" -RedirectStandardOutput "C:\bore_out.txt" -RedirectStandardError "C:\bore_err.txt" -PassThru -WindowStyle Hidden
+          $proc.Id | Out-File "C:\bore_pid.txt"
 
-          # ✅ STEP 3: ABHI service start karo (config padh legi!)
-          sudo rustdesk --service &
-          sleep 8
-          echo "[$(date -u '+%H:%M:%S')] ✅ Service started!" | tee -a "$LOG"
+          Start-Sleep -Seconds 12
 
-          # Config check - service ne overwrite kiya ya nahi?
-          echo "[$(date -u '+%H:%M:%S')] Config after service start:" | tee -a "$LOG"
-          sudo cat /root/.config/rustdesk/RustDesk2.toml | tee -a "$LOG"
+          # Port nikalo output se
+          $boreOut = Get-Content "C:\bore_out.txt" -ErrorAction SilentlyContinue
+          $boreErr = Get-Content "C:\bore_err.txt" -ErrorAction SilentlyContinue
+          $allOut = "$boreOut $boreErr"
+          $match = [regex]::Match($allOut, "bore\.pub:(\d+)")
 
-          # ID nikalo
-          RUSTDESK_ID=$(sudo rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
+          if ($match.Success) {
+            $port = $match.Groups[1].Value
+            $host = "bore.pub:$port"
 
-          echo "" | tee -a "$LOG"
-          echo "[$(date -u '+%H:%M:%S')] 🎉🎉 RUSTDESK READY!" | tee -a "$LOG"
-          echo "================================================" | tee -a "$LOG"
-          echo "   🔢 ID:       $RUSTDESK_ID" | tee -a "$LOG"
-          echo "   🔑 Password: $FIXED_PASS" | tee -a "$LOG"
-          echo "================================================" | tee -a "$LOG"
+            "" | Tee-Object -FilePath $LOG -Append
+            "[$(Get-Date -Format 'HH:mm:ss')] 🎉🎉 TUNNEL READY! 🎉🎉" | Tee-Object -FilePath $LOG -Append
+            "================================================" | Tee-Object -FilePath $LOG -Append
+            "   🪟  RDP CONNECTION INFO (Windows 2019)" | Tee-Object -FilePath $LOG -Append
+            "================================================" | Tee-Object -FilePath $LOG -Append
+            "   🌐 Host:     $host" | Tee-Object -FilePath $LOG -Append
+            "   👤 Username: runneradmin (ya rdpuser)" | Tee-Object -FilePath $LOG -Append
+            "   🔑 Password: RDP@Pass123" | Tee-Object -FilePath $LOG -Append
+            "   🎨 Color:    16-bit (optimized!)" | Tee-Object -FilePath $LOG -Append
+            "================================================" | Tee-Object -FilePath $LOG -Append
+          } else {
+            "[$(Get-Date -Format 'HH:mm:ss')] ⚠️ Port nahi mila! Output: $allOut" | Tee-Object -FilePath $LOG -Append
+          }
 
-      - name: 💾 Push Info
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 💾 Push Connection Info
+        shell: powershell
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🖥️ RustDesk - config pehle fix"
+          git diff --staged --quiet; if ($LASTEXITCODE -ne 0) { git commit -m "🪟 Windows RDP live!" }
+          $env:GIT_ASKPASS = ''
           git pull --rebase origin main
-          git push
+          git push origin main
 
-      - name: ⏳ Keep Alive
+      - name: ⏳ Keep Alive (5.5 hours)
+        shell: powershell
         run: |
-          LOG="output/runtimelogs.txt"
-          RUSTDESK_ID=$(sudo rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
-          echo "[$(date -u '+%H:%M:%S')] ⏳ Alive! ID:$RUSTDESK_ID Pass:Pass1234" | tee -a "$LOG"
-          COUNT=0
-          while true; do
-            sleep 300
-            COUNT=$((COUNT + 5))
-            RD_ALIVE=$(pgrep rustdesk > /dev/null && echo "alive" || echo "dead")
-            echo "[$(date -u '+%H:%M:%S')] [${COUNT}min] $RD_ALIVE ID:$RUSTDESK_ID" | tee -a "$LOG"
-            if [ "$RD_ALIVE" = "dead" ]; then
-              sudo rustdesk --service &
-              sleep 3
-            fi
-            if [ "$COUNT" -ge 330 ]; then
-              echo "[$(date -u '+%H:%M:%S')] ⏰ Done!" | tee -a "$LOG"
+          $LOG = "output\runtimelogs.txt"
+          $boreOut = Get-Content "C:\bore_out.txt" -ErrorAction SilentlyContinue
+          $boreErr = Get-Content "C:\bore_err.txt" -ErrorAction SilentlyContinue
+          $match = [regex]::Match("$boreOut $boreErr", "bore\.pub:(\d+)")
+          $host = if ($match.Success) { "bore.pub:$($match.Groups[1].Value)" } else { "unknown" }
+
+          "[$(Get-Date -Format 'HH:mm:ss')] ⏳ Session alive! Host: $host" | Tee-Object -FilePath $LOG -Append
+
+          $count = 0
+          while ($true) {
+            Start-Sleep -Seconds 300
+            $count += 5
+
+            $rdpSvc = (Get-Service TermService -ErrorAction SilentlyContinue).Status
+            $borePid = Get-Content "C:\bore_pid.txt" -ErrorAction SilentlyContinue
+            $boreAlive = if (Get-Process -Id $borePid -ErrorAction SilentlyContinue) { "alive" } else { "dead" }
+
+            "[$(Get-Date -Format 'HH:mm:ss')] [${count}min] RDP:$rdpSvc bore:$boreAlive Host:$host" | Tee-Object -FilePath $LOG -Append
+
+            if ($boreAlive -eq "dead") {
+              "[$(Get-Date -Format 'HH:mm:ss')] 🔄 bore restart..." | Tee-Object -FilePath $LOG -Append
+              $proc = Start-Process -FilePath "C:\bore.exe" -ArgumentList "local 3389 --to bore.pub" -RedirectStandardOutput "C:\bore_out.txt" -RedirectStandardError "C:\bore_err.txt" -PassThru -WindowStyle Hidden
+              $proc.Id | Out-File "C:\bore_pid.txt"
+              Start-Sleep -Seconds 10
+            }
+
+            if ($count -ge 330) {
+              "[$(Get-Date -Format 'HH:mm:ss')] ⏰ 5.5hr done!" | Tee-Object -FilePath $LOG -Append
               break
-            fi
-          done
+            }
+          }
