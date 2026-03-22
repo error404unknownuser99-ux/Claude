@@ -1,4 +1,4 @@
-name: APK Download Test
+name: GitHub Speed Test
 
 on:
   push:
@@ -15,25 +15,30 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Download APK
+      - name: Speed Test - Download to /dev/null
         run: |
           mkdir -p output
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚀 APK download start..." >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚀 Speed test start!" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📥 Downloading 1GB to /dev/null..." >> output/runtimelogs.txt
 
-          # Simple Flashlight - open source APK from F-Droid
-          curl -L -o output/simple-flashlight.apk \
-            "https://f-droid.org/repo/com.simplemobiletools.flashlight_57.apk"
+          # Download 1GB from Cloudflare speed test - directly to /dev/null!
+          RESULT=$(curl -o /dev/null \
+            --max-time 20 \
+            -w "Downloaded: %{size_download} bytes\nSpeed: %{speed_download} bytes/sec\nTime: %{time_total}s" \
+            "https://speed.cloudflare.com/__down?bytes=1073741824" 2>/dev/null)
 
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Download done!" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ Test done!" >> output/runtimelogs.txt
+          echo "$RESULT" >> output/runtimelogs.txt
 
-          SIZE=$(wc -c < output/simple-flashlight.apk)
-          SIZE_MB=$(echo "scale=2; $SIZE/1048576" | bc)
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📦 Size: $SIZE bytes (~${SIZE_MB} MB)" >> output/runtimelogs.txt
+          # Convert to MB/s for easy reading
+          SPEED_BPS=$(echo "$RESULT" | grep "Speed:" | awk '{print $2}' | cut -d. -f1)
+          SPEED_MBPS=$(echo "scale=2; $SPEED_BPS / 1048576" | bc)
+          SIZE_MB=$(echo "$RESULT" | grep "Downloaded:" | awk '{print $2}')
+          SIZE_MB_HUMAN=$(echo "scale=2; $SIZE_MB / 1048576" | bc)
 
-          # APK verification - check PK header (ZIP magic bytes)
-          MAGIC=$(xxd output/simple-flashlight.apk | head -1)
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🔍 Magic bytes: $MAGIC" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🎉 APK ready!" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📊 Speed: ${SPEED_MBPS} MB/s" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📦 Downloaded in 20s: ${SIZE_MB_HUMAN} MB" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🎉 Speed test complete!" >> output/runtimelogs.txt
 
       - name: Commit output
         env:
@@ -42,6 +47,6 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 APK download output [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git diff --staged --quiet || git commit -m "🤖 Speed test result [$(date '+%Y-%m-%d %H:%M:%S')]"
           git pull --rebase origin main
           git push
