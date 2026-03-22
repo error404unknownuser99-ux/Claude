@@ -16,21 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: System Optimize - MAX PERFORMANCE
+      - name: System Optimize
         run: |
           sudo swapoff -a
           echo 0 | sudo tee /proc/sys/vm/swappiness
-          sudo sysctl -w vm.vfs_cache_pressure=50
-          for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
-            echo performance | sudo tee $cpu 2>/dev/null || true
-          done
           sudo systemctl stop snapd 2>/dev/null || true
           sudo systemctl stop unattended-upgrades 2>/dev/null || true
           sudo systemctl stop apt-daily.timer 2>/dev/null || true
-          sudo systemctl stop apt-daily-upgrade.timer 2>/dev/null || true
-          echo "RAM:"
-          free -h
-          echo "Optimization done!"
+          echo "Optimized! RAM: $(free -h | grep Mem | awk '{print $2}')"
 
       - name: Install XFCE + XRDP + Themes
         run: |
@@ -38,28 +31,43 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             xfce4 xfce4-terminal xfce4-goodies \
-            xrdp dbus-x11 x11-xserver-utils \
+            xrdp dbus-x11 x11-xserver-utils xorgxrdp \
             fonts-noto fonts-firacode \
-            papirus-icon-theme \
-            arc-theme \
-            wget curl git unzip \
-            firefox \
-            xfce4-taskmanager \
-            neofetch
+            papirus-icon-theme arc-theme \
+            wget curl git unzip firefox \
+            xfce4-taskmanager neofetch
           echo "Packages installed!"
 
-      - name: Create User + Fix XFCE Config
+      - name: Create User + Fix Black Screen
         run: |
           sudo useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
           echo "cyberpunk:Cyber@2025!" | sudo chpasswd
           sudo usermod -aG sudo cyberpunk
 
-          # Fix: directories pehle banao!
+          # Directories pehle banao
           sudo mkdir -p /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml
           sudo mkdir -p /home/cyberpunk/.config/gtk-3.0
-          sudo mkdir -p /home/cyberpunk/.config/autostart
 
-          # xfwm4 - animations off, arc-dark theme
+          # BLACK SCREEN FIX 1: .xsession proper shebang ke saath
+          sudo tee /home/cyberpunk/.xsession > /dev/null << 'EOF'
+          #!/bin/bash
+          unset DBUS_SESSION_BUS_ADDRESS
+          unset XDG_RUNTIME_DIR
+          export XDG_SESSION_TYPE=x11
+          export XDG_CURRENT_DESKTOP=XFCE
+          export XDG_SESSION_DESKTOP=xfce
+          exec startxfce4
+          EOF
+          sudo chmod +x /home/cyberpunk/.xsession
+
+          # BLACK SCREEN FIX 2: .xsessionrc
+          sudo tee /home/cyberpunk/.xsessionrc > /dev/null << 'EOF'
+          export XDG_SESSION_DESKTOP=xfce
+          export XDG_CURRENT_DESKTOP=XFCE
+          export XDG_SESSION_TYPE=x11
+          EOF
+
+          # Theme configs
           sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml > /dev/null << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <channel name="xfwm4" version="1.0">
@@ -73,7 +81,6 @@ jobs:
           </channel>
           EOF
 
-          # xsettings - dark theme
           sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml > /dev/null << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <channel name="xsettings" version="1.0">
@@ -88,7 +95,6 @@ jobs:
           </channel>
           EOF
 
-          # gtk3 settings
           sudo tee /home/cyberpunk/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
           [Settings]
           gtk-theme-name=Arc-Dark
@@ -97,7 +103,6 @@ jobs:
           gtk-enable-animations=0
           EOF
 
-          # gtk2 settings
           sudo tee /home/cyberpunk/.gtkrc-2.0 > /dev/null << 'EOF'
           gtk-theme-name="Arc-Dark"
           gtk-icon-theme-name="Papirus-Dark"
@@ -105,37 +110,36 @@ jobs:
           gtk-enable-animations=0
           EOF
 
-          # FIX: startxfce4 use karo - black screen fix!
-          echo "startxfce4" | sudo tee /home/cyberpunk/.xsession
-          echo "startxfce4" | sudo tee /home/cyberpunk/.Xclients
-          sudo chmod +x /home/cyberpunk/.xsession
-          sudo chmod +x /home/cyberpunk/.Xclients
-
-          # Ownership fix
           sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
+          echo "User + config done!"
 
-          echo "User + XFCE config done!"
-
-      - name: Configure XRDP
+      - name: Configure XRDP - Black Screen Fix
         run: |
           sudo adduser xrdp ssl-cert 2>/dev/null || true
 
-          # xrdp config - performance tuned
-          sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
-
-          # startwm.sh fix
+          # BLACK SCREEN FIX 3: startwm.sh
           sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
           #!/bin/sh
           unset DBUS_SESSION_BUS_ADDRESS
           unset XDG_RUNTIME_DIR
+          export XDG_SESSION_TYPE=x11
+          export XDG_CURRENT_DESKTOP=XFCE
+          export XDG_SESSION_DESKTOP=xfce
           exec startxfce4
           EOF
           sudo chmod +x /etc/xrdp/startwm.sh
 
+          # BLACK SCREEN FIX 4: sesman.ini - Xorg use karo (better than Xvnc!)
+          sudo sed -i 's/^param=Xvnc/param=Xorg/' /etc/xrdp/sesman.ini 2>/dev/null || true
+
+          # Performance tune
+          sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
+          sudo sed -i 's/#tcp_send_buffer_bytes=32768/tcp_send_buffer_bytes=4194304/' /etc/xrdp/xrdp.ini 2>/dev/null || true
+
           sudo systemctl restart xrdp
-          sleep 3
+          sleep 4
           sudo systemctl status xrdp --no-pager
-          echo "XRDP configured!"
+          echo "XRDP ready!"
 
       - name: Start bore tunnel with Auto-Reconnect
         env:
