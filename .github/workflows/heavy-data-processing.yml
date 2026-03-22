@@ -37,8 +37,7 @@ jobs:
       - name: Show results
         run: |
           ls -lh output/
-          cat output/summary.json
-          head -6 output/top_python_repos.csv
+          cat output/speed_results.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
