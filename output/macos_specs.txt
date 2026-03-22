@@ -1,0 +1,9 @@
+====== 🍎 MACOS RUNNER ======
+🖥️  CPU Model  : Apple M1 (Virtual)
+🖥️  CPU Cores  : 3
+🧵 Threads    : 3
+💾 Total RAM  : 
+💿 Total Disk : 320Gi
+💿 Free Disk  : 45Gi
+🍎 OS         : macOS 15.7.4
+=============================
