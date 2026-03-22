@@ -1,0 +1,15 @@
+[18:14:35] 🚀 Setup shuru...
+[18:15:03] ✅ Desktop installed!
+[18:15:11] ✅ Virtual display ready!
+[18:15:16] 📥 RustDesk install...
+[18:15:26] ✅ RustDesk installed!
+[18:15:28] ✅ Headless enabled!
+[18:15:34] ✅ Service started!
+[18:15:36] 🔑 Password set!
+[18:15:36] --- Root Config ---
+
+[18:15:37] 🎉🎉 RUSTDESK READY!
+================================================
+   🔢 ID:       224660598
+   🔑 Password: Pass1234
+================================================
