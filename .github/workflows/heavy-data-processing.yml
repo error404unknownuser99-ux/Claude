@@ -22,85 +22,91 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Ollama
+        run: |
+          echo "🦙 Installing Ollama..."
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama --version
+
+      - name: Start Ollama service
+        run: |
+          ollama serve &
+          sleep 5
+          echo "✅ Ollama service started!"
+
+      - name: Pull qwen2:0.5b model (smallest - 352MB)
+        run: |
+          echo "📦 Pulling qwen2:0.5b — sabse chhota model (352MB)..."
+          ollama pull qwen2:0.5b
+          echo "✅ Model ready!"
+          ollama list
+
+      - name: Test model
+        run: |
+          echo "🧪 Quick model test..."
+          ollama run qwen2:0.5b "Say hello in one sentence" --nowordwrap
+          echo "✅ Model working!"
+
       - name: Install bore tunnel
         run: |
-          echo "📦 Installing bore..."
           curl -fsSL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz \
             -o /tmp/bore.tar.gz
           tar -xzf /tmp/bore.tar.gz -C /tmp/
           sudo mv /tmp/bore /usr/local/bin/bore
-          bore --version
+          echo "✅ bore installed!"
 
-      - name: Start web server
+      - name: Start Chat UI server
         run: |
           mkdir -p output
-          echo "🚀 Starting Python web server on port 3000..."
           nohup python scripts/process_data.py > output/server.log 2>&1 &
-          echo $! > /tmp/server.pid
           sleep 2
-          echo "✅ Server PID: $(cat /tmp/server.pid)"
-          curl -s http://localhost:3000/api/ping | python3 -m json.tool
+          curl -s http://localhost:3000/ | head -5
+          echo "✅ Chat UI server running!"
 
       - name: Start bore tunnel & save URL
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "🌐 Starting bore tunnel..."
           nohup bore local 3000 --to bore.pub > /tmp/bore.log 2>&1 &
-          echo $! > /tmp/bore.pid
-          sleep 5
-
-          # Get bore URL
+          sleep 6
           BORE_URL=$(grep -o 'bore.pub:[0-9]*' /tmp/bore.log | head -1)
-          echo "Bore log:"
           cat /tmp/bore.log
-
-          if [ -z "$BORE_URL" ]; then
-            echo "❌ bore URL nahi mila! Retrying..."
-            sleep 5
-            BORE_URL=$(grep -o 'bore.pub:[0-9]*' /tmp/bore.log | head -1)
-          fi
-
+          
           FULL_URL="http://$BORE_URL"
-          echo "✅ LIVE URL: $FULL_URL"
+          echo "🌐 LIVE URL: $FULL_URL"
           echo "$FULL_URL" > output/live_url.txt
-          echo "Started at: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> output/live_url.txt
-          echo "Expires in ~30 minutes" >> output/live_url.txt
-
-          # Commit URL immediately
+          echo "Model: qwen2:0.5b" >> output/live_url.txt
+          echo "Started: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> output/live_url.txt
+          echo "Expires: ~30 min" >> output/live_url.txt
+          
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🌐 Live at $FULL_URL"
+          git diff --staged --quiet || git commit -m "🦙 LLM Chat live at $FULL_URL"
           git pull --rebase origin main
           git push
-          echo "URL committed to repo! 🎉"
+          echo "✅ URL committed!"
 
       - name: Keep alive (30 min)
         run: |
-          echo "⏳ Server live rakhne ke liye wait kar raha hoon..."
           URL=$(cat output/live_url.txt | head -1)
-          echo "🌐 Visit karo: $URL"
-          
+          echo "🌐 Chat at: $URL"
+          echo "🦙 Model: qwen2:0.5b running!"
           for i in $(seq 1 30); do
             sleep 60
-            echo "⏱️ $i min done | Server alive check..."
-            curl -s http://localhost:3000/api/stats | python3 -m json.tool || echo "❌ Server down!"
+            echo "⏱️ $i/30 min | Ollama alive: $(curl -s http://localhost:11434/api/tags | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d["models"][0]["name"])' 2>/dev/null || echo 'checking...')"
           done
-          echo "✅ 30 min complete! Server shutting down."
 
-      - name: Commit output to repo
+      - name: Commit final output
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 Final output [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git diff --staged --quiet || git commit -m "🤖 Done [$(date '+%Y-%m-%d %H:%M:%S')]"
           git pull --rebase origin main
           git push
 
-      - name: Hit Monitor /full
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://track-workflow.onrender.com/full)
-          echo "✅ Monitor hit: $STATUS"
+      - name: Hit Monitor
+        run: curl -s -o /dev/null -w "Monitor: %{http_code}" https://track-workflow.onrender.com/full

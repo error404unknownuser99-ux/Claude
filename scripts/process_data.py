@@ -1,346 +1,292 @@
+# Chat UI Server - connects to Ollama API
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import json, datetime, platform, os, socket, subprocess, urllib.parse
+import json, urllib.request, urllib.error, datetime, time
+
+START_TIME = time.time()
 
 HTML = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚀 Claude's Live Demo - GitHub Actions</title>
+<title>🦙 Llama Chat - GitHub Actions LLM</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono&display=swap');
-  
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0d1117; color:#e6edf3; height:100vh; display:flex; flex-direction:column; }
   
-  body {
-    font-family: 'Inter', sans-serif;
-    background: #0a0a0f;
-    color: #fff;
-    min-height: 100vh;
-    overflow-x: hidden;
+  .header {
+    background:linear-gradient(135deg,#161b22,#1c2128);
+    border-bottom:1px solid #30363d;
+    padding:16px 24px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .header-icon { font-size:2rem; }
+  .header-info h1 { font-size:1.1rem; font-weight:700; }
+  .header-info p { font-size:12px; color:#8b949e; }
+  .status-badge {
+    margin-left:auto; display:flex; align-items:center; gap:6px;
+    background:rgba(35,134,54,0.2); border:1px solid rgba(35,134,54,0.4);
+    padding:4px 12px; border-radius:20px; font-size:12px; color:#3fb950;
+  }
+  .dot { width:8px; height:8px; border-radius:50%; background:#3fb950; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  
+  .model-info {
+    background:#161b22; border-bottom:1px solid #30363d;
+    padding:8px 24px; font-size:12px; color:#8b949e;
+    display:flex; gap:20px; align-items:center;
+  }
+  .model-info span { color:#e6edf3; font-weight:600; }
+  
+  #chat-box {
+    flex:1; overflow-y:auto; padding:20px 24px;
+    display:flex; flex-direction:column; gap:16px;
   }
   
-  .bg-grid {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background-image: 
-      linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
-    z-index: 0;
+  .msg { display:flex; gap:12px; max-width:800px; }
+  .msg.user { flex-direction:row-reverse; align-self:flex-end; }
+  
+  .avatar {
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; flex-shrink:0;
+  }
+  .avatar.ai { background:linear-gradient(135deg,#8957e5,#6e40c9); }
+  .avatar.user { background:linear-gradient(135deg,#238636,#1a6e2c); }
+  
+  .bubble {
+    background:#161b22; border:1px solid #30363d;
+    border-radius:12px; padding:12px 16px;
+    font-size:14px; line-height:1.6; max-width:600px;
+  }
+  .msg.user .bubble { background:#1f3a5f; border-color:#1b4b7a; }
+  
+  .bubble .name { font-size:11px; font-weight:600; color:#8b949e; margin-bottom:6px; }
+  .msg.user .bubble .name { color:#79c0ff; }
+  
+  .typing { display:flex; gap:4px; align-items:center; padding:4px 0; }
+  .typing span {
+    width:8px; height:8px; border-radius:50%; background:#8b949e;
+    animation:typing 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay:0.2s; }
+  .typing span:nth-child(3) { animation-delay:0.4s; }
+  @keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+  
+  .input-area {
+    border-top:1px solid #30363d; padding:16px 24px;
+    background:#161b22;
+    display:flex; gap:12px; align-items:flex-end;
   }
   
-  .orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.15;
-    animation: float 8s ease-in-out infinite;
+  #user-input {
+    flex:1; background:#0d1117; border:1px solid #30363d;
+    color:#e6edf3; padding:12px 16px; border-radius:10px;
+    font-family:'Inter',sans-serif; font-size:14px;
+    resize:none; outline:none; min-height:46px; max-height:120px;
+    transition: border-color 0.2s;
   }
-  .orb1 { width:400px; height:400px; background:#6366f1; top:-100px; left:-100px; }
-  .orb2 { width:300px; height:300px; background:#ec4899; bottom:-50px; right:-50px; animation-delay: -4s; }
-  .orb3 { width:250px; height:250px; background:#06b6d4; top:50%; left:50%; animation-delay: -2s; }
+  #user-input:focus { border-color:#8957e5; }
+  #user-input::placeholder { color:#484f58; }
   
-  @keyframes float {
-    0%,100% { transform: translate(0,0) scale(1); }
-    33% { transform: translate(30px,-30px) scale(1.05); }
-    66% { transform: translate(-20px,20px) scale(0.95); }
+  #send-btn {
+    background:linear-gradient(135deg,#8957e5,#6e40c9);
+    border:none; color:white; padding:12px 20px;
+    border-radius:10px; cursor:pointer; font-size:18px;
+    transition:all 0.2s; height:46px;
   }
+  #send-btn:hover { transform:scale(1.05); box-shadow:0 0 20px rgba(137,87,229,0.5); }
+  #send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
   
-  .container { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:40px 20px; }
-  
-  .header { text-align:center; margin-bottom:50px; }
-  .badge {
-    display:inline-flex; align-items:center; gap:8px;
-    background:rgba(99,102,241,0.2); border:1px solid rgba(99,102,241,0.4);
-    padding:6px 16px; border-radius:20px; font-size:12px; color:#a5b4fc;
-    margin-bottom:20px; letter-spacing:1px; text-transform:uppercase;
+  .welcome {
+    text-align:center; margin:auto; padding:40px;
+    color:#8b949e;
   }
-  .dot { width:8px; height:8px; border-radius:50%; background:#22c55e; animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-  
-  h1 { font-size:clamp(2rem,5vw,3.5rem); font-weight:900; line-height:1.1; margin-bottom:15px; }
-  .gradient-text {
-    background: linear-gradient(135deg, #6366f1, #ec4899, #06b6d4);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .welcome h2 { font-size:2rem; margin-bottom:10px; color:#e6edf3; }
+  .welcome p { font-size:14px; margin-bottom:24px; }
+  .suggestions { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .sug-btn {
+    background:#161b22; border:1px solid #30363d;
+    color:#e6edf3; padding:8px 16px; border-radius:20px;
+    cursor:pointer; font-size:13px; transition:all 0.2s;
+    font-family:'Inter',sans-serif;
   }
-  .subtitle { color:#94a3b8; font-size:1.1rem; }
+  .sug-btn:hover { border-color:#8957e5; color:#d2a8ff; }
   
-  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:30px; }
-  
-  .card {
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:16px; padding:24px;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-  }
-  .card:hover { border-color:rgba(99,102,241,0.4); transform:translateY(-2px); background:rgba(99,102,241,0.05); }
-  
-  .card-icon { font-size:2rem; margin-bottom:12px; }
-  .card-label { font-size:11px; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
-  .card-value { font-size:1.4rem; font-weight:700; color:#e2e8f0; font-family:'JetBrains Mono', monospace; }
-  .card-sub { font-size:12px; color:#475569; margin-top:4px; }
-  
-  .ping-section {
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:16px; padding:30px; margin-bottom:30px;
-  }
-  
-  .ping-section h2 { font-size:1.3rem; margin-bottom:20px; color:#e2e8f0; }
-  
-  .ping-btn {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border: none; color: white; padding: 12px 30px;
-    border-radius: 10px; font-size: 15px; font-weight: 600;
-    cursor: pointer; transition: all 0.2s; margin-right: 10px; margin-bottom:10px;
-  }
-  .ping-btn:hover { transform:scale(1.05); box-shadow:0 0 30px rgba(99,102,241,0.5); }
-  .ping-btn:active { transform:scale(0.98); }
-  
-  .ping-btn.cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
-  .ping-btn.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
-  
-  #response-box {
-    margin-top:20px;
-    background:rgba(0,0,0,0.4);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:10px; padding:16px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:13px; color:#a5b4fc;
-    min-height:60px; line-height:1.6;
-    white-space:pre-wrap;
-  }
-  
-  .visitor-section {
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:16px; padding:30px;
-    margin-bottom:30px;
-  }
-  
-  .visitor-section h2 { font-size:1.3rem; margin-bottom:20px; color:#e2e8f0; }
-  
-  #visitor-list { list-style:none; }
-  #visitor-list li {
-    padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);
-    font-family:'JetBrains Mono',monospace; font-size:13px; color:#94a3b8;
-    display:flex; justify-content:space-between;
-  }
-  #visitor-list li:last-child { border-bottom:none; }
-  
-  .clock-display {
-    text-align:center; padding:20px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:clamp(1.5rem,4vw,2.5rem);
-    color:#6366f1; letter-spacing:4px;
-    margin-bottom:30px;
-  }
-  
-  .footer { text-align:center; color:#334155; font-size:12px; margin-top:40px; }
-  .footer a { color:#6366f1; text-decoration:none; }
-  
-  #status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e; margin-right:8px; animation:pulse 2s infinite; }
+  #chat-box::-webkit-scrollbar { width:6px; }
+  #chat-box::-webkit-scrollbar-track { background:#0d1117; }
+  #chat-box::-webkit-scrollbar-thumb { background:#30363d; border-radius:3px; }
 </style>
 </head>
 <body>
-<div class="bg-grid"></div>
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
 
-<div class="container">
-  <div class="header">
-    <div class="badge"><span class="dot"></span> LIVE on GitHub Actions</div>
-    <h1>Claude's <span class="gradient-text">Live Demo</span> 🚀</h1>
-    <p class="subtitle">Running inside a GitHub Actions runner — powered by bore.pub tunnel! 😎</p>
+<div class="header">
+  <div class="header-icon">🦙</div>
+  <div class="header-info">
+    <h1>Llama Chat</h1>
+    <p>Powered by GitHub Actions Runner</p>
   </div>
-  
-  <div class="clock-display" id="clock">00:00:00</div>
-  
-  <div class="cards" id="stats-cards">
-    <div class="card">
-      <div class="card-icon">🖥️</div>
-      <div class="card-label">Server</div>
-      <div class="card-value" id="server-os">Loading...</div>
-      <div class="card-sub" id="server-host">GitHub Actions Runner</div>
-    </div>
-    <div class="card">
-      <div class="card-icon">⚡</div>
-      <div class="card-label">Uptime</div>
-      <div class="card-value" id="uptime">0s</div>
-      <div class="card-sub">Server ke seconds</div>
-    </div>
-    <div class="card">
-      <div class="card-icon">👥</div>
-      <div class="card-label">Total Visitors</div>
-      <div class="card-value" id="visitor-count">0</div>
-      <div class="card-sub">Aaj ka score 😄</div>
-    </div>
-    <div class="card">
-      <div class="card-icon">🌍</div>
-      <div class="card-label">Location</div>
-      <div class="card-value">Azure</div>
-      <div class="card-sub">US East Data Center</div>
-    </div>
-  </div>
-  
-  <div class="ping-section">
-    <h2>🎮 Interactive API Tester</h2>
-    <button class="ping-btn" onclick="callApi('/api/ping')">🏓 Ping Server</button>
-    <button class="ping-btn cyan" onclick="callApi('/api/info')">📊 Server Info</button>
-    <button class="ping-btn pink" onclick="callApi('/api/joke')">😂 Random Joke</button>
-    <button class="ping-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a)" onclick="callApi('/api/time')">⏰ Server Time</button>
-    <div id="response-box">👆 Koi bhi button press karo aur API ka response dekho!</div>
-  </div>
-  
-  <div class="visitor-section">
-    <h2>📋 Recent Visitors Log</h2>
-    <ul id="visitor-list">
-      <li><span>Waiting for visitors...</span><span>--</span></li>
-    </ul>
-  </div>
-  
-  <div class="footer">
-    Made with ❤️ by <a href="#">Claude AI</a> • Running on GitHub Actions • Tunneled via bore.pub<br>
-    <span id="server-url-display" style="color:#6366f1;font-family:monospace;font-size:13px;margin-top:5px;display:block;"></span>
+  <div class="status-badge">
+    <span class="dot"></span> Live on bore.pub
   </div>
 </div>
 
+<div class="model-info">
+  Model: <span>qwen2:0.5b</span> &nbsp;|&nbsp;
+  Running on: <span>GitHub Actions (Azure)</span> &nbsp;|&nbsp;
+  Tunnel: <span>bore.pub</span> &nbsp;|&nbsp;
+  Context: <span>2048 tokens</span>
+</div>
+
+<div id="chat-box">
+  <div class="welcome" id="welcome">
+    <h2>🦙 Llama is Ready!</h2>
+    <p>GitHub Actions pe chal raha hai ye LLM — bilkul free! 🤯<br>Kuch bhi pooch sakte ho!</p>
+    <div class="suggestions">
+      <button class="sug-btn" onclick="sendSuggestion(this)">🇮🇳 Bharat ke baare mein batao</button>
+      <button class="sug-btn" onclick="sendSuggestion(this)">Write a haiku about coding</button>
+      <button class="sug-btn" onclick="sendSuggestion(this)">Python vs JavaScript - kaunsa better?</button>
+      <button class="sug-btn" onclick="sendSuggestion(this)">Ek funny joke sunao</button>
+      <button class="sug-btn" onclick="sendSuggestion(this)">What is GitHub Actions?</button>
+    </div>
+  </div>
+</div>
+
+<div class="input-area">
+  <textarea id="user-input" placeholder="Kuch bhi pooch... (Enter = send, Shift+Enter = newline)" rows="1"></textarea>
+  <button id="send-btn" onclick="sendMessage()">➤</button>
+</div>
+
 <script>
-  // Live clock
-  function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').textContent = 
-      now.toTimeString().split(' ')[0];
+  const chatBox = document.getElementById('chat-box');
+  const input = document.getElementById('user-input');
+  const sendBtn = document.getElementById('send-btn');
+  let isLoading = false;
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+
+  function sendSuggestion(btn) {
+    input.value = btn.textContent.replace(/^[^ ]+ /, '').trim();
+    sendMessage();
   }
-  setInterval(updateClock, 1000);
-  updateClock();
-  
-  // API caller
-  async function callApi(endpoint) {
-    const box = document.getElementById('response-box');
-    box.textContent = '⏳ Loading...';
-    const start = Date.now();
+
+  function addMsg(role, text) {
+    const welcome = document.getElementById('welcome');
+    if (welcome) welcome.remove();
+    
+    const div = document.createElement('div');
+    div.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+    const isAI = role !== 'user';
+    div.innerHTML = `
+      <div class="avatar ${isAI ? 'ai' : 'user'}">${isAI ? '🦙' : '👤'}</div>
+      <div class="bubble">
+        <div class="name">${isAI ? 'Llama (qwen2:0.5b)' : 'You'}</div>
+        <div class="text">${text}</div>
+      </div>`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    return div;
+  }
+
+  function addTyping() {
+    const welcome = document.getElementById('welcome');
+    if (welcome) welcome.remove();
+    const div = document.createElement('div');
+    div.className = 'msg ai'; div.id = 'typing-indicator';
+    div.innerHTML = `<div class="avatar ai">🦙</div><div class="bubble"><div class="name">Llama (qwen2:0.5b)</div><div class="typing"><span></span><span></span><span></span></div></div>`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text || isLoading) return;
+    
+    isLoading = true;
+    sendBtn.disabled = true;
+    input.value = ''; input.style.height = 'auto';
+    
+    addMsg('user', text.replace(/\n/g, '<br>'));
+    addTyping();
+    
     try {
-      const res = await fetch(endpoint);
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: text})
+      });
       const data = await res.json();
-      const elapsed = Date.now() - start;
-      box.textContent = `✅ ${endpoint} [${elapsed}ms]\n\n${JSON.stringify(data, null, 2)}`;
+      removeTyping();
+      addMsg('ai', (data.reply || data.error || 'No response').replace(/\n/g, '<br>'));
     } catch(e) {
-      box.textContent = `❌ Error: ${e.message}`;
+      removeTyping();
+      addMsg('ai', '❌ Error: ' + e.message);
     }
+    
+    isLoading = false;
+    sendBtn.disabled = false;
+    input.focus();
   }
-  
-  // Stats refresh
-  async function refreshStats() {
-    try {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-      document.getElementById('visitor-count').textContent = data.visitors;
-      document.getElementById('uptime').textContent = data.uptime + 's';
-      document.getElementById('server-os').textContent = data.os;
-      document.getElementById('server-host').textContent = data.hostname;
-      
-      // Update visitor list
-      const list = document.getElementById('visitor-list');
-      if (data.recent_visits && data.recent_visits.length > 0) {
-        list.innerHTML = data.recent_visits.slice(-8).reverse().map(v => 
-          `<li><span>${v.path}</span><span style="color:#475569">${v.time}</span></li>`
-        ).join('');
-      }
-    } catch(e) {}
-  }
-  
-  setInterval(refreshStats, 2000);
-  refreshStats();
-  
-  // Show current URL
-  document.getElementById('server-url-display').textContent = '🌐 ' + window.location.href;
 </script>
 </body>
 </html>"""
 
-import time
-START_TIME = time.time()
-VISITORS = []
-VISIT_COUNT = 0
-
-JOKES = [
-    {"setup": "GitHub Actions runner ne kya kaha?", "punchline": "\"Main free hoon but kabhi nahi sonta!\" 😂"},
-    {"setup": "Programmer ko kya hua jab bore.pub se tunnel khola?", "punchline": "Uski duniya hi khul gayi! 🌍😎"},
-    {"setup": "Cloud server ka favorite song?", "punchline": "\"Tujhe dekha toh ye jaana sanam... main toh CPU hoon!\" 😂"},
-    {"setup": "API ne GET request ko kya bola?", "punchline": "\"Aaja mere paas, data dunga!\" 💘"},
-    {"setup": "Ek developer roz 8 ghante kaam karta tha...", "punchline": "Phir usne GitHub Actions discover kiya. Ab woh 23 ghante kaam karta hai! 😭"},
-]
-
-import random
-
 class Handler(BaseHTTPRequestHandler):
-    def log_message(self, format, *args):
-        pass  # Quiet logs
+    def log_message(self, format, *args): pass
     
     def do_GET(self):
-        global VISIT_COUNT
-        VISIT_COUNT += 1
-        visit_time = datetime.datetime.now().strftime('%H:%M:%S')
-        VISITORS.append({"path": self.path, "time": visit_time, "ip": self.client_address[0]})
-        
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path
-        
-        if path == '/api/ping':
-            self.send_json({"pong": True, "time": visit_time, "message": "🏓 Pong! Server alive hai bhai!", "latency_tip": "Ye response GitHub Actions runner se aa raha hai!"})
-        
-        elif path == '/api/info':
-            self.send_json({
-                "server": "GitHub Actions Runner",
-                "os": platform.system() + " " + platform.release(),
-                "python": platform.python_version(),
-                "hostname": socket.gethostname(),
-                "cpu_count": os.cpu_count(),
-                "tunnel": "bore.pub",
-                "message": "Ye sab GitHub ka free runner hai! 🤯"
-            })
-        
-        elif path == '/api/joke':
-            joke = random.choice(JOKES)
-            self.send_json(joke)
-        
-        elif path == '/api/time':
-            now = datetime.datetime.utcnow()
-            self.send_json({
-                "utc": now.isoformat(),
-                "ist": (now + datetime.timedelta(hours=5, minutes=30)).strftime('%Y-%m-%d %H:%M:%S IST'),
-                "message": "GitHub runner UTC time! 🕐"
-            })
-        
-        elif path == '/api/stats':
-            uptime = int(time.time() - START_TIME)
-            self.send_json({
-                "visitors": VISIT_COUNT,
-                "uptime": uptime,
-                "os": platform.system(),
-                "hostname": socket.gethostname()[:15],
-                "recent_visits": VISITORS[-20:]
-            })
-        
-        else:
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(HTML.encode())
-    
-    def send_json(self, data):
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
-        self.wfile.write(json.dumps(data, indent=2).encode())
+        self.wfile.write(HTML.encode())
+    
+    def do_POST(self):
+        length = int(self.headers.get('Content-Length', 0))
+        body = json.loads(self.rfile.read(length))
+        msg = body.get('message', '')
+        
+        try:
+            payload = json.dumps({
+                "model": "qwen2:0.5b",
+                "prompt": msg,
+                "stream": False
+            }).encode()
+            
+            req = urllib.request.Request(
+                'http://localhost:11434/api/generate',
+                data=payload,
+                headers={'Content-Type': 'application/json'}
+            )
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                result = json.loads(resp.read())
+                reply = result.get('response', 'No response')
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({"reply": reply}).encode())
+        
+        except Exception as e:
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": str(e)}).encode())
 
 if __name__ == '__main__':
-    port = 3000
-    server = HTTPServer(('0.0.0.0', port), Handler)
-    print(f"🚀 Server running on port {port}")
+    server = HTTPServer(('0.0.0.0', 3000), Handler)
+    print("🚀 Chat UI server running on port 3000")
     server.serve_forever()
