@@ -1,0 +1,13 @@
+====== 🐧 UBUNTU RUNNER ======
+🖥️  CPU Model  : AMD EPYC 7763 64-Core Processor
+🖥️  CPU Cores  : 4
+💾 Total RAM  : 15Gi
+💾 Free RAM   : 12Gi
+💿 Total Disk : 145G
+💿 Free Disk  : 91G
+🐧 OS         : Ubuntu 24.04.3 LTS
+🌐 Public IP  : 172.214.97.227
+⚡ CPU Speed  : 3241.013 MHz
+🧵 Threads    : 4
+🔄 Swap       : 3.0Gi
+==============================
