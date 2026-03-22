@@ -48,49 +48,35 @@ jobs:
           sudo dpkg -i /tmp/rustdesk.deb || sudo apt-get install -f -y -qq
           echo "[$(date -u '+%H:%M:%S')] ✅ RustDesk installed!" | tee -a "$LOG"
 
-      - name: 🚀 Configure RustDesk - Both Users
+      - name: 🚀 Start RustDesk + Set Password (root only)
         run: |
           LOG="output/runtimelogs.txt"
           FIXED_PASS="Pass1234"
 
-          # Headless enable
+          # Step 1: Headless enable
           sudo rustdesk --option allow-linux-headless Y
           sleep 2
           echo "[$(date -u '+%H:%M:%S')] ✅ Headless enabled!" | tee -a "$LOG"
 
-          # Service start
+          # Step 2: Service start (root se chalega)
           sudo rustdesk --service &
           sleep 6
           echo "[$(date -u '+%H:%M:%S')] ✅ Service started!" | tee -a "$LOG"
 
-          # Password set karo DONO users ke liye - root aur runner!
+          # Step 3: Password set (sirf sudo se - root config mein jayega)
           sudo rustdesk --password "$FIXED_PASS"
-          rustdesk --password "$FIXED_PASS"
           sleep 2
+          echo "[$(date -u '+%H:%M:%S')] 🔑 Password set!" | tee -a "$LOG"
 
-          # Config manually DONO jagah likhte hain
-          sudo mkdir -p /root/.config/rustdesk
-          mkdir -p /home/runner/.config/rustdesk
+          # Step 4: Root config verify karo
+          echo "[$(date -u '+%H:%M:%S')] --- Root Config ---" | tee -a "$LOG"
+          sudo cat /root/.config/rustdesk/RustDesk2.toml 2>/dev/null | tee -a "$LOG" || echo "Config nahi mila!" | tee -a "$LOG"
 
-          # permanent-password config mein explicitly set
-          sudo bash -c "grep -q 'permanent-password' /root/.config/rustdesk/RustDesk2.toml 2>/dev/null && sed -i 's/permanent-password.*/permanent-password = \"'$FIXED_PASS'\"/' /root/.config/rustdesk/RustDesk2.toml || echo 'permanent-password = \"'$FIXED_PASS'\"' >> /root/.config/rustdesk/RustDesk2.toml"
-          
-          grep -q 'permanent-password' /home/runner/.config/rustdesk/RustDesk2.toml 2>/dev/null && \
-            sed -i "s/permanent-password.*/permanent-password = \"$FIXED_PASS\"/" /home/runner/.config/rustdesk/RustDesk2.toml || \
-            echo "permanent-password = \"$FIXED_PASS\"" >> /home/runner/.config/rustdesk/RustDesk2.toml
-
-          echo "[$(date -u '+%H:%M:%S')] 🔑 Password set dono jagah!" | tee -a "$LOG"
-
-          # Config verify
-          echo "[$(date -u '+%H:%M:%S')] Root config:" | tee -a "$LOG"
-          sudo cat /root/.config/rustdesk/RustDesk2.toml | tee -a "$LOG"
-          echo "[$(date -u '+%H:%M:%S')] Runner config:" | tee -a "$LOG"
-          cat /home/runner/.config/rustdesk/RustDesk2.toml | tee -a "$LOG"
-
-          # ID nikalo
+          # Step 5: ID nikalo
           RUSTDESK_ID=$(sudo rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
+
           echo "" | tee -a "$LOG"
-          echo "[$(date -u '+%H:%M:%S')] 🎉 RUSTDESK READY!" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 🎉🎉 RUSTDESK READY!" | tee -a "$LOG"
           echo "================================================" | tee -a "$LOG"
           echo "   🔢 ID:       $RUSTDESK_ID" | tee -a "$LOG"
           echo "   🔑 Password: $FIXED_PASS" | tee -a "$LOG"
@@ -103,7 +89,7 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🖥️ RustDesk - both users password fix"
+          git diff --staged --quiet || git commit -m "🖥️ RustDesk - root config only"
           git pull --rebase origin main
           git push
 
