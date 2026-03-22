@@ -15,30 +15,30 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Speed Test - Download to /dev/null
+      - name: Speed Test
         run: |
           mkdir -p output
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚀 Speed test start!" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📥 Downloading 1GB to /dev/null..." >> output/runtimelogs.txt
+          echo "🚀 Speed test start!"
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚀 Speed test start!" > output/runtimelogs.txt
 
-          # Download 1GB from Cloudflare speed test - directly to /dev/null!
-          RESULT=$(curl -o /dev/null \
+          # Download 1GB to /dev/null - max speed test!
+          curl -o /dev/null \
             --max-time 20 \
-            -w "Downloaded: %{size_download} bytes\nSpeed: %{speed_download} bytes/sec\nTime: %{time_total}s" \
-            "https://speed.cloudflare.com/__down?bytes=1073741824" 2>/dev/null)
+            -w "Downloaded: %{size_download} bytes\nSpeed: %{speed_download} bytes/sec\nTime: %{time_total}s\n" \
+            "https://speed.cloudflare.com/__down?bytes=1073741824" 2>/dev/null | tee -a output/runtimelogs.txt
 
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ Test done!" >> output/runtimelogs.txt
-          echo "$RESULT" >> output/runtimelogs.txt
-
-          # Convert to MB/s for easy reading
-          SPEED_BPS=$(echo "$RESULT" | grep "Speed:" | awk '{print $2}' | cut -d. -f1)
+          # Calculate MB/s
+          SPEED_BPS=$(grep "Speed:" output/runtimelogs.txt | awk '{print $2}' | cut -d. -f1)
           SPEED_MBPS=$(echo "scale=2; $SPEED_BPS / 1048576" | bc)
-          SIZE_MB=$(echo "$RESULT" | grep "Downloaded:" | awk '{print $2}')
-          SIZE_MB_HUMAN=$(echo "scale=2; $SIZE_MB / 1048576" | bc)
+          SIZE_BYTES=$(grep "Downloaded:" output/runtimelogs.txt | awk '{print $2}')
+          SIZE_MB=$(echo "scale=2; $SIZE_BYTES / 1048576" | bc)
 
+          echo "📊 Speed: ${SPEED_MBPS} MB/s"
+          echo "📦 Downloaded in 20s: ${SIZE_MB} MB"
           echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📊 Speed: ${SPEED_MBPS} MB/s" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📦 Downloaded in 20s: ${SIZE_MB_HUMAN} MB" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🎉 Speed test complete!" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📦 Downloaded in 20s: ${SIZE_MB} MB" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🎉 Test complete!" >> output/runtimelogs.txt
+          cat output/runtimelogs.txt
 
       - name: Commit output
         env:
