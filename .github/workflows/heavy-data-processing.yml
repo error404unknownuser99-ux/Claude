@@ -1,4 +1,4 @@
-name: Android Emulator + RDP
+name: Ubuntu XFCE RDP
 
 on:
   push:
@@ -9,53 +9,96 @@ on:
   workflow_dispatch:
 
 jobs:
-  android-rdp:
+  ubuntu-rdp:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 360
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Enable KVM
+      - name: System Optimize
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+          sudo swapoff -a
+          echo 0 | sudo tee /proc/sys/vm/swappiness
+          sudo systemctl stop snapd 2>/dev/null || true
+          sudo systemctl stop unattended-upgrades 2>/dev/null || true
+          sudo systemctl stop apt-daily.timer 2>/dev/null || true
+          echo "RAM: $(free -h | grep Mem | awk '{print $2}') | Optimized!"
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Download F-Droid APK
-        run: |
-          curl -L https://f-droid.org/F-Droid.apk -o fdroid.apk
-          echo "F-Droid Downloaded!"
-
-      - name: Install XFCE + XRDP + bore
+      - name: Install XFCE + XRDP
         run: |
           export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             xfce4 xfce4-terminal xfce4-goodies \
             xrdp dbus-x11 dbus-user-session x11-xserver-utils xorgxrdp \
-            wget curl
+            fonts-noto fonts-firacode \
+            papirus-icon-theme arc-theme \
+            wget curl git unzip firefox \
+            xfce4-taskmanager neofetch
           echo "Packages installed!"
 
-      - name: Create User + Configure XRDP
+      - name: Create User + Theme Config
         run: |
           sudo useradd -m -s /bin/bash cyberpunk 2>/dev/null || true
           echo "cyberpunk:Cyber@2025!" | sudo chpasswd
           sudo usermod -aG sudo cyberpunk
 
-          sudo adduser xrdp ssl-cert 2>/dev/null || true
+          sudo mkdir -p /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml
+          sudo mkdir -p /home/cyberpunk/.config/gtk-3.0
+          sudo mkdir -p /home/cyberpunk/.config/caja
 
-          # autorun=Xorg - black screen fix
+          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml > /dev/null << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <channel name="xfwm4" version="1.0">
+            <property name="general" type="empty">
+              <property name="theme" type="string" value="Arc-Dark"/>
+              <property name="use_compositing" type="bool" value="false"/>
+              <property name="animate_mouse" type="bool" value="false"/>
+              <property name="box_move" type="bool" value="false"/>
+              <property name="box_resize" type="bool" value="false"/>
+            </property>
+          </channel>
+          EOF
+
+          sudo tee /home/cyberpunk/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml > /dev/null << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <channel name="xsettings" version="1.0">
+            <property name="Net" type="empty">
+              <property name="ThemeName" type="string" value="Arc-Dark"/>
+              <property name="IconThemeName" type="string" value="Papirus-Dark"/>
+            </property>
+            <property name="Gtk" type="empty">
+              <property name="FontName" type="string" value="Noto Sans 10"/>
+              <property name="EnableAnimations" type="bool" value="false"/>
+            </property>
+          </channel>
+          EOF
+
+          sudo tee /home/cyberpunk/.config/gtk-3.0/settings.ini > /dev/null << 'EOF'
+          [Settings]
+          gtk-theme-name=Arc-Dark
+          gtk-icon-theme-name=Papirus-Dark
+          gtk-font-name=Noto Sans 10
+          gtk-enable-animations=0
+          EOF
+
+          sudo tee /home/cyberpunk/.gtkrc-2.0 > /dev/null << 'EOF'
+          gtk-theme-name="Arc-Dark"
+          gtk-icon-theme-name="Papirus-Dark"
+          gtk-font-name="Noto Sans 10"
+          gtk-enable-animations=0
+          EOF
+
+          sudo chown -R cyberpunk:cyberpunk /home/cyberpunk/
+          echo "User + themes configured!"
+
+      - name: Configure XRDP
+        run: |
+          sudo adduser xrdp ssl-cert 2>/dev/null || true
           sudo sed -i 's/^autorun=$/autorun=Xorg/' /etc/xrdp/xrdp.ini
           sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini 2>/dev/null || true
 
-          # startwm.sh - dbus fix
           sudo tee /etc/xrdp/startwm.sh > /dev/null << 'EOF'
           #!/bin/sh
           unset DBUS_SESSION_BUS_ADDRESS
@@ -70,7 +113,7 @@ jobs:
           sleep 3
           echo "XRDP Ready!"
 
-      - name: Start bore tunnel + Save Port
+      - name: Start bore tunnel with Auto-Reconnect
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -82,43 +125,34 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
 
-          # Bore tunnel start karo background mein
-          ./bore local 3389 --to bore.pub > output/bore_out.txt 2>&1 &
-          sleep 8
-
-          PORT=$(grep -oP 'listening at bore\.pub:\K\d+' output/bore_out.txt 2>/dev/null)
-          echo "PORT: $PORT"
-
-          cat > output/rdp_credentials.txt << CREDS
+          attempt=0
+          while true; do
+            attempt=$((attempt + 1))
+            echo "=== Tunnel attempt #$attempt ==="
+            ./bore local 3389 --to bore.pub > output/bore_out.txt 2>&1 &
+            BORE_PID=$!
+            sleep 8
+            PORT=$(grep -oP 'listening at bore\.pub:\K\d+' output/bore_out.txt 2>/dev/null)
+            if [ -n "$PORT" ]; then
+              echo "TUNNEL LIVE! bore.pub:$PORT"
+              cat > output/rdp_credentials.txt << CREDS
           USERNAME: cyberpunk
           PASSWORD: Cyber@2025!
           ADDRESS:  bore.pub:$PORT
+          ATTEMPT:  $attempt
           CREDS
-
-          git add output/
-          git diff --staged --quiet || (git commit -m "Android RDP LIVE bore.pub:$PORT" && \
-            for i in 1 2 3 4 5; do
-              git pull --rebase origin main && git push && break
-              sleep 2
-            done)
-
-          echo "Tunnel LIVE at bore.pub:$PORT"
-
-      - name: Android Emulator - RDP Display Pe
-        uses: reactivecircus/android-emulator-runner@v2
-        env:
-          DISPLAY: :10.0
-        with:
-          api-level: 30
-          target: google_apis
-          arch: x86_64
-          ram-size: 4096M
-          emulator-options: -no-snapshot-save -noaudio -no-boot-anim
-          disable-animations: true
-          script: |
-            echo "Emulator chal raha hai!"
-            adb install fdroid.apk || true
-            echo "F-Droid Installed!"
-            adb shell monkey -p org.fdroid.fdroid 1 || true
-            echo "Session alive - RDP se connect karo!"
-            sleep 18000
+              git add output/
+              git diff --staged --quiet || (git commit -m "Ubuntu RDP LIVE bore.pub:$PORT" && \
+                for i in 1 2 3 4 5; do
+                  git pull --rebase origin main && git push && break
+                  sleep 2
+                done)
+              wait $BORE_PID
+              echo "Bore exited! Reconnecting in 5s..."
+              sleep 5
+            else
+              echo "Port not found, retrying..."
+              kill $BORE_PID 2>/dev/null || true
+              sleep 5
+            fi
+          done
