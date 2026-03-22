@@ -1,4 +1,4 @@
-name: Windows Desktop RDP + bore.pub
+name: Windows RDP via bore.pub
 
 on:
   push:
@@ -9,119 +9,144 @@ on:
   workflow_dispatch:
 
 jobs:
-  windows-desktop:
+  windows-rdp:
     runs-on: windows-latest
-    timeout-minutes: 355
+    timeout-minutes: 360
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Optimize + RDP + bore.pub
-        shell: powershell
+      - name: Enable RDP and Create User
+        shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path "output" | Out-Null
-          $LOG = "output\runtimelogs.txt"
+          $pass = "BoreRDP@2025!"
+          net user liveuser $pass /add
+          net localgroup administrators liveuser /add
+          net localgroup "Remote Desktop Users" liveuser /add
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
+          netsh advfirewall firewall add rule name="RDP-3389" protocol=TCP dir=in localport=3389 action=allow
+          Write-Host "RDP Enabled!"
 
-          # === 1. OPTIMIZE ===
-          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Optimization start..." | Tee-Object -FilePath $LOG -Append
-          $vfxPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"
-          New-Item -Path $vfxPath -Force | Out-Null
-          Set-ItemProperty -Path $vfxPath -Name VisualFXSetting -Value 2
-          $advPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
-          Set-ItemProperty -Path $advPath -Name TaskbarAnimations -Value 0 -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path $advPath -Name ListviewShadow -Value 0 -ErrorAction SilentlyContinue
-          @("SysMain","WSearch","DiagTrack","wuauserv","BITS","TabletInputService") | ForEach-Object {
-            Stop-Service -Name $_ -Force -ErrorAction SilentlyContinue
-            Set-Service -Name $_ -StartupType Disabled -ErrorAction SilentlyContinue
+      - name: ULTRA OPTIMIZE Windows
+        shell: pwsh
+        run: |
+          Write-Host "=== Killing useless services ==="
+          $services = @(
+            "WSearch","SysMain","DiagTrack","dmwappushservice",
+            "RetailDemo","MapsBroker","lfsvc","SharedAccess",
+            "wisvc","WerSvc","wercplsupport","Themes",
+            "TabletInputService","PrintNotify","Spooler",
+            "Fax","XblAuthManager","XblGameSave","XboxNetApiSvc",
+            "XboxGipSvc","spectrum","WMPNetworkSvc","icssvc",
+            "PhoneSvc","TapiSrv","RmSvc","SCardSvr",
+            "SCPolicySvc","WbioSrvc","StorSvc","FrameServer",
+            "stisvc","WiaRpc","WdNisSvc","WinDefend",
+            "MsKeyboardFilter","NaturalAuthentication"
+          )
+          foreach ($svc in $services) {
+            try {
+              Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
+              Set-Service -Name $svc -StartupType Disabled -ErrorAction SilentlyContinue
+            } catch {}
           }
-          powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
-          "[$(Get-Date -Format 'HH:mm:ss')] [OK] Optimization done!" | Tee-Object -FilePath $LOG -Append
+          Write-Host "Services killed!"
 
-          # === 2. ENABLE RDP ===
-          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
-          Enable-NetFirewallRule -DisplayGroup "Remote Desktop" -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "UserAuthentication" -Value 0
-          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 2 -ErrorAction SilentlyContinue
-          net user runneradmin "RDP@Pass123" 2>$null
-          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "runneradmin" -ErrorAction SilentlyContinue
-          Restart-Service TermService -Force -ErrorAction SilentlyContinue
-          "[$(Get-Date -Format 'HH:mm:ss')] [OK] RDP ready! User:runneradmin Pass:RDP@Pass123" | Tee-Object -FilePath $LOG -Append
+          Write-Host "=== ALL Animations OFF ==="
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Value "0" -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Value "0" -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -Value 0 -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name "MinAnimate" -Value "0" -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "FontSmoothing" -Value "0" -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "CursorBlinkRate" -Value "-1" -Force -ErrorAction SilentlyContinue
+          Write-Host "Animations OFF!"
 
-          # === 3. BORE DOWNLOAD (WebClient - most reliable) ===
-          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] bore download..." | Tee-Object -FilePath $LOG -Append
-          $wc = New-Object System.Net.WebClient
-          $wc.DownloadFile("https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-pc-windows-msvc.exe", "C:\bore.exe")
-          $sz = (Get-Item "C:\bore.exe").Length
-          "[$(Get-Date -Format 'HH:mm:ss')] [OK] bore downloaded! Size: $sz bytes" | Tee-Object -FilePath $LOG -Append
+          Write-Host "=== Transparency + Dark Mode ==="
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0 -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0 -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0 -Force -ErrorAction SilentlyContinue
 
-          # === 4. BORE TUNNEL ===
-          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Tunnel start port 3389..." | Tee-Object -FilePath $LOG -Append
-          $proc = Start-Process -FilePath "C:\bore.exe" `
-            -ArgumentList "local 3389 --to bore.pub" `
-            -RedirectStandardOutput "C:\bore_out.txt" `
-            -RedirectStandardError "C:\bore_err.txt" `
-            -PassThru -WindowStyle Hidden
-          $proc.Id | Out-File "C:\bore_pid.txt"
-          Start-Sleep -Seconds 12
+          Write-Host "=== MAX CPU - High Performance ==="
+          powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+          powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100
+          powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 100
+          powercfg /apply
 
-          $boreOut = (Get-Content "C:\bore_out.txt" -ErrorAction SilentlyContinue) -join " "
-          $boreErr = (Get-Content "C:\bore_err.txt" -ErrorAction SilentlyContinue) -join " "
-          $match = [regex]::Match("$boreOut $boreErr", "bore\.pub:(\d+)")
+          Write-Host "=== RDP Color Depth = 16bit ==="
+          Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 4 -Force -ErrorAction SilentlyContinue
 
-          if ($match.Success) {
-            $tunnel = "bore.pub:$($match.Groups[1].Value)"
-            "" | Tee-Object -FilePath $LOG -Append
-            "[$(Get-Date -Format 'HH:mm:ss')] [READY] TUNNEL READY!" | Tee-Object -FilePath $LOG -Append
-            "================================================" | Tee-Object -FilePath $LOG -Append
-            "  RDP CONNECTION INFO" | Tee-Object -FilePath $LOG -Append
-            "================================================" | Tee-Object -FilePath $LOG -Append
-            "  Host:     $tunnel" | Tee-Object -FilePath $LOG -Append
-            "  Username: runneradmin" | Tee-Object -FilePath $LOG -Append
-            "  Password: RDP@Pass123" | Tee-Object -FilePath $LOG -Append
-            "================================================" | Tee-Object -FilePath $LOG -Append
-          } else {
-            "[$(Get-Date -Format 'HH:mm:ss')] [WARN] Port nahi mila! out:$boreOut err:$boreErr" | Tee-Object -FilePath $LOG -Append
-          }
+          Write-Host "=== Disable Defender + Telemetry ==="
+          Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Force -ErrorAction SilentlyContinue
 
-      - name: Push Info
-        shell: powershell
+          Write-Host "=== RAM Status ==="
+          Get-WmiObject Win32_OperatingSystem | Select-Object @{N='FreeRAM_GB';E={[math]::Round($_.FreePhysicalMemory/1MB,2)}} | Format-List
+          Write-Host "OPTIMIZATION COMPLETE!"
+
+      - name: Download bore
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path output | Out-Null
+          Invoke-WebRequest -Uri "https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-pc-windows-msvc.zip" -OutFile bore.zip -UseBasicParsing
+          Expand-Archive bore.zip -DestinationPath . -Force
+          Write-Host "bore downloaded!"
+
+      - name: Start bore tunnel with auto-reconnect and commit port
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
-          git add output/
-          $diff = git diff --staged --name-only
-          if ($diff) { git commit -m "Windows RDP live!" }
-          git pull --rebase origin main
-          git push origin main
 
-      - name: Keep Alive 5.5 hours
-        shell: powershell
-        run: |
-          $LOG = "output\runtimelogs.txt"
-          $boreErr = (Get-Content "C:\bore_err.txt" -ErrorAction SilentlyContinue) -join " "
-          $match = [regex]::Match($boreErr, "bore\.pub:(\d+)")
-          $tunnel = if ($match.Success) { "bore.pub:$($match.Groups[1].Value)" } else { "check logs" }
-          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Alive! Host:$tunnel" | Tee-Object -FilePath $LOG -Append
-          $count = 0
+          $attempt = 0
           while ($true) {
-            Start-Sleep -Seconds 300
-            $count += 5
-            $borePid = Get-Content "C:\bore_pid.txt" -ErrorAction SilentlyContinue
-            $alive = if (Get-Process -Id $borePid -ErrorAction SilentlyContinue) { "alive" } else { "dead" }
-            $rdp = (Get-Service TermService -ErrorAction SilentlyContinue).Status
-            "[$(Get-Date -Format 'HH:mm:ss')] [${count}min] bore:$alive RDP:$rdp Host:$tunnel" | Tee-Object -FilePath $LOG -Append
-            if ($alive -eq "dead") {
-              $proc = Start-Process -FilePath "C:\bore.exe" -ArgumentList "local 3389 --to bore.pub" -RedirectStandardOutput "C:\bore_out.txt" -RedirectStandardError "C:\bore_err.txt" -PassThru -WindowStyle Hidden
-              $proc.Id | Out-File "C:\bore_pid.txt"
-              Start-Sleep -Seconds 12
-              $newErr = (Get-Content "C:\bore_err.txt" -ErrorAction SilentlyContinue) -join " "
-              $newMatch = [regex]::Match($newErr, "bore\.pub:(\d+)")
-              if ($newMatch.Success) { $tunnel = "bore.pub:$($newMatch.Groups[1].Value)" }
-              "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Restarted! Host:$tunnel" | Tee-Object -FilePath $LOG -Append
-            }
-            if ($count -ge 330) {
-              "[$(Get-Date -Format 'HH:mm:ss')] [INFO] 5.5hr done!" | Tee-Object -FilePath $LOG -Append
-              break
+            $attempt++
+            Write-Host "=== Tunnel attempt #$attempt ==="
+            Remove-Item "output\bore_out.txt" -ErrorAction SilentlyContinue
+
+            $proc = Start-Process -FilePath ".\bore.exe" `
+              -ArgumentList "local 3389 --to bore.pub" `
+              -RedirectStandardOutput "output\bore_out.txt" `
+              -RedirectStandardError "output\bore_err.txt" `
+              -NoNewWindow -PassThru
+
+            Start-Sleep -Seconds 8
+
+            $out = Get-Content "output\bore_out.txt" -Raw -ErrorAction SilentlyContinue
+            $err = Get-Content "output\bore_err.txt" -Raw -ErrorAction SilentlyContinue
+            $combined = "$out $err"
+
+            if ($combined -match "listening at bore\.pub:(\d+)") {
+              $port = $Matches[1]
+              Write-Host "TUNNEL LIVE on port: $port"
+
+              "USERNAME: liveuser" | Out-File output\rdp_credentials.txt -Encoding UTF8
+              "PASSWORD: BoreRDP@2025!" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+              "ADDRESS: bore.pub:$port" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+              "ATTEMPT: $attempt" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+
+              git add output/
+              git diff --staged --quiet
+              if ($LASTEXITCODE -ne 0) {
+                git commit -m "RDP LIVE bore.pub:$port (attempt $attempt)"
+                for ($i = 0; $i -lt 5; $i++) {
+                  git pull --rebase origin main
+                  git push
+                  if ($LASTEXITCODE -eq 0) { break }
+                  Start-Sleep -Seconds 2
+                }
+              }
+
+              Write-Host "Waiting for bore process..."
+              $proc.WaitForExit()
+              Write-Host "Bore exited! Reconnecting in 5 sec..."
+              Start-Sleep -Seconds 5
+            } else {
+              Write-Host "Port not found, retrying..."
+              Stop-Process -Id $proc.Id -ErrorAction SilentlyContinue
+              Start-Sleep -Seconds 5
             }
           }
