@@ -1,56 +1,111 @@
-import requests, json, os, csv
-from datetime import datetime
+import subprocess
+import time
+import json
+import os
 
-os.makedirs("output", exist_ok=True)
+print("🚀 GitHub Actions Internet Speed Test Starting...")
+print("=" * 50)
 
-print("🚀 GitHub Trending Repos Analysis shuru...")
+results = {}
 
-# ── 1. GitHub public API se top Python repos fetch karo ──
-print("📡 GitHub API se data fetch kar rahe hain...")
-res = requests.get(
-    "https://api.github.com/search/repositories",
-    params={"q": "language:python stars:>10000", "sort": "stars", "per_page": 30},
-    headers={"Accept": "application/vnd.github+json"},
-    timeout=15
+# Test 1: Download speed using curl (100MB file from fast.com CDN)
+print("\n📥 Download Speed Test (100MB file)...")
+start = time.time()
+result = subprocess.run(
+    ["curl", "-o", "/dev/null", "-s", "-w", "%{speed_download}",
+     "https://speed.cloudflare.com/__down?bytes=104857600"],
+    capture_output=True, text=True, timeout=60
 )
-data = res.json()
-repos = data.get("items", [])
-print(f"✅ {len(repos)} repos mila!")
+elapsed = time.time() - start
+if result.returncode == 0:
+    speed_bps = float(result.stdout.strip())
+    speed_mbps = (speed_bps * 8) / 1_000_000
+    results['download_mbps'] = round(speed_mbps, 2)
+    print(f"✅ Download Speed: {speed_mbps:.2f} Mbps")
+    print(f"   Time taken: {elapsed:.2f}s")
+else:
+    results['download_mbps'] = "Error"
+    print(f"❌ Error: {result.stderr}")
 
-# ── 2. CSV mein save karo ──
-with open("output/top_python_repos.csv", "w", newline="") as f:
-    writer = csv.DictWriter(f, fieldnames=["rank","name","stars","forks","issues","description"])
-    writer.writeheader()
-    for i, r in enumerate(repos, 1):
-        writer.writerow({
-            "rank":        i,
-            "name":        r["full_name"],
-            "stars":       r["stargazers_count"],
-            "forks":       r["forks_count"],
-            "issues":      r["open_issues_count"],
-            "description": (r["description"] or "")[:80]
-        })
-print("✅ top_python_repos.csv saved!")
+# Test 2: Upload speed test
+print("\n📤 Upload Speed Test (10MB)...")
+# Generate 10MB of data and upload
+start = time.time()
+result = subprocess.run(
+    ["curl", "-s", "-w", "%{speed_upload}", "-X", "POST",
+     "--data-binary", "@/dev/urandom",
+     "-o", "/dev/null",
+     "--max-time", "10",
+     "https://speed.cloudflare.com/__up"],
+    capture_output=True, text=True, timeout=15
+)
+elapsed = time.time() - start
+if result.returncode == 0 and result.stdout.strip():
+    speed_bps = float(result.stdout.strip())
+    speed_mbps = (speed_bps * 8) / 1_000_000
+    results['upload_mbps'] = round(speed_mbps, 2)
+    print(f"✅ Upload Speed: {speed_mbps:.2f} Mbps")
+else:
+    # Alternative upload test
+    result2 = subprocess.run(
+        ["curl", "-s", "-w", "%{speed_upload}",
+         "-F", "file=@/etc/hostname",
+         "-o", "/dev/null",
+         "https://httpbin.org/post"],
+        capture_output=True, text=True, timeout=15
+    )
+    if result2.returncode == 0:
+        speed_bps = float(result2.stdout.strip() or "0")
+        speed_mbps = (speed_bps * 8) / 1_000_000
+        results['upload_mbps'] = round(speed_mbps, 2)
+        print(f"✅ Upload Speed: {speed_mbps:.2f} Mbps")
+    else:
+        results['upload_mbps'] = "N/A"
+        print("⚠️ Upload test skipped")
 
-# ── 3. Stats nikalo ──
-total_stars = sum(r["stargazers_count"] for r in repos)
-total_forks = sum(r["forks_count"] for r in repos)
-top3 = [r["full_name"] for r in repos[:3]]
+# Test 3: Latency/Ping test
+print("\n⚡ Latency Test (ping to google.com)...")
+result = subprocess.run(
+    ["ping", "-c", "5", "google.com"],
+    capture_output=True, text=True, timeout=15
+)
+if result.returncode == 0:
+    lines = result.stdout.split('\n')
+    for line in lines:
+        if 'avg' in line or 'rtt' in line:
+            # Extract avg ping
+            parts = line.split('/')
+            if len(parts) >= 5:
+                avg_ping = parts[4]
+                results['avg_ping_ms'] = float(avg_ping)
+                print(f"✅ Avg Ping: {avg_ping} ms")
+    print(result.stdout)
+else:
+    results['avg_ping_ms'] = "N/A"
+    print("❌ Ping failed")
 
-summary = {
-    "fetched_at":    datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
-    "total_repos":   len(repos),
-    "total_stars":   total_stars,
-    "total_forks":   total_forks,
-    "avg_stars":     round(total_stars / len(repos)) if repos else 0,
-    "top_3_repos":   top3,
-    "most_starred":  repos[0]["full_name"] if repos else "N/A",
-    "max_stars":     repos[0]["stargazers_count"] if repos else 0
-}
+# Test 4: DNS resolution speed
+print("\n🔍 DNS Resolution Speed...")
+start = time.time()
+result = subprocess.run(
+    ["nslookup", "google.com"],
+    capture_output=True, text=True, timeout=5
+)
+dns_time = (time.time() - start) * 1000
+results['dns_ms'] = round(dns_time, 2)
+print(f"✅ DNS Resolution: {dns_time:.2f} ms")
 
-with open("output/summary.json", "w") as f:
-    json.dump(summary, f, indent=2)
+# Summary
+print("\n" + "=" * 50)
+print("📊 FINAL RESULTS:")
+print(f"  📥 Download: {results.get('download_mbps', 'N/A')} Mbps")
+print(f"  📤 Upload:   {results.get('upload_mbps', 'N/A')} Mbps")
+print(f"  ⚡ Ping:     {results.get('avg_ping_ms', 'N/A')} ms")
+print(f"  🔍 DNS:      {results.get('dns_ms', 'N/A')} ms")
+print("=" * 50)
 
-print("📊 Summary:")
-print(json.dumps(summary, indent=2))
-print("🎉 Sab complete!")
+# Save results
+os.makedirs("output", exist_ok=True)
+with open("output/speed_results.json", "w") as f:
+    json.dump(results, f, indent=2)
+print("\n✅ Results saved to output/speed_results.json")
