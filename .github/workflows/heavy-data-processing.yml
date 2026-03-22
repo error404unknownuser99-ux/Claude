@@ -1,4 +1,4 @@
-name: 🪟 Windows Desktop - RDP + ngrok
+name: Windows Desktop RDP + ngrok
 
 on:
   push:
@@ -14,10 +14,10 @@ jobs:
     timeout-minutes: 355
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: ⚡ Optimize + Enable RDP + ngrok
+      - name: Optimize + RDP + ngrok
         shell: powershell
         env:
           NGROK_TOKEN: 3BJQSr9d5pNOmSTJO9Ci576O5NY_3hCpqUn3VgWzc9ygdEfkP
@@ -25,8 +25,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path "output" | Out-Null
           $LOG = "output\runtimelogs.txt"
 
-          # ── 1. OPTIMIZE ──────────────────────────────
-          "[$(Get-Date -Format 'HH:mm:ss')] ⚡ Optimization shuru..." | Tee-Object -FilePath $LOG -Append
+          # === 1. OPTIMIZE ===
+          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Optimization start..." | Tee-Object -FilePath $LOG -Append
 
           # Visual FX - Best Performance (animations off)
           $vfxPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"
@@ -37,9 +37,6 @@ jobs:
           Set-ItemProperty -Path $advPath -Name ListviewShadow -Value 0 -ErrorAction SilentlyContinue
           Set-ItemProperty -Path $advPath -Name ListviewAlphaSelect -Value 0 -ErrorAction SilentlyContinue
 
-          # 16-bit color depth RDP ke liye
-          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 2 -ErrorAction SilentlyContinue
-
           # Unnecessary services stop
           @("SysMain","WSearch","DiagTrack","wuauserv","BITS","TabletInputService") | ForEach-Object {
             Stop-Service -Name $_ -Force -ErrorAction SilentlyContinue
@@ -49,29 +46,31 @@ jobs:
           # High Performance power plan
           powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
 
-          "[$(Get-Date -Format 'HH:mm:ss')] ✅ Optimization done!" | Tee-Object -FilePath $LOG -Append
+          "[$(Get-Date -Format 'HH:mm:ss')] [OK] Optimization done!" | Tee-Object -FilePath $LOG -Append
 
-          # ── 2. ENABLE RDP ─────────────────────────────
-          "[$(Get-Date -Format 'HH:mm:ss')] 🖥️ RDP enable ho raha hai..." | Tee-Object -FilePath $LOG -Append
+          # === 2. ENABLE RDP ===
+          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] RDP enable..." | Tee-Object -FilePath $LOG -Append
 
           Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop" -ErrorAction SilentlyContinue
+          # NLA off - easy connect
           Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "UserAuthentication" -Value 0
+          # 16-bit color
+          Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 2 -ErrorAction SilentlyContinue
           net user runneradmin "RDP@Pass123" 2>$null
           Add-LocalGroupMember -Group "Remote Desktop Users" -Member "runneradmin" -ErrorAction SilentlyContinue
           Restart-Service TermService -Force -ErrorAction SilentlyContinue
 
-          "[$(Get-Date -Format 'HH:mm:ss')] ✅ RDP ready! User:runneradmin Pass:RDP@Pass123" | Tee-Object -FilePath $LOG -Append
+          "[$(Get-Date -Format 'HH:mm:ss')] [OK] RDP ready! User:runneradmin Pass:RDP@Pass123" | Tee-Object -FilePath $LOG -Append
 
-          # ── 3. NGROK TUNNEL ───────────────────────────
-          "[$(Get-Date -Format 'HH:mm:ss')] 📥 ngrok download..." | Tee-Object -FilePath $LOG -Append
+          # === 3. NGROK TUNNEL ===
+          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] ngrok download..." | Tee-Object -FilePath $LOG -Append
 
           Invoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -OutFile "C:\ngrok.zip" -UseBasicParsing
           Expand-Archive -Path "C:\ngrok.zip" -DestinationPath "C:\" -Force
-
           C:\ngrok.exe config add-authtoken $env:NGROK_TOKEN
 
-          "[$(Get-Date -Format 'HH:mm:ss')] 🌐 TCP Tunnel start (port 3389)..." | Tee-Object -FilePath $LOG -Append
+          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Tunnel start port 3389..." | Tee-Object -FilePath $LOG -Append
 
           $proc = Start-Process -FilePath "C:\ngrok.exe" `
             -ArgumentList "tcp 3389 --log=stdout" `
@@ -81,38 +80,36 @@ jobs:
 
           Start-Sleep -Seconds 15
 
-          # ngrok API se tunnel address nikalo
           try {
             $api = Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels" -ErrorAction Stop
             $tunnel = $api.tunnels[0].public_url -replace "tcp://", ""
-
             "" | Tee-Object -FilePath $LOG -Append
-            "[$(Get-Date -Format 'HH:mm:ss')] 🎉🎉 TUNNEL READY!" | Tee-Object -FilePath $LOG -Append
+            "[$(Get-Date -Format 'HH:mm:ss')] [READY] TUNNEL READY!" | Tee-Object -FilePath $LOG -Append
             "================================================" | Tee-Object -FilePath $LOG -Append
-            "   🪟  RDP CONNECTION INFO" | Tee-Object -FilePath $LOG -Append
+            "  RDP CONNECTION INFO" | Tee-Object -FilePath $LOG -Append
             "================================================" | Tee-Object -FilePath $LOG -Append
-            "   🌐 Host:     $tunnel" | Tee-Object -FilePath $LOG -Append
-            "   👤 Username: runneradmin" | Tee-Object -FilePath $LOG -Append
-            "   🔑 Password: RDP@Pass123" | Tee-Object -FilePath $LOG -Append
-            "   🎨 Color:    16-bit optimized!" | Tee-Object -FilePath $LOG -Append
+            "  Host:     $tunnel" | Tee-Object -FilePath $LOG -Append
+            "  Username: runneradmin" | Tee-Object -FilePath $LOG -Append
+            "  Password: RDP@Pass123" | Tee-Object -FilePath $LOG -Append
+            "  Color:    16-bit optimized" | Tee-Object -FilePath $LOG -Append
             "================================================" | Tee-Object -FilePath $LOG -Append
           } catch {
-            "[$(Get-Date -Format 'HH:mm:ss')] ⚠️ API nahi mila, log:" | Tee-Object -FilePath $LOG -Append
+            "[$(Get-Date -Format 'HH:mm:ss')] [WARN] API nahi mila!" | Tee-Object -FilePath $LOG -Append
             Get-Content "C:\ngrok_out.txt" -ErrorAction SilentlyContinue | Tee-Object -FilePath $LOG -Append
           }
 
-      - name: 💾 Push Info
+      - name: Push Info
         shell: powershell
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
           $diff = git diff --staged --name-only
-          if ($diff) { git commit -m "🪟 Windows RDP live!" }
+          if ($diff) { git commit -m "Windows RDP live!" }
           git pull --rebase origin main
           git push origin main
 
-      - name: ⏳ Keep Alive (5.5 hours)
+      - name: Keep Alive 5.5 hours
         shell: powershell
         run: |
           $LOG = "output\runtimelogs.txt"
@@ -121,7 +118,7 @@ jobs:
             $tunnel = $api.tunnels[0].public_url -replace "tcp://", ""
           } catch { $tunnel = "unknown" }
 
-          "[$(Get-Date -Format 'HH:mm:ss')] ⏳ Alive! Host:$tunnel Pass:RDP@Pass123" | Tee-Object -FilePath $LOG -Append
+          "[$(Get-Date -Format 'HH:mm:ss')] [INFO] Alive! Host:$tunnel Pass:RDP@Pass123" | Tee-Object -FilePath $LOG -Append
 
           $count = 0
           while ($true) {
@@ -133,13 +130,13 @@ jobs:
             "[$(Get-Date -Format 'HH:mm:ss')] [${count}min] ngrok:$alive RDP:$rdp" | Tee-Object -FilePath $LOG -Append
 
             if ($alive -eq "dead") {
-              "[$(Get-Date -Format 'HH:mm:ss')] 🔄 ngrok restart..." | Tee-Object -FilePath $LOG -Append
+              "[$(Get-Date -Format 'HH:mm:ss')] [INFO] ngrok restart..." | Tee-Object -FilePath $LOG -Append
               $proc = Start-Process -FilePath "C:\ngrok.exe" -ArgumentList "tcp 3389 --log=stdout" -RedirectStandardOutput "C:\ngrok_out.txt" -PassThru -WindowStyle Hidden
               $proc.Id | Out-File "C:\ngrok_pid.txt"
               Start-Sleep -Seconds 12
             }
             if ($count -ge 330) {
-              "[$(Get-Date -Format 'HH:mm:ss')] ⏰ 5.5hr done!" | Tee-Object -FilePath $LOG -Append
+              "[$(Get-Date -Format 'HH:mm:ss')] [INFO] 5.5hr done!" | Tee-Object -FilePath $LOG -Append
               break
             }
           }
