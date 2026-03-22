@@ -18,26 +18,22 @@ jobs:
       - name: Speed Test
         run: |
           mkdir -p output
-          echo "🚀 Speed test start!"
           echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚀 Speed test start!" > output/runtimelogs.txt
 
-          # Download 1GB to /dev/null - max speed test!
-          curl -o /dev/null \
+          # Ubuntu ISO from fast mirror - real heavy file!
+          curl -L -o /dev/null \
             --max-time 20 \
             -w "Downloaded: %{size_download} bytes\nSpeed: %{speed_download} bytes/sec\nTime: %{time_total}s\n" \
-            "https://speed.cloudflare.com/__down?bytes=1073741824" 2>/dev/null | tee -a output/runtimelogs.txt
+            "http://releases.ubuntu.com/22.04/ubuntu-22.04.5-desktop-amd64.iso" 2>/dev/null | tee -a output/runtimelogs.txt
 
-          # Calculate MB/s
           SPEED_BPS=$(grep "Speed:" output/runtimelogs.txt | awk '{print $2}' | cut -d. -f1)
           SPEED_MBPS=$(echo "scale=2; $SPEED_BPS / 1048576" | bc)
           SIZE_BYTES=$(grep "Downloaded:" output/runtimelogs.txt | awk '{print $2}')
           SIZE_MB=$(echo "scale=2; $SIZE_BYTES / 1048576" | bc)
 
-          echo "📊 Speed: ${SPEED_MBPS} MB/s"
-          echo "📦 Downloaded in 20s: ${SIZE_MB} MB"
           echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📊 Speed: ${SPEED_MBPS} MB/s" >> output/runtimelogs.txt
           echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📦 Downloaded in 20s: ${SIZE_MB} MB" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🎉 Test complete!" >> output/runtimelogs.txt
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🎉 Done!" >> output/runtimelogs.txt
           cat output/runtimelogs.txt
 
       - name: Commit output
