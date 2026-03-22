@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitChat ⚡</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg-dark:    #0b141a;
+  --bg-panel:   #111b21;
+  --bg-card:    #202c33;
+  --bg-input:   #2a3942;
+  --green:      #25d366;
+  --green-dark: #128c7e;
+  --green-msg:  #005c4b;
+  --text:       #e9edef;
+  --muted:      #8696a0;
+  --border:     #2a3942;
+  --recv-bg:    #202c33;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-dark); color: var(--text);
+  height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+}
+
+/* ── Signup ─────────────────────────────────────────────────── */
+#signup-screen {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100vh; gap: 16px; padding: 24px;
+  background: var(--bg-dark);
+}
+.brand { text-align: center; }
+.brand-icon { font-size: 64px; line-height: 1; margin-bottom: 8px; }
+.brand-name { font-size: 2rem; font-weight: 700; color: var(--green); }
+.brand-tag  { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+.signup-card {
+  background: var(--bg-card); border-radius: 20px; padding: 32px 28px;
+  width: 100%; max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.signup-card h2 { margin-bottom: 24px; font-size: 1.3rem; color: var(--text); text-align: center; }
+.field input {
+  width: 100%; padding: 14px 18px; background: var(--bg-input);
+  border: 2px solid var(--border); border-radius: 12px; color: var(--text);
+  font-size: 1rem; outline: none; transition: border-color .2s;
+}
+.field input:focus { border-color: var(--green); }
+.field input::placeholder { color: var(--muted); }
+.btn-join {
+  margin-top: 16px; width: 100%; padding: 15px; background: var(--green);
+  border: none; border-radius: 12px; color: #111b21; font-size: 1rem;
+  font-weight: 700; cursor: pointer; transition: background .2s, transform .1s;
+}
+.btn-join:hover  { background: var(--green-dark); color: white; }
+.btn-join:active { transform: scale(.98); }
+.signup-hint { font-size: .75rem; color: var(--muted); text-align: center; margin-top: 12px; }
+
+/* ── Chat Screen ─────────────────────────────────────────────── */
+#chat-screen { display: none; flex: 1; overflow: hidden; }
+.layout { display: flex; height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+  width: 360px; min-width: 240px; max-width: 400px;
+  background: var(--bg-panel); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; flex-shrink: 0;
+}
+.sidebar-header {
+  background: var(--bg-card); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.me-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+}
+.me-info .me-name   { font-weight: 600; font-size: .95rem; }
+.me-info .me-status { font-size: .72rem; color: var(--green); }
+.users-title {
+  padding: 10px 16px; color: var(--muted);
+  font-size: .75rem; text-transform: uppercase; letter-spacing: 1px;
+  background: var(--bg-panel); flex-shrink: 0;
+}
+.user-list { flex: 1; overflow-y: auto; }
+.user-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px; cursor: pointer;
+  transition: background .15s;
+  border-bottom: 1px solid rgba(42,57,66,.5);
+}
+.user-item:hover, .user-item.active { background: var(--bg-card); }
+.u-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.15rem; flex-shrink: 0; color: white;
+}
+.u-info { flex: 1; min-width: 0; }
+.u-name    { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: .95rem; }
+.u-preview { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.u-badge {
+  background: var(--green); color: #111b21; border-radius: 50%;
+  width: 20px; height: 20px; font-size: .72rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+/* Main / No chat */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.no-chat-selected {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; color: var(--muted); background: var(--bg-dark);
+}
+.no-chat-selected .big-icon { font-size: 80px; opacity: .4; }
+.no-chat-selected h2 { color: var(--text); font-size: 1.3rem; }
+.no-chat-selected p  { font-size: .85rem; text-align: center; max-width: 260px; }
+
+/* Chat pane */
+#chat-pane { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+.chat-header {
+  background: var(--bg-card); padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.chat-header .c-name  { font-weight: 700; font-size: 1rem; }
+.chat-header .c-sub   { font-size: .75rem; color: var(--green); }
+.back-btn {
+  display: none; background: none; border: none; color: var(--muted);
+  font-size: 1.4rem; cursor: pointer; padding: 4px; flex-shrink: 0;
+}
+.messages-wrap {
+  flex: 1; overflow-y: auto; padding: 12px 16px;
+  background: var(--bg-dark);
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.02) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+.day-divider {
+  text-align: center; font-size: .72rem; color: var(--muted);
+  background: rgba(11,20,26,.8); display: inline-block;
+  padding: 4px 12px; border-radius: 8px; margin: 8px auto; display: block;
+}
+.bubble {
+  max-width: 68%; padding: 8px 12px 6px; border-radius: 8px;
+  margin-bottom: 3px; position: relative; word-break: break-word;
+  font-size: .92rem; line-height: 1.45;
+}
+.bubble.sent { background: var(--green-msg); margin-left: auto; border-radius: 8px 2px 8px 8px; }
+.bubble.recv { background: var(--recv-bg); margin-right: auto; border-radius: 2px 8px 8px 8px; }
+.bubble-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-top: 2px; }
+.bubble-time   { font-size: .67rem; color: rgba(255,255,255,.45); }
+.tick { font-size: .65rem; color: #53bdeb; }
+.empty-chat-msg {
+  text-align: center; padding: 40px 20px; color: var(--muted); font-size: .85rem;
+}
+
+.input-bar {
+  background: var(--bg-card); padding: 10px 14px;
+  display: flex; align-items: flex-end; gap: 10px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.msg-ta {
+  flex: 1; background: var(--bg-input); border: none; border-radius: 22px;
+  padding: 10px 18px; color: var(--text); font-size: .93rem;
+  outline: none; resize: none; min-height: 42px; max-height: 100px;
+  line-height: 1.5; font-family: inherit;
+}
+.msg-ta::placeholder { color: var(--muted); }
+.send-btn {
+  width: 44px; height: 44px; border-radius: 50%; background: var(--green);
+  border: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; transition: background .2s, transform .1s;
+}
+.send-btn:hover  { background: var(--green-dark); }
+.send-btn:active { transform: scale(.92); }
+.send-btn svg    { width: 20px; height: 20px; fill: #111b21; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3a4a54; border-radius: 3px; }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .sidebar { width: 100%; }
+  .back-btn { display: block; }
+  .no-chat-selected { display: none !important; }
+  #chat-pane { position: absolute; inset: 0; z-index: 10; }
+  .layout.chatting .sidebar { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIGNUP ─────────────────────────────────────────────────── -->
+<div id="signup-screen">
+  <div class="brand">
+    <div class="brand-icon">💬</div>
+    <div class="brand-name">GitChat</div>
+    <div class="brand-tag">Powered by GitHub Actions ⚡</div>
+  </div>
+  <div class="signup-card">
+    <h2>Join the Chat 🎉</h2>
+    <div class="field">
+      <input type="text" id="nameInput" placeholder="Apna naam daalo..." maxlength="20" autocomplete="off" />
+    </div>
+    <button class="btn-join" onclick="signup()">Let's Go! 🚀</button>
+    <div class="signup-hint">Bas naam daalo — signup ho jao! No password needed 😎</div>
+  </div>
+</div>
+
+<!-- ── CHAT SCREEN ────────────────────────────────────────────── -->
+<div id="chat-screen">
+  <div class="layout" id="layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="me-avatar" id="meAvatar">?</div>
+        <div class="me-info">
+          <div class="me-name" id="meName">...</div>
+          <div class="me-status">● Online</div>
+        </div>
+        <div style="margin-left:auto;font-size:.7rem;color:var(--muted);text-align:right">
+          <div>GitHub</div><div style="color:var(--green)">Backend ⚡</div>
+        </div>
+      </div>
+      <div class="users-title" id="usersTitle">Users (0)</div>
+      <div class="user-list" id="userList">
+        <div style="padding:24px;text-align:center;color:var(--muted);font-size:.85rem">
+          Loading... ⏳
+        </div>
+      </div>
+    </div>
+
+    <!-- Main area -->
+    <div class="main">
+
+      <!-- No chat selected -->
+      <div class="no-chat-selected" id="noChatView">
+        <div class="big-icon">💬</div>
+        <h2>GitChat</h2>
+        <p>Left se kisi bhi user ko select karo aur chatting shuru karo!</p>
+        <div style="margin-top:8px;font-size:.75rem;background:var(--bg-card);padding:8px 16px;border-radius:8px;color:var(--green)">
+          ⚡ GitHub Actions is the backend!
+        </div>
+      </div>
+
+      <!-- Chat pane -->
+      <div id="chat-pane">
+        <div class="chat-header">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="u-avatar" id="chatAvatar" style="width:38px;height:38px;font-size:1rem">?</div>
+          <div>
+            <div class="c-name" id="chatName">...</div>
+            <div class="c-sub" id="chatSub">Online</div>
+          </div>
+        </div>
+        <div class="messages-wrap" id="messagesWrap">
+          <div class="empty-chat-msg">👋 Conversation start karo!</div>
+        </div>
+        <div class="input-bar">
+          <textarea class="msg-ta" id="msgInput" placeholder="Message..." rows="1"></textarea>
+          <button class="send-btn" onclick="sendMsg()">
+            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let me        = null;          // { id, name, at }
+let users     = [];            // all users from server
+let partner   = null;          // currently chatting with
+let msgs      = {};            // chatId -> [msg, ...]
+let unread    = {};            // userId -> count
+let lastTs    = {};            // chatId -> last msg ts for polling
+let pollTimer = null;
+
+// ── Colors ─────────────────────────────────────────────────────
+const COLORS = ['#25d366','#00a884','#0088cc','#7c3aed','#e11d48','#ea580c','#ca8a04','#0891b2'];
+function color(name) {
+  let h = 0;
+  for (let c of name) h = (h * 31 + c.charCodeAt(0)) % COLORS.length;
+  return COLORS[Math.abs(h)];
+}
+function initial(name) { return name[0].toUpperCase(); }
+
+// ── Signup ─────────────────────────────────────────────────────
+async function signup() {
+  const inp = document.getElementById('nameInput');
+  const name = inp.value.trim();
+  if (name.length < 2) {
+    inp.style.borderColor = '#ef4444';
+    inp.focus();
+    return;
+  }
+  try {
+    const r = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+    const d = await r.json();
+    if (d.user) {
+      me = d.user;
+      localStorage.setItem('gitchat_me', JSON.stringify(me));
+      showChat();
+    }
+  } catch(e) {
+    alert('Server se connect nahi hua 😅 Thodi der baad try karo!');
+  }
+}
+
+// ── Show Chat Screen ───────────────────────────────────────────
+function showChat() {
+  document.getElementById('signup-screen').style.display = 'none';
+  document.getElementById('chat-screen').style.display = 'flex';
+
+  const av = document.getElementById('meAvatar');
+  av.textContent = initial(me.name);
+  av.style.background = color(me.name);
+  document.getElementById('meName').textContent = me.name;
+
+  startPoll();
+}
+
+// ── Polling ────────────────────────────────────────────────────
+function startPoll() {
+  loadUsers();
+  pollTimer = setInterval(() => {
+    loadUsers();
+    if (partner) loadMsgs(partner.id, true);
+  }, 3000);
+}
+
+async function loadUsers() {
+  try {
+    const r = await fetch('/api/users');
+    users = await r.json();
+    renderUserList();
+  } catch(e) {}
+}
+
+function renderUserList() {
+  const others = users.filter(u => u.id !== me.id);
+  const title = document.getElementById('usersTitle');
+  title.textContent = `Users (${others.length})`;
+
+  const list = document.getElementById('userList');
+  if (others.length === 0) {
+    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:.85rem">
+      Abhi tum akele ho 😅<br><br>
+      Is URL ko dosto ke saath share karo!
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = others.map(u => {
+    const chatId = [me.id, u.id].sort().join(':');
+    const chatMsgs = msgs[chatId] || [];
+    const last = chatMsgs[chatMsgs.length - 1];
+    const badge = unread[u.id] || 0;
+    const active = partner && partner.id === u.id;
+    const lastText = last
+      ? (last.from === me.id ? '✓ ' : '') + escHtml(last.text)
+      : '👋 Tap to chat!';
+
+    return `<div class="user-item ${active ? 'active' : ''}" onclick="selectUser('${u.id}')">
+      <div class="u-avatar" style="background:${color(u.name)}">${initial(u.name)}</div>
+      <div class="u-info">
+        <div class="u-name">${escHtml(u.name)}</div>
+        <div class="u-preview">${lastText}</div>
+      </div>
+      ${badge ? `<div class="u-badge">${badge}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── Select User ────────────────────────────────────────────────
+async function selectUser(uid) {
+  partner = users.find(u => u.id === uid);
+  if (!partner) return;
+
+  unread[uid] = 0;
+
+  document.getElementById('noChatView').style.display = 'none';
+  const cp = document.getElementById('chat-pane');
+  cp.style.display = 'flex';
+
+  const av = document.getElementById('chatAvatar');
+  av.textContent = initial(partner.name);
+  av.style.background = color(partner.name);
+  document.getElementById('chatName').textContent = partner.name;
+  document.getElementById('chatSub').textContent = 'Online';
+
+  document.getElementById('layout').classList.add('chatting');
+
+  renderUserList();
+  await loadMsgs(uid, false);
+  document.getElementById('msgInput').focus();
+}
+
+async function loadMsgs(uid, incremental) {
+  const chatId = [me.id, uid].sort().join(':');
+  const since  = incremental ? (lastTs[chatId] || 0) : 0;
+
+  try {
+    const r    = await fetch(`/api/chat/${chatId}?since=${since}`);
+    const newM = await r.json();
+    if (newM.length === 0) return;
+
+    if (!msgs[chatId]) msgs[chatId] = [];
+
+    // Merge (avoid dupes by id)
+    const existIds = new Set(msgs[chatId].map(m => m.id));
+    let added = 0;
+    for (const m of newM) {
+      if (!existIds.has(m.id)) {
+        msgs[chatId].push(m);
+        added++;
+      }
+    }
+
+    if (added > 0) {
+      lastTs[chatId] = Math.max(...msgs[chatId].map(m => m.ts));
+
+      // Unread for other chats
+      if (partner && partner.id !== uid) {
+        unread[uid] = (unread[uid] || 0) + added;
+        renderUserList();
+      }
+
+      if (partner && partner.id === uid) {
+        renderMsgs(chatId);
+        renderUserList();
+      }
+    }
+  } catch(e) {}
+}
+
+function renderMsgs(chatId) {
+  const wrap = document.getElementById('messagesWrap');
+  const list = msgs[chatId] || [];
+
+  if (list.length === 0) {
+    wrap.innerHTML = '<div class="empty-chat-msg">👋 Pehla message bhejo!</div>';
+    return;
+  }
+
+  const atBottom = wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 60;
+
+  let html = '';
+  let lastDay = '';
+  for (const m of list) {
+    const d   = new Date(m.ts);
+    const day = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    if (day !== lastDay) {
+      html += `<div class="day-divider">${day}</div>`;
+      lastDay = day;
+    }
+    const sent = m.from === me.id;
+    const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    html += `<div class="bubble ${sent ? 'sent' : 'recv'}">
+      ${escHtml(m.text)}
+      <div class="bubble-footer">
+        <span class="bubble-time">${time}</span>
+        ${sent ? '<span class="tick">✓✓</span>' : ''}
+      </div>
+    </div>`;
+  }
+
+  wrap.innerHTML = html;
+  if (atBottom) wrap.scrollTop = wrap.scrollHeight;
+}
+
+// ── Send Message ───────────────────────────────────────────────
+async function sendMsg() {
+  const ta   = document.getElementById('msgInput');
+  const text = ta.value.trim();
+  if (!text || !partner) return;
+
+  ta.value = '';
+  ta.style.height = '';
+
+  // Optimistic add
+  const chatId = [me.id, partner.id].sort().join(':');
+  if (!msgs[chatId]) msgs[chatId] = [];
+  const opt = { id: 'opt_' + Date.now(), from: me.id, to: partner.id, text, ts: Date.now() };
+  msgs[chatId].push(opt);
+  lastTs[chatId] = opt.ts;
+  renderMsgs(chatId);
+  document.getElementById('messagesWrap').scrollTop = 99999;
+
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: me.id, to: partner.id, text })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      // Replace optimistic with real
+      msgs[chatId] = msgs[chatId].filter(m => m.id !== opt.id);
+      msgs[chatId].push(d.msg);
+      lastTs[chatId] = d.msg.ts;
+      renderMsgs(chatId);
+    }
+  } catch(e) {}
+}
+
+function goBack() {
+  document.getElementById('layout').classList.remove('chatting');
+  document.getElementById('chat-pane').style.display = 'none';
+  document.getElementById('noChatView').style.display = 'flex';
+  partner = null;
+  renderUserList();
+}
+
+// ── Utils ──────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Auto-resize textarea
+document.getElementById('msgInput').addEventListener('input', function() {
+  this.style.height = '';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+document.getElementById('msgInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+document.getElementById('nameInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') signup();
+});
+
+// ── Auto-login ─────────────────────────────────────────────────
+(async function init() {
+  const saved = localStorage.getItem('gitchat_me');
+  if (!saved) return;
+  try {
+    const candidate = JSON.parse(saved);
+    // Re-signup to make sure we're on the server
+    const r = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: candidate.name })
+    });
+    const d = await r.json();
+    if (d.user) {
+      me = d.user;
+      localStorage.setItem('gitchat_me', JSON.stringify(me));
+      showChat();
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
