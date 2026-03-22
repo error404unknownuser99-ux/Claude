@@ -1,22 +1,3 @@
-2026-03-22T13:22:53.1594152Z Rebasing (1/1)
-2026-03-22T13:22:53.1594806Z Successfully rebased and updated refs/heads/main.
-2026-03-22T13:22:53.5816327Z To https://github.com/error404unknownuser99-ux/Claude
-2026-03-22T13:22:53.5818339Z  ! [remote rejected] main -> main (cannot lock ref 'refs/heads/main': is at 1cf26656498862ba967b12a00b8b80f2d7bfa0dd but expected 052ddce3d67d6cb399114a28c0f1ac56c727da19)
-2026-03-22T13:22:53.5819331Z error: failed to push some refs to 'https://github.com/error404unknownuser99-ux/Claude'
-2026-03-22T13:22:53.5854937Z ##[error]Process completed with exit code 1.
-2026-03-22T13:22:53.5963934Z Post job cleanup.
-2026-03-22T13:22:53.6770876Z [command]/usr/bin/git version
-2026-03-22T13:22:53.6816044Z git version 2.53.0
-2026-03-22T13:22:53.6864998Z Temporarily overriding HOME='/home/runner/work/_temp/507eb351-f83d-4d76-86e8-48a0cff98c33' before making global git config changes
-2026-03-22T13:22:53.6866715Z Adding repository directory to the temporary git global config as a safe directory
-2026-03-22T13:22:53.6870561Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Claude/Claude
-2026-03-22T13:22:53.6911731Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
-2026-03-22T13:22:53.6952723Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
-2026-03-22T13:22:53.7242513Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
-2026-03-22T13:22:53.7270199Z http.https://github.com/.extraheader
-2026-03-22T13:22:53.7284968Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
-2026-03-22T13:22:53.7325914Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
-2026-03-22T13:22:53.7728628Z Cleaning up orphan processes
-2026-03-22T13:22:53.8047592Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v3, actions/setup-python@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+[Log fetch failed HTTP 404]
 
-⏰ Updated: 2026-03-22 13:22:58
+⏰ Updated: 2026-03-22 13:24:05
