@@ -26,51 +26,74 @@ jobs:
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0
+          netsh advfirewall firewall add rule name="RDP-3389" protocol=TCP dir=in localport=3389 action=allow
           Write-Host "RDP Enabled! User: liveuser | Pass: BoreRDP@2025!"
 
-      - name: Download bore and Start Tunnel
+      - name: Download bore
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path output | Out-Null
-          Write-Host "Downloading bore..."
           Invoke-WebRequest -Uri "https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-pc-windows-msvc.zip" -OutFile bore.zip -UseBasicParsing
           Expand-Archive bore.zip -DestinationPath . -Force
-          Write-Host "Starting bore tunnel on port 3389..."
-          Start-Process -FilePath ".\bore.exe" -ArgumentList "local 3389 --to bore.pub" -RedirectStandardError "output\bore_err.txt" -RedirectStandardOutput "output\bore_out.txt" -NoNewWindow -PassThru | Out-Null
-          Start-Sleep -Seconds 12
-          $err = Get-Content "output\bore_err.txt" -Raw -ErrorAction SilentlyContinue
-          $out = Get-Content "output\bore_out.txt" -Raw -ErrorAction SilentlyContinue
-          Write-Host "BORE STDERR: $err"
-          Write-Host "BORE STDOUT: $out"
-          "USERNAME: liveuser" | Out-File output\rdp_credentials.txt -Encoding UTF8
-          "PASSWORD: BoreRDP@2025!" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
-          "BORE STDERR: $err" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
-          "BORE STDOUT: $out" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
-          "HOW TO CONNECT: mstsc or Microsoft RDP app -> bore.pub:PORT" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
-          Get-Content output\rdp_credentials.txt
+          Write-Host "bore downloaded!"
 
-      - name: Commit Credentials
+      - name: Start bore tunnel with auto-reconnect and commit port
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
-          git add output/
-          git diff --staged --quiet
-          if ($LASTEXITCODE -ne 0) {
-            git commit -m "RDP credentials ready"
-            for ($i = 0; $i -lt 5; $i++) {
-              git pull --rebase origin main
-              git push
-              if ($LASTEXITCODE -eq 0) { break }
-              Start-Sleep -Seconds 3
+
+          $attempt = 0
+          while ($true) {
+            $attempt++
+            Write-Host "=== Tunnel attempt #$attempt ==="
+
+            Remove-Item "output\bore_out.txt" -ErrorAction SilentlyContinue
+
+            $proc = Start-Process -FilePath ".\bore.exe" `
+              -ArgumentList "local 3389 --to bore.pub" `
+              -RedirectStandardOutput "output\bore_out.txt" `
+              -RedirectStandardError "output\bore_err.txt" `
+              -NoNewWindow -PassThru
+
+            Start-Sleep -Seconds 8
+
+            $out = Get-Content "output\bore_out.txt" -Raw -ErrorAction SilentlyContinue
+            $err = Get-Content "output\bore_err.txt" -Raw -ErrorAction SilentlyContinue
+            $combined = "$out $err"
+
+            Write-Host "OUTPUT: $combined"
+
+            if ($combined -match "listening at bore\.pub:(\d+)") {
+              $port = $Matches[1]
+              Write-Host "TUNNEL LIVE on port: $port"
+
+              "USERNAME: liveuser" | Out-File output\rdp_credentials.txt -Encoding UTF8
+              "PASSWORD: BoreRDP@2025!" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+              "ADDRESS: bore.pub:$port" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+              "ATTEMPT: $attempt" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8
+
+              git add output/
+              git diff --staged --quiet
+              if ($LASTEXITCODE -ne 0) {
+                git commit -m "RDP LIVE bore.pub:$port (attempt $attempt)"
+                for ($i = 0; $i -lt 5; $i++) {
+                  git pull --rebase origin main
+                  git push
+                  if ($LASTEXITCODE -eq 0) { break }
+                  Start-Sleep -Seconds 2
+                }
+              }
+
+              Write-Host "Waiting for bore process..."
+              $proc.WaitForExit()
+              Write-Host "Bore exited! Reconnecting in 5 sec..."
+              Start-Sleep -Seconds 5
+            } else {
+              Write-Host "Port not found in output, retrying in 5 sec..."
+              Stop-Process -Id $proc.Id -ErrorAction SilentlyContinue
+              Start-Sleep -Seconds 5
             }
           }
-
-      - name: Keep Session Alive
-        shell: pwsh
-        run: |
-          Write-Host "Session alive - connect karo RDP se!"
-          Write-Host "User: liveuser | Pass: BoreRDP@2025!"
-          Start-Sleep -Seconds 19800
