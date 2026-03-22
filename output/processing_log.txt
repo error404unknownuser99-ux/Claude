@@ -1,0 +1,24 @@
+📦 Installing... Sun Mar 22 07:53:31 UTC 2026
+✅ Done: Sun Mar 22 07:53:32 UTC 2026
+🚀 Script start: Sun Mar 22 07:53:32 UTC 2026
+🚀 GitHub Trending Repos Analysis shuru...
+📡 GitHub API se data fetch kar rahe hain...
+✅ 30 repos mila!
+✅ top_python_repos.csv saved!
+📊 Summary:
+{
+  "fetched_at": "2026-03-22 07:53:34 UTC",
+  "total_repos": 30,
+  "total_stars": 4463417,
+  "total_forks": 671960,
+  "avg_stars": 148781,
+  "top_3_repos": [
+    "public-apis/public-apis",
+    "EbookFoundation/free-programming-books",
+    "donnemartin/system-design-primer"
+  ],
+  "most_starred": "public-apis/public-apis",
+  "max_stars": 413277
+}
+🎉 Sab complete!
+✅ Script done: Sun Mar 22 07:53:34 UTC 2026
