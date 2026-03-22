@@ -48,31 +48,34 @@ jobs:
           sudo dpkg -i /tmp/rustdesk.deb || sudo apt-get install -f -y -qq
           echo "[$(date -u '+%H:%M:%S')] ✅ RustDesk installed!" | tee -a "$LOG"
 
-      - name: 🚀 Start RustDesk + Set Password (root only)
+      - name: 🔑 Config PEHLE likho - PHIR service start karo!
         run: |
           LOG="output/runtimelogs.txt"
           FIXED_PASS="Pass1234"
 
-          # Step 1: Headless enable
+          # ✅ STEP 1: Config PEHLE likho (service start se pehle!)
+          sudo mkdir -p /root/.config/rustdesk
+          sudo bash -c "echo 'permanent-password = \"$FIXED_PASS\"' > /root/.config/rustdesk/RustDesk2.toml"
+
+          echo "[$(date -u '+%H:%M:%S')] ✅ Config likha!" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] Config content:" | tee -a "$LOG"
+          sudo cat /root/.config/rustdesk/RustDesk2.toml | tee -a "$LOG"
+
+          # ✅ STEP 2: Headless enable karo
           sudo rustdesk --option allow-linux-headless Y
           sleep 2
           echo "[$(date -u '+%H:%M:%S')] ✅ Headless enabled!" | tee -a "$LOG"
 
-          # Step 2: Service start (root se chalega)
+          # ✅ STEP 3: ABHI service start karo (config padh legi!)
           sudo rustdesk --service &
-          sleep 6
+          sleep 8
           echo "[$(date -u '+%H:%M:%S')] ✅ Service started!" | tee -a "$LOG"
 
-          # Step 3: Password set (sirf sudo se - root config mein jayega)
-          sudo rustdesk --password "$FIXED_PASS"
-          sleep 2
-          echo "[$(date -u '+%H:%M:%S')] 🔑 Password set!" | tee -a "$LOG"
+          # Config check - service ne overwrite kiya ya nahi?
+          echo "[$(date -u '+%H:%M:%S')] Config after service start:" | tee -a "$LOG"
+          sudo cat /root/.config/rustdesk/RustDesk2.toml | tee -a "$LOG"
 
-          # Step 4: Root config verify karo
-          echo "[$(date -u '+%H:%M:%S')] --- Root Config ---" | tee -a "$LOG"
-          sudo cat /root/.config/rustdesk/RustDesk2.toml 2>/dev/null | tee -a "$LOG" || echo "Config nahi mila!" | tee -a "$LOG"
-
-          # Step 5: ID nikalo
+          # ID nikalo
           RUSTDESK_ID=$(sudo rustdesk --get-id 2>/dev/null | tr -d '[:space:]')
 
           echo "" | tee -a "$LOG"
@@ -89,7 +92,7 @@ jobs:
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🖥️ RustDesk - root config only"
+          git diff --staged --quiet || git commit -m "🖥️ RustDesk - config pehle fix"
           git pull --rebase origin main
           git push
 
