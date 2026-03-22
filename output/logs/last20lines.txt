@@ -1,3 +1,22 @@
-[Log fetch failed HTTP 404]
+2026-03-22T07:27:42.0320767Z hint: the same ref. If you want to integrate the remote changes, use
+2026-03-22T07:27:42.0321347Z hint: 'git pull' before pushing again.
+2026-03-22T07:27:42.0321840Z hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+2026-03-22T07:27:42.0335746Z ##[error]Process completed with exit code 1.
+2026-03-22T07:27:42.0420567Z Post job cleanup.
+2026-03-22T07:27:42.1374330Z [command]/usr/bin/git version
+2026-03-22T07:27:42.1411743Z git version 2.53.0
+2026-03-22T07:27:42.1457546Z Temporarily overriding HOME='/home/runner/work/_temp/40e77351-a843-477b-8e4f-fd702420509f' before making global git config changes
+2026-03-22T07:27:42.1459162Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T07:27:42.1471817Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Claude/Claude
+2026-03-22T07:27:42.1507487Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T07:27:42.1544681Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-22T07:27:42.1803666Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T07:27:42.1826043Z http.https://github.com/.extraheader
+2026-03-22T07:27:42.1838962Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T07:27:42.1870321Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-22T07:27:42.2107394Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T07:27:42.2138465Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-22T07:27:42.2487299Z Cleaning up orphan processes
+2026-03-22T07:27:42.2785520Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
 
-⏰ Updated: 2026-03-22 07:27:41
+⏰ Updated: 2026-03-22 07:27:50
