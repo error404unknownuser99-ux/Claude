@@ -3,6 +3,9 @@ name: Hello World Test 🧪
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'output/**'    # Monitor ke pushes pe trigger mat ho!
+      - '**.md'
 
 jobs:
   hello-world:
@@ -29,34 +32,28 @@ jobs:
 
       - name: Hit Monitor API 🔍
         run: |
-          echo ""                                        | tee -a output/output.txt
+          echo ""                                         | tee -a output/output.txt
           echo "----------------------------------------" | tee -a output/output.txt
           echo "📡 Monitor API hit kar rahe hain..."     | tee -a output/output.txt
           echo "🔗 https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" | tee -a output/output.txt
-
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://track-workflow.onrender.com/)
-          echo "📊 Monitor API HTTP Status: $STATUS"     | tee -a output/output.txt
-
+          echo "📊 Monitor HTTP Status: $STATUS"         | tee -a output/output.txt
           curl -s https://track-workflow.onrender.com/latest > output/monitor_response.json
-          echo "✅ Monitor response output/monitor_response.json mein save!" | tee -a output/output.txt
+          echo "✅ Monitor response saved!"              | tee -a output/output.txt
           echo "----------------------------------------" | tee -a output/output.txt
 
-          echo "--- Monitor API Response ---"
-          cat output/monitor_response.json
-
-      - name: Upload output as artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: hello-world-output
           path: output/
 
       - name: Commit output to repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 Auto: Hello World test output [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git diff --staged --quiet || git commit -m "🤖 Auto: Hello World output [$(date '+%Y-%m-%d %H:%M:%S')]"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- 

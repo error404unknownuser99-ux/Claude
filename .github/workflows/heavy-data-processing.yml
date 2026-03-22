@@ -3,6 +3,9 @@ name: 🔬 Heavy Data Processing
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'output/**'    # Monitor ke pushes pe trigger mat ho!
+      - '**.md'
     paths:
       - '.github/workflows/heavy-data-processing.yml'
       - 'scripts/process_data.py'
@@ -31,20 +34,14 @@ jobs:
 
       - name: Run data processing script
         run: |
-          echo "🚀 Script chala rahe hain: $(date)" | tee -a output/processing_log.txt
+          echo "🚀 Script: $(date)" | tee -a output/processing_log.txt
           python scripts/process_data.py 2>&1 | tee -a output/processing_log.txt
           echo "✅ Script done: $(date)" | tee -a output/processing_log.txt
 
       - name: Show output files
         run: |
-          echo "--- Output files ---"
           ls -lh output/
-          echo ""
-          echo "--- summary.json ---"
           cat output/summary.json
-          echo ""
-          echo "--- high_earners.csv (top 5) ---"
-          head -6 output/high_earners.csv
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -64,12 +61,5 @@ jobs:
 
       - name: Hit Monitor /full
         run: |
-          echo "📡 Monitor /full hit kar rahe hain..."
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://track-workflow.onrender.com/full)
           echo "Monitor HTTP Status: $STATUS"
-          if [ "$STATUS" = "200" ]; then
-            echo "✅ Monitor triggered successfully!"
-          else
-            echo "⚠️ Monitor status: $STATUS"
-          fi
-           
