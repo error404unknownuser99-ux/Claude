@@ -1,6 +1,6 @@
 ============================================================
 🤖 Monitor Bot — Auto Update
-Timestamp  : 2026-03-22 18:51:04 UTC
+Timestamp  : 2026-03-22 18:51:12 UTC
 Run ID     : 23410014324
 Workflow   : 🪟 Windows Desktop - RDP + ngrok
 Status     : in_progress
@@ -10,7 +10,221 @@ URL        : https://github.com/error404unknownuser99-ux/Claude/actions/runs/234
 
 
 --- JOB: windows-desktop | status:in_progress | conclusion:None ---
-[Log fetch failed HTTP 404]
+ï»¿2026-03-22T18:50:59.0290146Z Current runner version: '2.332.0'
+2026-03-22T18:50:59.0313173Z ##[group]Runner Image Provisioner
+2026-03-22T18:50:59.0313983Z Hosted Compute Agent
+2026-03-22T18:50:59.0314446Z Version: 20260213.493
+2026-03-22T18:50:59.0314980Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-03-22T18:50:59.0315633Z Build Date: 2026-02-13T00:28:41Z
+2026-03-22T18:50:59.0316212Z Worker ID: {e49bad60-fe53-4300-bb0d-270a25552f38}
+2026-03-22T18:50:59.0316812Z Azure Region: westus3
+2026-03-22T18:50:59.0317288Z ##[endgroup]
+2026-03-22T18:50:59.0318556Z ##[group]Operating System
+2026-03-22T18:50:59.0319120Z Microsoft Windows Server 2025
+2026-03-22T18:50:59.0319663Z 10.0.26100
+2026-03-22T18:50:59.0320107Z Datacenter
+2026-03-22T18:50:59.0320529Z ##[endgroup]
+2026-03-22T18:50:59.0320938Z ##[group]Runner Image
+2026-03-22T18:50:59.0321411Z Image: windows-2025
+2026-03-22T18:50:59.0321814Z Version: 20260302.43.1
+2026-03-22T18:50:59.0323065Z Included Software: https://github.com/actions/runner-images/blob/win25/20260302.43/images/windows/Windows2025-Readme.md
+2026-03-22T18:50:59.0324690Z Image Release: https://github.com/actions/runner-images/releases/tag/win25%2F20260302.43
+2026-03-22T18:50:59.0325562Z ##[endgroup]
+2026-03-22T18:50:59.0328058Z ##[group]GITHUB_TOKEN Permissions
+2026-03-22T18:50:59.0330202Z Actions: write
+2026-03-22T18:50:59.0330692Z ArtifactMetadata: write
+2026-03-22T18:50:59.0331182Z Attestations: write
+2026-03-22T18:50:59.0331599Z Checks: write
+2026-03-22T18:50:59.0332065Z Contents: write
+2026-03-22T18:50:59.0332472Z Deployments: write
+2026-03-22T18:50:59.0332901Z Discussions: write
+2026-03-22T18:50:59.0333384Z Issues: write
+2026-03-22T18:50:59.0333771Z Metadata: read
+2026-03-22T18:50:59.0334174Z Models: read
+2026-03-22T18:50:59.0334604Z Packages: write
+2026-03-22T18:50:59.0335031Z Pages: write
+2026-03-22T18:50:59.0335471Z PullRequests: write
+2026-03-22T18:50:59.0335970Z RepositoryProjects: write
+2026-03-22T18:50:59.0336458Z SecurityEvents: write
+2026-03-22T18:50:59.0336891Z Statuses: write
+2026-03-22T18:50:59.0337353Z ##[endgroup]
+2026-03-22T18:50:59.0339183Z Secret source: Actions
+2026-03-22T18:50:59.0339798Z Prepare workflow directory
+2026-03-22T18:50:59.0669015Z Prepare all required actions
+2026-03-22T18:50:59.0723300Z Getting action download info
+2026-03-22T18:50:59.4256328Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-03-22T18:50:59.8148918Z Complete job name: windows-desktop
+2026-03-22T18:51:00.1007343Z ##[group]Run actions/checkout@v4
+2026-03-22T18:51:00.1008805Z with:
+2026-03-22T18:51:00.1009244Z   repository: error404unknownuser99-ux/Claude
+2026-03-22T18:51:00.1010658Z   token: ***
+2026-03-22T18:51:00.1011254Z   ssh-strict: true
+2026-03-22T18:51:00.1011873Z   ssh-user: git
+2026-03-22T18:51:00.1012267Z   persist-credentials: true
+2026-03-22T18:51:00.1012676Z   clean: true
+2026-03-22T18:51:00.1013027Z   sparse-checkout-cone-mode: true
+2026-03-22T18:51:00.1013453Z   fetch-depth: 1
+2026-03-22T18:51:00.1013791Z   fetch-tags: false
+2026-03-22T18:51:00.1014171Z   show-progress: true
+2026-03-22T18:51:00.1014527Z   lfs: false
+2026-03-22T18:51:00.1014845Z   submodules: false
+2026-03-22T18:51:00.1015186Z   set-safe-directory: true
+2026-03-22T18:51:00.1015929Z ##[endgroup]
+2026-03-22T18:51:00.3183852Z Syncing repository: error404unknownuser99-ux/Claude
+2026-03-22T18:51:00.3185994Z ##[group]Getting Git version info
+2026-03-22T18:51:00.3186604Z Working directory is 'D:\a\Claude\Claude'
+2026-03-22T18:51:00.4319414Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-03-22T18:51:01.5054398Z git version 2.53.0.windows.1
+2026-03-22T18:51:01.5110167Z ##[endgroup]
+2026-03-22T18:51:01.5133569Z Temporarily overriding HOME='D:\a\_temp\ce1876f9-1a44-4b3c-b06e-8f857814e584' before making global git config changes
+2026-03-22T18:51:01.5135942Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T18:51:01.5146884Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Claude\Claude
+2026-03-22T18:51:01.6236523Z Deleting the contents of 'D:\a\Claude\Claude'
+2026-03-22T18:51:01.6243242Z ##[group]Initializing the repository
+2026-03-22T18:51:01.6252626Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\Claude\Claude
+2026-03-22T18:51:01.7619231Z Initialized empty Git repository in D:/a/Claude/Claude/.git/
+2026-03-22T18:51:01.7676603Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/error404unknownuser99-ux/Claude
+2026-03-22T18:51:01.8183131Z ##[endgroup]
+2026-03-22T18:51:01.8184919Z ##[group]Disabling automatic garbage collection
+2026-03-22T18:51:01.8195388Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-03-22T18:51:01.8497053Z ##[endgroup]
+2026-03-22T18:51:01.8499197Z ##[group]Setting up auth
+2026-03-22T18:51:01.8512662Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T18:51:01.8820509Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-03-22T18:51:05.6838844Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T18:51:05.7142122Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-03-22T18:51:06.2152967Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T18:51:06.2445492Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-03-22T18:51:06.7400679Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-03-22T18:51:06.7711282Z ##[endgroup]
+2026-03-22T18:51:06.7711820Z ##[group]Fetching the repository
+2026-03-22T18:51:06.7731736Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +e7c6c8a2f4eae69c1a72711b6d1e9881b4f58d35:refs/remotes/origin/main
+2026-03-22T18:51:08.5015902Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-22T18:51:08.5947705Z  * [new ref]         e7c6c8a2f4eae69c1a72711b6d1e9881b4f58d35 -> origin/main
+2026-03-22T18:51:08.5949631Z ##[endgroup]
+2026-03-22T18:51:08.5949961Z ##[group]Determining the checkout info
+2026-03-22T18:51:08.5952308Z ##[endgroup]
+2026-03-22T18:51:08.5968994Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-03-22T18:51:08.6711140Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-03-22T18:51:08.7047965Z ##[group]Checking out the ref
+2026-03-22T18:51:08.7048931Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B main refs/remotes/origin/main
+2026-03-22T18:51:08.8584889Z Switched to a new branch 'main'
+2026-03-22T18:51:08.9080862Z branch 'main' set up to track 'origin/main'.
+2026-03-22T18:51:08.9126688Z ##[endgroup]
+2026-03-22T18:51:08.9943944Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-03-22T18:51:09.0228991Z e7c6c8a2f4eae69c1a72711b6d1e9881b4f58d35
+2026-03-22T18:51:09.0639592Z ##[group]Run New-Item -ItemType Directory -Force -Path "output" | Out-Null
+2026-03-22T18:51:09.0640308Z [36;1mNew-Item -ItemType Directory -Force -Path "output" | Out-Null[0m
+2026-03-22T18:51:09.0640682Z [36;1m$LOG = "output\runtimelogs.txt"[0m
+2026-03-22T18:51:09.0640911Z [36;1m[0m
+2026-03-22T18:51:09.0641125Z [36;1m# ââ 1. OPTIMIZE ââââââââââââââââââââââââââââââ[0m
+2026-03-22T18:51:09.0641600Z [36;1m"[$(Get-Date -Format 'HH:mm:ss')] â¡ Optimization shuru..." | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0642834Z [36;1m[0m
+2026-03-22T18:51:09.0643042Z [36;1m# Visual FX - Best Performance (animations off)[0m
+2026-03-22T18:51:09.0643517Z [36;1m$vfxPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"[0m
+2026-03-22T18:51:09.0643957Z [36;1mNew-Item -Path $vfxPath -Force | Out-Null[0m
+2026-03-22T18:51:09.0644330Z [36;1mSet-ItemProperty -Path $vfxPath -Name VisualFXSetting -Value 2[0m
+2026-03-22T18:51:09.0644844Z [36;1m$advPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"[0m
+2026-03-22T18:51:09.0645436Z [36;1mSet-ItemProperty -Path $advPath -Name TaskbarAnimations -Value 0 -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0646592Z [36;1mSet-ItemProperty -Path $advPath -Name ListviewShadow -Value 0 -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0647270Z [36;1mSet-ItemProperty -Path $advPath -Name ListviewAlphaSelect -Value 0 -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0647739Z [36;1m[0m
+2026-03-22T18:51:09.0647905Z [36;1m# 16-bit color depth RDP ke liye[0m
+2026-03-22T18:51:09.0648570Z [36;1mSet-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 2 -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0649230Z [36;1m[0m
+2026-03-22T18:51:09.0649384Z [36;1m# Unnecessary services stop[0m
+2026-03-22T18:51:09.0649796Z [36;1m@("SysMain","WSearch","DiagTrack","wuauserv","BITS","TabletInputService") | ForEach-Object {[0m
+2026-03-22T18:51:09.0650320Z [36;1m  Stop-Service -Name $_ -Force -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0650810Z [36;1m  Set-Service -Name $_ -StartupType Disabled -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0651171Z [36;1m}[0m
+2026-03-22T18:51:09.0651304Z [36;1m[0m
+2026-03-22T18:51:09.0651476Z [36;1m# High Performance power plan[0m
+2026-03-22T18:51:09.0651831Z [36;1mpowercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null[0m
+2026-03-22T18:51:09.0652163Z [36;1m[0m
+2026-03-22T18:51:09.0652495Z [36;1m"[$(Get-Date -Format 'HH:mm:ss')] â Optimization done!" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0652890Z [36;1m[0m
+2026-03-22T18:51:09.0653082Z [36;1m# ââ 2. ENABLE RDP âââââââââââââââââââââââââââââ[0m
+2026-03-22T18:51:09.0653534Z [36;1m"[$(Get-Date -Format 'HH:mm:ss')] ð¥ï¸ RDP enable ho raha hai..." | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0653945Z [36;1m[0m
+2026-03-22T18:51:09.0654397Z [36;1mSet-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0[0m
+2026-03-22T18:51:09.0655108Z [36;1mEnable-NetFirewallRule -DisplayGroup "Remote Desktop" -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0655882Z [36;1mSet-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "UserAuthentication" -Value 0[0m
+2026-03-22T18:51:09.0656516Z [36;1mnet user runneradmin "RDP@Pass123" 2>$null[0m
+2026-03-22T18:51:09.0657034Z [36;1mAdd-LocalGroupMember -Group "Remote Desktop Users" -Member "runneradmin" -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0657616Z [36;1mRestart-Service TermService -Force -ErrorAction SilentlyContinue[0m
+2026-03-22T18:51:09.0657951Z [36;1m[0m
+2026-03-22T18:51:09.0658348Z [36;1m"[$(Get-Date -Format 'HH:mm:ss')] â RDP ready! User:runneradmin Pass:RDP@Pass123" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0658826Z [36;1m[0m
+2026-03-22T18:51:09.0660508Z [36;1m# ââ 3. NGROK TUNNEL âââââââââââââââââââââââââââ[0m
+2026-03-22T18:51:09.0661031Z [36;1m"[$(Get-Date -Format 'HH:mm:ss')] ð¥ ngrok download..." | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0661432Z [36;1m[0m
+2026-03-22T18:51:09.0662021Z [36;1mInvoke-WebRequest -Uri "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip" -OutFile "C:\ngrok.zip" -UseBasicParsing[0m
+2026-03-22T18:51:09.0663450Z [36;1mExpand-Archive -Path "C:\ngrok.zip" -DestinationPath "C:\" -Force[0m
+2026-03-22T18:51:09.0664345Z [36;1m[0m
+2026-03-22T18:51:09.0664587Z [36;1mC:\ngrok.exe config add-authtoken $env:NGROK_TOKEN[0m
+2026-03-22T18:51:09.0664896Z [36;1m[0m
+2026-03-22T18:51:09.0665309Z [36;1m"[$(Get-Date -Format 'HH:mm:ss')] ð TCP Tunnel start (port 3389)..." | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0665820Z [36;1m[0m
+2026-03-22T18:51:09.0666056Z [36;1m$proc = Start-Process -FilePath "C:\ngrok.exe" `[0m
+2026-03-22T18:51:09.0666434Z [36;1m  -ArgumentList "tcp 3389 --log=stdout" `[0m
+2026-03-22T18:51:09.0666785Z [36;1m  -RedirectStandardOutput "C:\ngrok_out.txt" `[0m
+2026-03-22T18:51:09.0667110Z [36;1m  -PassThru -WindowStyle Hidden[0m
+2026-03-22T18:51:09.0667425Z [36;1m$proc.Id | Out-File "C:\ngrok_pid.txt"[0m
+2026-03-22T18:51:09.0667706Z [36;1m[0m
+2026-03-22T18:51:09.0667895Z [36;1mStart-Sleep -Seconds 15[0m
+2026-03-22T18:51:09.0668137Z [36;1m[0m
+2026-03-22T18:51:09.0668331Z [36;1m# ngrok API se tunnel address nikalo[0m
+2026-03-22T18:51:09.0668642Z [36;1mtry {[0m
+2026-03-22T18:51:09.0669080Z [36;1m  $api = Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels" -ErrorAction Stop[0m
+2026-03-22T18:51:09.0669702Z [36;1m  $tunnel = $api.tunnels[0].public_url -replace "tcp://", ""[0m
+2026-03-22T18:51:09.0670066Z [36;1m[0m
+2026-03-22T18:51:09.0670275Z [36;1m  "" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0670789Z [36;1m  "[$(Get-Date -Format 'HH:mm:ss')] ðð TUNNEL READY!" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0671352Z [36;1m  "================================================" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0671848Z [36;1m  "   ðª  RDP CONNECTION INFO" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0672330Z [36;1m  "================================================" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0672790Z [36;1m  "   ð Host:     $tunnel" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0673276Z [36;1m  "   ð¤ Username: runneradmin" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0673799Z [36;1m  "   ð Password: RDP@Pass123" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0674317Z [36;1m  "   ð¨ Color:    16-bit optimized!" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0674809Z [36;1m  "================================================" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0675172Z [36;1m} catch {[0m
+2026-03-22T18:51:09.0675596Z [36;1m  "[$(Get-Date -Format 'HH:mm:ss')] â ï¸ API nahi mila, log:" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0676345Z [36;1m  Get-Content "C:\ngrok_out.txt" -ErrorAction SilentlyContinue | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T18:51:09.0676886Z [36;1m}[0m
+2026-03-22T18:51:09.2639826Z shell: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.EXE -command ". '{0}'"
+2026-03-22T18:51:09.2640255Z env:
+2026-03-22T18:51:09.2640502Z   NGROK_TOKEN: 3BJQSr9d5pNOmSTJO9Ci576O5NY_3hCpqUn3VgWzc9ygdEfkP
+2026-03-22T18:51:09.2640851Z ##[endgroup]
+2026-03-22T18:51:09.7270945Z At D:\a\_temp\e514e5d2-6ec5-40fa-a187-b72d60394c0b.ps1:44 char:38
+2026-03-22T18:51:09.7272244Z + "[$(Get-Date -Format 'HH:mm:ss')] Ã°Å¸âÂ¥ ngrok download..." | Tee-Objec ...
+2026-03-22T18:51:09.7272922Z +                                      ~
+2026-03-22T18:51:09.7273520Z Unexpected token 'Â¥' in expression or statement.
+2026-03-22T18:51:09.7275878Z At D:\a\_temp\e514e5d2-6ec5-40fa-a187-b72d60394c0b.ps1:78 char:32
+2026-03-22T18:51:09.7276817Z + ... grok_out.txt" -ErrorAction SilentlyContinue | Tee-Object -FilePath $L ...
+2026-03-22T18:51:09.7278156Z +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2026-03-22T18:51:09.7278557Z The string is missing the terminator: ".
+2026-03-22T18:51:09.7278870Z     + CategoryInfo          : ParserError: (:) [], ParseException
+2026-03-22T18:51:09.7279360Z     + FullyQualifiedErrorId : UnexpectedToken
+2026-03-22T18:51:09.7279778Z  
+2026-03-22T18:51:09.7812177Z ##[error]Process completed with exit code 1.
+2026-03-22T18:51:09.8041729Z Post job cleanup.
+2026-03-22T18:51:10.0378782Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-03-22T18:51:10.0655026Z git version 2.53.0.windows.1
+2026-03-22T18:51:10.0737393Z Temporarily overriding HOME='D:\a\_temp\82860af3-878b-43ac-a37e-0b18f9791997' before making global git config changes
+2026-03-22T18:51:10.0738464Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T18:51:10.0748978Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Claude\Claude
+2026-03-22T18:51:10.1058103Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T18:51:10.1378029Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-03-22T18:51:10.7002196Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T18:51:10.7263782Z http.https://github.com/.extraheader
+2026-03-22T18:51:10.7307348Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T18:51:10.7601665Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-03-22T18:51:11.2830478Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T18:51:11.3125903Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-03-22T18:51:11.8510024Z Cleaning up orphan processes
+2026-03-22T18:51:11.8541923Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
 --- END JOB ---
 
 
@@ -21,4 +235,4 @@ YAML VALIDATION:
 
 CONCURRENCY: ✅ 1/5 running — sab theek!
 
-⏰ Last updated: 2026-03-22 18:51:04 UTC
+⏰ Last updated: 2026-03-22 18:51:12 UTC
