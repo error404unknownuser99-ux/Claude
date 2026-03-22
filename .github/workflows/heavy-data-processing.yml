@@ -1,4 +1,4 @@
-name: VNC Desktop Server
+name: Web Scraper - example.com
 
 on:
   push:
@@ -11,82 +11,34 @@ on:
 jobs:
   data-processing:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Install XFCE Desktop + VNC
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
         run: |
-          mkdir -p output
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 📦 Installing desktop environment..." > output/runtimelogs.txt
-          git config user.name "error404unknownuser99-ux"
-          git config user.email "error404unknownuser99@users.noreply.github.com"
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📦 Installing libraries..." >> output/runtimelogs.txt
+          pip install -q requests beautifulsoup4
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Install done!" >> output/runtimelogs.txt
 
-          sudo apt-get update -q
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            xfce4 xfce4-goodies \
-            tigervnc-standalone-server tigervnc-common \
-            dbus-x11 x11-utils \
-            curl wget
+      - name: Run scraper
+        run: |
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚀 Starting scraper..." >> output/runtimelogs.txt
+          python scripts/process_data.py
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Scraper done!" >> output/runtimelogs.txt
 
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ Desktop installed!" >> output/runtimelogs.txt
-
-      - name: Setup VNC + bore tunnel
+      - name: Commit output
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # VNC password set karo
-          mkdir -p ~/.vnc
-          echo "vnc12345" | vncpasswd -f > ~/.vnc/passwd
-          chmod 600 ~/.vnc/passwd
-
-          # XFCE startup script
-          echo "startxfce4" > ~/.vnc/xstartup
-          chmod +x ~/.vnc/xstartup
-
-          # VNC server start karo
-          vncserver :1 -geometry 1280x800 -depth 24 --I-really-want-to-run-as-root 2>/dev/null || \
-          vncserver :1 -geometry 1280x800 -depth 24
-          sleep 3
-
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ✅ VNC Server started on :1 (port 5901)!" >> output/runtimelogs.txt
-
-          # bore.pub download karo
-          curl -sL https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin/
-          chmod +x /usr/local/bin/bore
-
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚇 Starting bore tunnel..." >> output/runtimelogs.txt
-
-          # bore tunnel background mein chalaao aur port capture karo
-          bore local 5901 --to bore.pub > /tmp/bore_output.txt 2>&1 &
-          BORE_PID=$!
-
-          sleep 5
-
-          # Port capture karo bore output se
-          BORE_ADDR=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
-
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🌐 Tunnel Address: ${BORE_ADDR}" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🔑 VNC Password: vnc12345" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💻 Connect: Open VNC viewer → ${BORE_ADDR}" >> output/runtimelogs.txt
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] ⏰ Server 6 ghante tak live rahega!" >> output/runtimelogs.txt
-
-          # Push initial info
+          git config user.name "error404unknownuser99-ux"
+          git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🖥️ VNC Desktop Live!"
+          git diff --staged --quiet || git commit -m "🤖 Scraped output [$(date '+%Y-%m-%d %H:%M:%S')]"
           git pull --rebase origin main
           git push
-
-          # Har 5 min mein status update karo
-          COUNT=0
-          while kill -0 $BORE_PID 2>/dev/null; do
-            sleep 300
-            COUNT=$((COUNT + 5))
-            BORE_ADDR=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
-            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 💚 Still alive! ${COUNT} min | ${BORE_ADDR}" >> output/runtimelogs.txt
-            git add output/runtimelogs.txt
-            git diff --staged --quiet || git commit -m "💚 VNC alive [${COUNT}min]"
-            git pull --rebase origin main
-            git push
-          done
