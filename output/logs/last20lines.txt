@@ -1,3 +1,22 @@
-[Log fetch failed HTTP 404]
+2026-03-22T18:47:24.6942693Z     + CategoryInfo          : ParserError: (:) [], ParseException
+2026-03-22T18:47:24.6942995Z     + FullyQualifiedErrorId : UnexpectedToken
+2026-03-22T18:47:24.6943232Z  
+2026-03-22T18:47:24.7229125Z ##[error]Process completed with exit code 1.
+2026-03-22T18:47:24.7435966Z Post job cleanup.
+2026-03-22T18:47:24.9628246Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-03-22T18:47:24.9922977Z git version 2.53.0.windows.2
+2026-03-22T18:47:25.0002989Z Temporarily overriding HOME='D:\a\_temp\a81eb42b-7ca1-4bde-a4fc-e4973b57559f' before making global git config changes
+2026-03-22T18:47:25.0004377Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T18:47:25.0016494Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Claude\Claude
+2026-03-22T18:47:25.0348741Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T18:47:25.0660486Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-03-22T18:47:25.6397833Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T18:47:25.6642752Z http.https://github.com/.extraheader
+2026-03-22T18:47:25.6696300Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T18:47:25.7001868Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-03-22T18:47:26.2389330Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T18:47:26.2687033Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-03-22T18:47:26.8131110Z Cleaning up orphan processes
+2026-03-22T18:47:26.8445766Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
 
-⏰ Updated: 2026-03-22 18:14:30
+⏰ Updated: 2026-03-22 18:47:28
