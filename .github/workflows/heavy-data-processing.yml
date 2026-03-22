@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/heavy-data-processing.yml'
+      - 'scripts/process_data.py'
   workflow_dispatch:
 
 jobs:
@@ -22,9 +23,9 @@ jobs:
       - name: 📦 Install XFCE Desktop + XRDP
         run: |
           LOG="output/runtimelogs.txt"
-          echo "[$(date -u '+%H:%M:%S')] 🚀 Starting Desktop setup..." | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 🚀 Desktop setup start..." | tee -a "$LOG"
           sudo apt-get update -qq
-          echo "[$(date -u '+%H:%M:%S')] 📦 Installing XFCE4 + XRDP..." | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 📦 XFCE4 + XRDP install ho raha hai..." | tee -a "$LOG"
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
             xfce4 xfce4-goodies xrdp dbus-x11 x11-xserver-utils \
             --no-install-recommends -qq
@@ -37,21 +38,13 @@ jobs:
           echo "rdpuser:Desktop@123" | sudo chpasswd
           sudo usermod -aG sudo rdpuser
           sudo -u rdpuser bash -c 'echo "startxfce4" > ~/.xsession && chmod +x ~/.xsession'
-          echo "[$(date -u '+%H:%M:%S')] ✅ User ready! Username: rdpuser | Pass: Desktop@123" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] ✅ User ready! rdpuser / Desktop@123" | tee -a "$LOG"
 
       - name: ⚙️ Configure & Start XRDP
         run: |
           LOG="output/runtimelogs.txt"
           echo "startxfce4" | sudo tee /etc/skel/.xsession
           sudo sed -i 's/max_bpp=32/max_bpp=24/' /etc/xrdp/xrdp.ini || true
-          sudo bash -c 'cat > /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla << EOF
-[Allow Colord all Users]
-Identity=unix-user:*
-Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
-ResultAny=no
-ResultInactive=no
-ResultActive=yes
-EOF'
           sudo systemctl enable xrdp
           sudo systemctl start xrdp
           sleep 3
@@ -61,28 +54,28 @@ EOF'
       - name: 🌐 Install & Start bore.pub Tunnel
         run: |
           LOG="output/runtimelogs.txt"
-          echo "[$(date -u '+%H:%M:%S')] 📥 bore install ho raha hai..." | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 📥 bore download ho raha hai..." | tee -a "$LOG"
           curl -sSL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz \
             -o /tmp/bore.tar.gz
           tar -xzf /tmp/bore.tar.gz -C /tmp/
           sudo mv /tmp/bore /usr/local/bin/bore
           sudo chmod +x /usr/local/bin/bore
-          echo "[$(date -u '+%H:%M:%S')] 🌐 Tunnel start ho raha hai..." | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] 🌐 bore tunnel start (port 3389)..." | tee -a "$LOG"
           nohup bore local 3389 --to bore.pub > /tmp/bore_output.txt 2>&1 &
           echo $! > /tmp/bore.pid
           sleep 10
           BORE_LINE=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
           if [ -n "$BORE_LINE" ]; then
             echo "[$(date -u '+%H:%M:%S')] 🎉 TUNNEL READY!" | tee -a "$LOG"
-            echo "╔══════════════════════════════════════╗" | tee -a "$LOG"
-            echo "║     🖥️  RDP CONNECTION INFO  🖥️      ║" | tee -a "$LOG"
-            echo "╠══════════════════════════════════════╣" | tee -a "$LOG"
-            echo "║  🌐 Host:     $BORE_LINE              " | tee -a "$LOG"
-            echo "║  👤 Username: rdpuser                 " | tee -a "$LOG"
-            echo "║  🔑 Password: Desktop@123             " | tee -a "$LOG"
-            echo "╚══════════════════════════════════════╝" | tee -a "$LOG"
+            echo "================================================" | tee -a "$LOG"
+            echo "   🖥️  RDP CONNECTION INFO" | tee -a "$LOG"
+            echo "================================================" | tee -a "$LOG"
+            echo "   🌐 Host:     $BORE_LINE" | tee -a "$LOG"
+            echo "   👤 Username: rdpuser" | tee -a "$LOG"
+            echo "   🔑 Password: Desktop@123" | tee -a "$LOG"
+            echo "================================================" | tee -a "$LOG"
           else
-            echo "[$(date -u '+%H:%M:%S')] ⚠️ Tunnel URL nahi mila! bore output:" | tee -a "$LOG"
+            echo "[$(date -u '+%H:%M:%S')] ⚠️ Tunnel URL nahi mila! Output:" | tee -a "$LOG"
             cat /tmp/bore_output.txt | tee -a "$LOG"
           fi
 
@@ -101,26 +94,25 @@ EOF'
         run: |
           LOG="output/runtimelogs.txt"
           BORE_LINE=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
-          echo "[$(date -u '+%H:%M:%S')] ⏳ Session alive - max 5.5 ghante | Host: $BORE_LINE" | tee -a "$LOG"
+          echo "[$(date -u '+%H:%M:%S')] ⏳ Session alive! Max 5.5 ghante | Host: $BORE_LINE" | tee -a "$LOG"
           COUNT=0
           while true; do
             sleep 300
             COUNT=$((COUNT + 5))
             XRDP_STATUS=$(sudo systemctl is-active xrdp)
             BORE_PID=$(cat /tmp/bore.pid 2>/dev/null)
-            BORE_ALIVE=$(kill -0 $BORE_PID 2>/dev/null && echo "✅ alive" || echo "❌ dead")
-            echo "[$(date -u '+%H:%M:%S')] [$COUNT min] XRDP: $XRDP_STATUS | bore: $BORE_ALIVE | $BORE_LINE" | tee -a "$LOG"
-            if echo "$BORE_ALIVE" | grep -q "dead"; then
+            kill -0 "$BORE_PID" 2>/dev/null && BORE_ALIVE="alive" || BORE_ALIVE="dead"
+            echo "[$(date -u '+%H:%M:%S')] [${COUNT}min] XRDP:$XRDP_STATUS bore:$BORE_ALIVE $BORE_LINE" | tee -a "$LOG"
+            if [ "$BORE_ALIVE" = "dead" ]; then
               echo "[$(date -u '+%H:%M:%S')] 🔄 bore restart..." | tee -a "$LOG"
               nohup bore local 3389 --to bore.pub > /tmp/bore_output.txt 2>&1 &
               echo $! > /tmp/bore.pid
               sleep 10
-              NEW_LINE=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
-              echo "[$(date -u '+%H:%M:%S')] 🆕 New Host: $NEW_LINE" | tee -a "$LOG"
-              BORE_LINE=$NEW_LINE
+              BORE_LINE=$(grep -o 'bore.pub:[0-9]*' /tmp/bore_output.txt | head -1)
+              echo "[$(date -u '+%H:%M:%S')] 🆕 New Host: $BORE_LINE" | tee -a "$LOG"
             fi
-            if [ $COUNT -ge 330 ]; then
-              echo "[$(date -u '+%H:%M:%S')] ⏰ 5.5hr complete - session khatam!" | tee -a "$LOG"
+            if [ "$COUNT" -ge 330 ]; then
+              echo "[$(date -u '+%H:%M:%S')] ⏰ 5.5hr done - bye!" | tee -a "$LOG"
               break
             fi
           done
