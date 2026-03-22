@@ -1,114 +1,98 @@
-name: 🔬 Heavy Data Processing
+name: Calculator on bore.pub
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - '.github/workflows/heavy-data-processing.yml'
       - 'scripts/process_data.py'
+      - 'scripts/calculator.html'
   workflow_dispatch:
 
 jobs:
-  data-processing:
+  serve-calculator:
     runs-on: ubuntu-latest
     timeout-minutes: 35
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Ollama
+      - name: Setup output folder
         run: |
-          echo "🦙 Installing Ollama..."
-          curl -fsSL https://ollama.com/install.sh | sh
-          ollama --version
+          mkdir -p output/logs
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🚀 Workflow started!" >> output/runtimelogs.txt
 
-      - name: Start Ollama service
+      - name: Install bore
         run: |
-          ollama serve &
-          sleep 5
-          echo "✅ Ollama service started!"
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📦 Installing bore..." >> output/runtimelogs.txt
+          curl -sL https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz \
+            | tar xz -C /usr/local/bin/ bore
+          chmod +x /usr/local/bin/bore
+          bore --version
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ bore installed!" >> output/runtimelogs.txt
 
-      - name: Pull qwen2:0.5b model (smallest - 352MB)
+      - name: Setup web server folder
         run: |
-          echo "📦 Pulling qwen2:0.5b — sabse chhota model (352MB)..."
-          ollama pull qwen2:0.5b
-          echo "✅ Model ready!"
-          ollama list
+          mkdir -p /tmp/www
+          cp scripts/calculator.html /tmp/www/index.html
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📁 Calculator HTML ready" >> output/runtimelogs.txt
 
-      - name: Test model
+      - name: Start HTTP server + bore tunnel
         run: |
-          echo "🧪 Quick model test..."
-          ollama run qwen2:0.5b "Say hello in one sentence" --nowordwrap
-          echo "✅ Model working!"
+          cd /tmp/www && python3 -m http.server 8080 > /tmp/http.log 2>&1 &
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🌐 HTTP server started on port 8080" >> output/runtimelogs.txt
 
-      - name: Install bore tunnel
-        run: |
-          curl -fsSL https://github.com/ekzhang/bore/releases/download/v0.5.0/bore-v0.5.0-x86_64-unknown-linux-musl.tar.gz \
-            -o /tmp/bore.tar.gz
-          tar -xzf /tmp/bore.tar.gz -C /tmp/
-          sudo mv /tmp/bore /usr/local/bin/bore
-          echo "✅ bore installed!"
+          bore local 8080 --to bore.pub > /tmp/bore.log 2>&1 &
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🕳️  bore tunnel starting..." >> output/runtimelogs.txt
 
-      - name: Start Chat UI server
-        run: |
-          mkdir -p output
-          nohup python scripts/process_data.py > output/server.log 2>&1 &
-          sleep 2
-          curl -s http://localhost:3000/ | head -5
-          echo "✅ Chat UI server running!"
+          sleep 8
 
-      - name: Start bore tunnel & save URL
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          nohup bore local 3000 --to bore.pub > /tmp/bore.log 2>&1 &
-          sleep 6
-          BORE_URL=$(grep -o 'bore.pub:[0-9]*' /tmp/bore.log | head -1)
-          cat /tmp/bore.log
-          
-          FULL_URL="http://$BORE_URL"
-          echo "🌐 LIVE URL: $FULL_URL"
-          echo "$FULL_URL" > output/live_url.txt
-          echo "Model: qwen2:0.5b" >> output/live_url.txt
-          echo "Started: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> output/live_url.txt
-          echo "Expires: ~30 min" >> output/live_url.txt
-          
+          PORT=$(grep -oP '(?<=bore\.pub:)\d+' /tmp/bore.log | head -1)
+          echo "[$(date -u)] bore log: $(cat /tmp/bore.log)" >> output/runtimelogs.txt
+
+          if [ -n "$PORT" ]; then
+            URL="http://bore.pub:$PORT"
+            echo "$URL" > output/url.txt
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Calculator LIVE at: $URL" >> output/runtimelogs.txt
+            echo "======================================"
+            echo "🔥 Calculator URL: $URL"
+            echo "======================================"
+          else
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [ERROR] ❌ Could not extract bore port!" >> output/runtimelogs.txt
+            exit 1
+          fi
+
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🦙 LLM Chat live at $FULL_URL"
+          git diff --staged --quiet || git commit -m "🔗 Calculator URL: $URL"
           git pull --rebase origin main
           git push
-          echo "✅ URL committed!"
 
-      - name: Keep alive (30 min)
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 📌 URL pushed to output/url.txt!" >> output/runtimelogs.txt
+
+      - name: Keep alive 30 minutes
         run: |
-          URL=$(cat output/live_url.txt | head -1)
-          echo "🌐 Chat at: $URL"
-          echo "🦙 Model: qwen2:0.5b running!"
-          for i in $(seq 1 30); do
-            sleep 60
-            echo "⏱️ $i/30 min | Ollama alive: $(curl -s http://localhost:11434/api/tags | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d["models"][0]["name"])' 2>/dev/null || echo 'checking...')"
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ⏳ Server alive for 30 min..." >> output/runtimelogs.txt
+          for i in 1 2 3 4 5 6; do
+            sleep 300
+            MIN=$((i * 5))
+            echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] ✅ Still running... ${MIN}/30 min" >> output/runtimelogs.txt
+            git config user.name "error404unknownuser99-ux"
+            git config user.email "error404unknownuser99@users.noreply.github.com"
+            git add output/runtimelogs.txt
+            git diff --staged --quiet || git commit -m "⏰ Alive ${MIN}min"
+            git pull --rebase origin main
+            git push
           done
 
-      - name: Commit final output
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Final commit
+        if: always()
         run: |
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] [INFO] 🏁 Workflow ending" >> output/runtimelogs.txt
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
           git add output/
-          git diff --staged --quiet || git commit -m "🤖 Done [$(date '+%Y-%m-%d %H:%M:%S')]"
+          git diff --staged --quiet || git commit -m "🏁 Done"
           git pull --rebase origin main
           git push
-
-      - name: Hit Monitor
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://track-workflow.onrender.com/full)
-          echo "Monitor hit: $STATUS"

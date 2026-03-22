@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔢 Calculator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .calc-wrapper {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 45px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+      width: 320px;
+    }
+    .badge {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .display {
+      background: rgba(0,0,0,0.3);
+      border-radius: 16px;
+      padding: 20px 16px 12px;
+      margin-bottom: 20px;
+      text-align: right;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .display .expr {
+      color: rgba(255,255,255,0.35);
+      font-size: 13px;
+      min-height: 18px;
+      margin-bottom: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .display .value {
+      color: #ffffff;
+      font-size: 42px;
+      font-weight: 300;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      letter-spacing: -1px;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button {
+      padding: 18px 0;
+      border: none;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      outline: none;
+    }
+    button:active { transform: scale(0.93); }
+    .btn-num {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .btn-num:hover { background: rgba(255,255,255,0.14); }
+    .btn-op {
+      background: rgba(99, 179, 237, 0.15);
+      color: #63b3ed;
+      border: 1px solid rgba(99,179,237,0.2);
+    }
+    .btn-op:hover { background: rgba(99, 179, 237, 0.25); }
+    .btn-eq {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+    }
+    .btn-eq:hover { box-shadow: 0 6px 20px rgba(102,126,234,0.6); }
+    .btn-clear {
+      background: rgba(252, 129, 74, 0.15);
+      color: #fc814a;
+      border: 1px solid rgba(252,129,74,0.2);
+    }
+    .btn-clear:hover { background: rgba(252,129,74,0.25); }
+    .btn-zero { grid-column: span 2; }
+  </style>
+</head>
+<body>
+  <div class="calc-wrapper">
+    <div class="badge">⚡ GitHub Actions Calculator</div>
+    <div class="display">
+      <div class="expr" id="expr"></div>
+      <div class="value" id="display">0</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-clear" onclick="clearAll()">AC</button>
+      <button class="btn-clear" onclick="toggleSign()">+/-</button>
+      <button class="btn-clear" onclick="percent()">%</button>
+      <button class="btn-op"    onclick="setOp('/')">÷</button>
+
+      <button class="btn-num" onclick="input('7')">7</button>
+      <button class="btn-num" onclick="input('8')">8</button>
+      <button class="btn-num" onclick="input('9')">9</button>
+      <button class="btn-op"  onclick="setOp('*')">×</button>
+
+      <button class="btn-num" onclick="input('4')">4</button>
+      <button class="btn-num" onclick="input('5')">5</button>
+      <button class="btn-num" onclick="input('6')">6</button>
+      <button class="btn-op"  onclick="setOp('-')">−</button>
+
+      <button class="btn-num" onclick="input('1')">1</button>
+      <button class="btn-num" onclick="input('2')">2</button>
+      <button class="btn-num" onclick="input('3')">3</button>
+      <button class="btn-op"  onclick="setOp('+')">+</button>
+
+      <button class="btn-num btn-zero" onclick="input('0')">0</button>
+      <button class="btn-num" onclick="inputDot()">.</button>
+      <button class="btn-eq"  onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    let cur = '0', prev = '', op = null, fresh = false;
+    const disp = document.getElementById('display');
+    const expr = document.getElementById('expr');
+
+    function update() {
+      disp.textContent = parseFloat(cur).toLocaleString('en', {maximumFractionDigits: 10});
+      if (cur.includes('.') && cur.endsWith('0')) {
+        disp.textContent = cur; // preserve trailing zeros after dot
+      }
+      // shrink font if too long
+      disp.style.fontSize = cur.length > 12 ? '22px' : cur.length > 9 ? '30px' : '42px';
+    }
+
+    function input(d) {
+      if (fresh) { cur = d; fresh = false; }
+      else cur = cur === '0' ? d : cur + d;
+      if (cur.length > 14) cur = cur.slice(0, 14);
+      update();
+    }
+
+    function inputDot() {
+      if (fresh) { cur = '0.'; fresh = false; }
+      else if (!cur.includes('.')) cur += '.';
+      update();
+    }
+
+    function setOp(o) {
+      if (op && !fresh) calculate(true);
+      prev = cur; op = o; fresh = true;
+      const sym = {'+':'+', '-':'−', '*':'×', '/':'÷'}[o];
+      expr.textContent = `${prev} ${sym}`;
+    }
+
+    function calculate(chain = false) {
+      if (!op || !prev) return;
+      const a = parseFloat(prev), b = parseFloat(cur);
+      let r;
+      switch(op) {
+        case '+': r = a + b; break;
+        case '-': r = a - b; break;
+        case '*': r = a * b; break;
+        case '/': r = b !== 0 ? a / b : 'Error'; break;
+      }
+      const sym = {'+':'+', '-':'−', '*':'×', '/':'÷'}[op];
+      if (!chain) expr.textContent = `${prev} ${sym} ${cur} =`;
+      cur = r === 'Error' ? 'Error' : String(parseFloat(r.toFixed(10)));
+      op = chain ? op : null;
+      prev = ''; fresh = true;
+      update();
+    }
+
+    function clearAll() { cur = '0'; prev = ''; op = null; fresh = false; expr.textContent = ''; update(); }
+    function toggleSign() { cur = String(-parseFloat(cur)); update(); }
+    function percent() { cur = String(parseFloat(cur) / 100); update(); }
+  </script>
+</body>
+</html>

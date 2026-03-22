@@ -1,4 +1,0 @@
-http://bore.pub:53118
-Model: qwen2:0.5b
-Started: 2026-03-22 08:52:25 UTC
-Expires: ~30 min
