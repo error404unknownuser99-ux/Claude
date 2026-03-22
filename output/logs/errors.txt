@@ -1,2 +1,43 @@
-[2026-03-22 19:07:24] ✅ No errors — Run ID: 23410320654
-YAML: ✅ All valid
+[2026-03-22 19:08:05 UTC] ❌ FAILED JOB: windows-rdp
+Run: 23410320654 | Windows RDP via bore.pub
+2026-03-22T19:07:42.4831856Z [36;1mWrite-Host "=== Disable Defender + Telemetry ==="[0m
+2026-03-22T19:07:42.4832300Z [36;1mSet-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue[0m
+2026-03-22T19:07:42.4833132Z [36;1mSet-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Force -ErrorAction SilentlyContinue[0m
+2026-03-22T19:07:42.4833759Z [36;1m[0m
+2026-03-22T19:07:42.4833911Z [36;1mWrite-Host "=== RAM Status ==="[0m
+2026-03-22T19:07:42.4834462Z [36;1mGet-WmiObject Win32_OperatingSystem | Select-Object @{N='FreeRAM_GB';E={[math]::Round($_.FreePhysicalMemory/1MB,2)}} | Format-List[0m
+2026-03-22T19:07:42.4835024Z [36;1mWrite-Host "OPTIMIZATION COMPLETE!"[0m
+2026-03-22T19:07:42.4897945Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-03-22T19:07:42.4898273Z ##[endgroup]
+2026-03-22T19:07:42.8406008Z === Killing useless services ===
+2026-03-22T19:07:52.3632079Z Services killed!
+2026-03-22T19:07:52.3638600Z === ALL Animations OFF ===
+2026-03-22T19:07:52.3842385Z Animations OFF!
+2026-03-22T19:07:52.3848298Z === Transparency + Dark Mode ===
+2026-03-22T19:07:52.4004209Z === MAX CPU - High Performance ===
+2026-03-22T19:07:52.5293748Z Power plan set!
+2026-03-22T19:07:52.5299637Z === RDP Color Depth = 16bit ===
+2026-03-22T19:07:52.5333647Z === Disable Defender + Telemetry ===
+2026-03-22T19:07:55.0982451Z === RAM Status ===
+2026-03-22T19:07:57.3160344Z 
+2026-03-22T19:07:57.3175237Z [32;1mFreeRAM_GB : [0m13.03
+2026-03-22T19:07:57.3175554Z 
+2026-03-22T19:07:57.3183310Z OPTIMIZATION COMPLETE!
+2026-03-22T19:07:57.3569792Z ##[error]Process completed with exit code 1.
+2026-03-22T19:07:57.3798451Z Post job cleanup.
+2026-03-22T19:07:57.6076310Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-03-22T19:07:57.6346213Z git version 2.53.0.windows.1
+2026-03-22T19:07:57.6423839Z Temporarily overriding HOME='D:\a\_temp\9669a5f6-04f9-42bf-b0e3-09c78cbdbc66' before making global git config changes
+2026-03-22T19:07:57.6424658Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T19:07:57.6435584Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Claude\Claude
+2026-03-22T19:07:57.6734598Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T19:07:57.7026474Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-03-22T19:07:58.2773368Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T19:07:58.3066534Z http.https://github.com/.extraheader
+2026-03-22T19:07:58.3116025Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T19:07:58.3449184Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-03-22T19:07:58.9100112Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T19:07:58.9417694Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-03-22T19:07:59.5077385Z Cleaning up orphan processes
+2026-03-22T19:07:59.5396026Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+---
