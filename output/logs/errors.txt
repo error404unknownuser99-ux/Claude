@@ -1,2 +1,43 @@
-[2026-03-22 19:01:03] ✅ No errors — Run ID: 23410197749
-YAML: ✅ All valid
+[2026-03-22 19:01:21 UTC] ❌ FAILED JOB: windows-desktop
+Run: 23410197749 | Windows Desktop RDP + bore.pub
+2026-03-22T19:01:10.0021478Z [36;1m  "  Host:     $tunnel" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T19:01:10.0021892Z [36;1m  "  Username: runneradmin" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T19:01:10.0022349Z [36;1m  "  Password: RDP@Pass123" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T19:01:10.0022737Z [36;1m  "================================================" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T19:01:10.0023045Z [36;1m} else {[0m
+2026-03-22T19:01:10.0023475Z [36;1m  "[$(Get-Date -Format 'HH:mm:ss')] [WARN] Port nahi mila! out:$boreOut err:$boreErr" | Tee-Object -FilePath $LOG -Append[0m
+2026-03-22T19:01:10.0023946Z [36;1m}[0m
+2026-03-22T19:01:10.0674355Z shell: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.EXE -command ". '{0}'"
+2026-03-22T19:01:10.0674970Z ##[endgroup]
+2026-03-22T19:01:10.4767014Z [19:01:10] [INFO] Optimization start...
+2026-03-22T19:01:12.6697469Z [19:01:12] [OK] Optimization done!
+2026-03-22T19:01:14.5890753Z The command completed successfully.
+2026-03-22T19:01:15.2632415Z 
+2026-03-22T19:01:15.2632976Z [19:01:15] [OK] RDP ready! User:runneradmin Pass:RDP@Pass123
+2026-03-22T19:01:15.2639361Z [19:01:15] [INFO] bore download...
+2026-03-22T19:01:16.0782798Z Exception calling "DownloadFile" with "2" argument(s): "The request was aborted: The connection was closed 
+2026-03-22T19:01:16.0783868Z unexpectedly."
+2026-03-22T19:01:16.0784494Z At D:\a\_temp\b7998eb8-29fb-4660-95b0-53dd392a5b8d.ps1:33 char:1
+2026-03-22T19:01:16.0785455Z + $wc.DownloadFile("https://github.com/ekzhang/bore/releases/download/v ...
+2026-03-22T19:01:16.0786557Z + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2026-03-22T19:01:16.0787282Z     + CategoryInfo          : NotSpecified: (:) [], ParentContainsErrorRecordException
+2026-03-22T19:01:16.0787896Z     + FullyQualifiedErrorId : WebException
+2026-03-22T19:01:16.0788180Z  
+2026-03-22T19:01:16.1044306Z ##[error]Process completed with exit code 1.
+2026-03-22T19:01:16.1273297Z Post job cleanup.
+2026-03-22T19:01:16.3574279Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-03-22T19:01:16.3853263Z git version 2.53.0.windows.1
+2026-03-22T19:01:16.3932185Z Temporarily overriding HOME='D:\a\_temp\1c7d75c4-724e-46fa-b849-13f4e76aa6b4' before making global git config changes
+2026-03-22T19:01:16.3932901Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-22T19:01:16.3944530Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Claude\Claude
+2026-03-22T19:01:16.4265944Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-03-22T19:01:16.4606382Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-03-22T19:01:17.0165375Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-22T19:01:17.0436277Z http.https://github.com/.extraheader
+2026-03-22T19:01:17.0486205Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-03-22T19:01:17.0808664Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-03-22T19:01:17.6432459Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-22T19:01:17.6764846Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-03-22T19:01:18.2192619Z Cleaning up orphan processes
+2026-03-22T19:01:18.2433110Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+---
