@@ -32,55 +32,50 @@ jobs:
       - name: ULTRA OPTIMIZE Windows
         shell: pwsh
         run: |
+          $ErrorActionPreference = "SilentlyContinue"
+          
           Write-Host "=== Killing useless services ==="
           $services = @(
             "WSearch","SysMain","DiagTrack","dmwappushservice",
-            "RetailDemo","MapsBroker","lfsvc","SharedAccess",
-            "wisvc","WerSvc","wercplsupport","Themes",
-            "TabletInputService","PrintNotify","Spooler",
-            "Fax","XblAuthManager","XblGameSave","XboxNetApiSvc",
-            "XboxGipSvc","spectrum","WMPNetworkSvc","icssvc",
-            "PhoneSvc","TapiSrv","RmSvc","SCardSvr",
-            "SCPolicySvc","WbioSrvc","StorSvc","FrameServer",
-            "stisvc","WiaRpc","WdNisSvc","WinDefend",
-            "MsKeyboardFilter","NaturalAuthentication"
+            "RetailDemo","MapsBroker","WerSvc","Themes",
+            "Spooler","Fax","XblAuthManager","XblGameSave",
+            "XboxNetApiSvc","WdNisSvc","WinDefend"
           )
           foreach ($svc in $services) {
-            try {
-              Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
-              Set-Service -Name $svc -StartupType Disabled -ErrorAction SilentlyContinue
-            } catch {}
+            try { Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue } catch {}
+            try { Set-Service -Name $svc -StartupType Disabled -ErrorAction SilentlyContinue } catch {}
           }
           Write-Host "Services killed!"
 
           Write-Host "=== ALL Animations OFF ==="
-          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Force -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Value "0" -Force -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Value "0" -Force -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -Value 0 -Force -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name "MinAnimate" -Value "0" -Force -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "FontSmoothing" -Value "0" -Force -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "CursorBlinkRate" -Value "-1" -Force -ErrorAction SilentlyContinue
-          Write-Host "Animations OFF!"
-
-          Write-Host "=== Transparency + Dark Mode ==="
-          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0 -Force -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0 -Force -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0 -Force -ErrorAction SilentlyContinue
+          $null = New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Force -ErrorAction SilentlyContinue
+          $null = New-Item -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Force -ErrorAction SilentlyContinue
+          $null = New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Type DWord -Force
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Value "0" -Type String -Force
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Value "0" -Type String -Force
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name "MinAnimate" -Value "0" -Type String -Force
+          Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "FontSmoothing" -Value 0 -Type DWord -Force
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0 -Type DWord -Force
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0 -Type DWord -Force
+          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0 -Type DWord -Force
+          Write-Host "Animations + Transparency OFF!"
 
           Write-Host "=== MAX CPU - High Performance ==="
-          powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c -ErrorAction SilentlyContinue 2>$null
+          & powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
           Write-Host "Power plan set!"
 
           Write-Host "=== RDP Color Depth = 16bit ==="
-          Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 4 -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 4 -Type DWord -Force
 
-          Write-Host "=== Disable Defender + Telemetry ==="
-          Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue
-          Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Force -ErrorAction SilentlyContinue
+          Write-Host "=== Disable Telemetry ==="
+          $null = New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force -ErrorAction SilentlyContinue
+          Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Type DWord -Force
 
           Write-Host "=== RAM Status ==="
-          Get-WmiObject Win32_OperatingSystem | Select-Object @{N='FreeRAM_GB';E={[math]::Round($_.FreePhysicalMemory/1MB,2)}} | Format-List
+          $os = Get-CimInstance Win32_OperatingSystem
+          $freeRam = [math]::Round($os.FreePhysicalMemory/1MB, 2)
+          Write-Host "Free RAM: ${freeRam} GB"
           Write-Host "OPTIMIZATION COMPLETE!"
 
       - name: Download bore
