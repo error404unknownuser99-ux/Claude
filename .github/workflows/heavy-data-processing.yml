@@ -98,7 +98,7 @@ jobs:
           while ($true) {
             $attempt++
             Write-Host "=== Tunnel attempt #$attempt ==="
-            Remove-Item "output\bore_out.txt" -ErrorAction SilentlyContinue
+            Remove-Item "output\bore_out.txt","output\bore_err.txt" -ErrorAction SilentlyContinue
 
             $proc = Start-Process -FilePath ".\bore.exe" `
               -ArgumentList "local 3389 --to bore.pub" `
@@ -126,8 +126,9 @@ jobs:
               if ($LASTEXITCODE -ne 0) {
                 git commit -m "RDP LIVE bore.pub:$port (attempt $attempt)"
                 for ($i = 0; $i -lt 5; $i++) {
+                  Remove-Item "output\bore_out.txt","output\bore_err.txt" -ErrorAction SilentlyContinue
                   git pull --rebase origin main
-                  git push
+                  git push origin HEAD:main
                   if ($LASTEXITCODE -eq 0) { break }
                   Start-Sleep -Seconds 2
                 }
