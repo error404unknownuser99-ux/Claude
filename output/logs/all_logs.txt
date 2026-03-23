@@ -1,6 +1,6 @@
 ============================================================
 🤖 Monitor Bot — Auto Update
-Timestamp  : 2026-03-23 05:19:31 UTC
+Timestamp  : 2026-03-23 05:23:35 UTC
 Run ID     : 23422644026
 Workflow   : Windows RDP via bore.pub
 Status     : in_progress
@@ -9,8 +9,344 @@ URL        : https://github.com/error404unknownuser99-ux/Claude/actions/runs/234
 ============================================================
 
 
---- JOB: windows-rdp | status:in_progress | conclusion:None ---
-[Log fetch failed HTTP 404]
+--- JOB: windows-rdp | status:completed | conclusion:cancelled ---
+ï»¿2026-03-23T05:19:20.9324010Z Current runner version: '2.332.0'
+2026-03-23T05:19:20.9358613Z ##[group]Runner Image Provisioner
+2026-03-23T05:19:20.9359718Z Hosted Compute Agent
+2026-03-23T05:19:20.9360558Z Version: 20260213.493
+2026-03-23T05:19:20.9361454Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-03-23T05:19:20.9362816Z Build Date: 2026-02-13T00:28:41Z
+2026-03-23T05:19:20.9363851Z Worker ID: {0166a728-3e6e-44d7-8673-b12164b5e86c}
+2026-03-23T05:19:20.9364901Z Azure Region: eastus
+2026-03-23T05:19:20.9365642Z ##[endgroup]
+2026-03-23T05:19:20.9367797Z ##[group]Operating System
+2026-03-23T05:19:20.9368742Z Microsoft Windows Server 2025
+2026-03-23T05:19:20.9369642Z 10.0.26100
+2026-03-23T05:19:20.9370379Z Datacenter
+2026-03-23T05:19:20.9371020Z ##[endgroup]
+2026-03-23T05:19:20.9371761Z ##[group]Runner Image
+2026-03-23T05:19:20.9372536Z Image: windows-2025
+2026-03-23T05:19:20.9373766Z Version: 20260302.43.1
+2026-03-23T05:19:20.9375949Z Included Software: https://github.com/actions/runner-images/blob/win25/20260302.43/images/windows/Windows2025-Readme.md
+2026-03-23T05:19:20.9379402Z Image Release: https://github.com/actions/runner-images/releases/tag/win25%2F20260302.43
+2026-03-23T05:19:20.9380907Z ##[endgroup]
+2026-03-23T05:19:20.9385570Z ##[group]GITHUB_TOKEN Permissions
+2026-03-23T05:19:20.9388652Z Actions: write
+2026-03-23T05:19:20.9389566Z ArtifactMetadata: write
+2026-03-23T05:19:20.9390398Z Attestations: write
+2026-03-23T05:19:20.9391200Z Checks: write
+2026-03-23T05:19:20.9391962Z Contents: write
+2026-03-23T05:19:20.9392735Z Deployments: write
+2026-03-23T05:19:20.9393896Z Discussions: write
+2026-03-23T05:19:20.9394763Z Issues: write
+2026-03-23T05:19:20.9395557Z Metadata: read
+2026-03-23T05:19:20.9396289Z Models: read
+2026-03-23T05:19:20.9397106Z Packages: write
+2026-03-23T05:19:20.9397858Z Pages: write
+2026-03-23T05:19:20.9398791Z PullRequests: write
+2026-03-23T05:19:20.9399576Z RepositoryProjects: write
+2026-03-23T05:19:20.9400447Z SecurityEvents: write
+2026-03-23T05:19:20.9401382Z Statuses: write
+2026-03-23T05:19:20.9402150Z ##[endgroup]
+2026-03-23T05:19:20.9404837Z Secret source: Actions
+2026-03-23T05:19:20.9405826Z Prepare workflow directory
+2026-03-23T05:19:20.9783387Z Prepare all required actions
+2026-03-23T05:19:20.9823436Z Getting action download info
+2026-03-23T05:19:21.1605672Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-03-23T05:19:21.4611396Z Complete job name: windows-rdp
+2026-03-23T05:19:21.5984365Z ##[group]Run actions/checkout@v4
+2026-03-23T05:19:21.5985392Z with:
+2026-03-23T05:19:21.5985813Z   repository: error404unknownuser99-ux/Claude
+2026-03-23T05:19:21.5986579Z   token: ***
+2026-03-23T05:19:21.5987011Z   ssh-strict: true
+2026-03-23T05:19:21.5987461Z   ssh-user: git
+2026-03-23T05:19:21.5987908Z   persist-credentials: true
+2026-03-23T05:19:21.5988423Z   clean: true
+2026-03-23T05:19:21.5988874Z   sparse-checkout-cone-mode: true
+2026-03-23T05:19:21.5989422Z   fetch-depth: 1
+2026-03-23T05:19:21.5989849Z   fetch-tags: false
+2026-03-23T05:19:21.5990336Z   show-progress: true
+2026-03-23T05:19:21.5990784Z   lfs: false
+2026-03-23T05:19:21.5991196Z   submodules: false
+2026-03-23T05:19:21.5992071Z   set-safe-directory: true
+2026-03-23T05:19:21.5993128Z ##[endgroup]
+2026-03-23T05:19:21.7699587Z Syncing repository: error404unknownuser99-ux/Claude
+2026-03-23T05:19:21.7702748Z ##[group]Getting Git version info
+2026-03-23T05:19:21.7703763Z Working directory is 'D:\a\Claude\Claude'
+2026-03-23T05:19:21.8787825Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-03-23T05:19:22.0761375Z git version 2.53.0.windows.1
+2026-03-23T05:19:22.0817214Z ##[endgroup]
+2026-03-23T05:19:22.0841633Z Temporarily overriding HOME='D:\a\_temp\f8142b6b-51d9-42f6-a148-9c0fe7a32588' before making global git config changes
+2026-03-23T05:19:22.0843804Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-23T05:19:22.0854878Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Claude\Claude
+2026-03-23T05:19:22.1227656Z Deleting the contents of 'D:\a\Claude\Claude'
+2026-03-23T05:19:22.1235671Z ##[group]Initializing the repository
+2026-03-23T05:19:22.1246535Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\Claude\Claude
+2026-03-23T05:19:22.1837237Z Initialized empty Git repository in D:/a/Claude/Claude/.git/
+2026-03-23T05:19:22.1887326Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/error404unknownuser99-ux/Claude
+2026-03-23T05:19:22.2271006Z ##[endgroup]
+2026-03-23T05:19:22.2272078Z ##[group]Disabling automatic garbage collection
+2026-03-23T05:19:22.2282123Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-03-23T05:19:22.2669240Z ##[endgroup]
+2026-03-23T05:19:22.2671176Z ##[group]Setting up auth
+2026-03-23T05:19:22.2684954Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-03-23T05:19:22.3022812Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-03-23T05:19:23.3494973Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-23T05:19:23.3893968Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-03-23T05:19:25.8374996Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-23T05:19:25.8905538Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-03-23T05:19:26.5319405Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-03-23T05:19:26.5640153Z ##[endgroup]
+2026-03-23T05:19:26.5641032Z ##[group]Fetching the repository
+2026-03-23T05:19:26.5654253Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +088d35714a22709acedc8f26caf687910e82e62c:refs/remotes/origin/main
+2026-03-23T05:19:27.2068928Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-23T05:19:27.2070499Z  * [new ref]         088d35714a22709acedc8f26caf687910e82e62c -> origin/main
+2026-03-23T05:19:27.2365184Z ##[endgroup]
+2026-03-23T05:19:27.2365675Z ##[group]Determining the checkout info
+2026-03-23T05:19:27.2367477Z ##[endgroup]
+2026-03-23T05:19:27.2378203Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-03-23T05:19:27.2732817Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-03-23T05:19:27.3051453Z ##[group]Checking out the ref
+2026-03-23T05:19:27.3052210Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B main refs/remotes/origin/main
+2026-03-23T05:19:27.3565850Z Switched to a new branch 'main'
+2026-03-23T05:19:27.3589070Z branch 'main' set up to track 'origin/main'.
+2026-03-23T05:19:27.3634188Z ##[endgroup]
+2026-03-23T05:19:27.4018186Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-03-23T05:19:27.4303612Z 088d35714a22709acedc8f26caf687910e82e62c
+2026-03-23T05:19:27.4690030Z ##[group]Run $pass = "BoreRDP@2025!"
+2026-03-23T05:19:27.4690527Z [36;1m$pass = "BoreRDP@2025!"[0m
+2026-03-23T05:19:27.4690840Z [36;1mnet user liveuser $pass /add[0m
+2026-03-23T05:19:27.4691169Z [36;1mnet localgroup administrators liveuser /add[0m
+2026-03-23T05:19:27.4691580Z [36;1mnet localgroup "Remote Desktop Users" liveuser /add[0m
+2026-03-23T05:19:27.4692242Z [36;1mSet-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0[0m
+2026-03-23T05:19:27.4693711Z [36;1mEnable-NetFirewallRule -DisplayGroup "Remote Desktop"[0m
+2026-03-23T05:19:27.4694465Z [36;1mSet-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 0[0m
+2026-03-23T05:19:27.4695349Z [36;1mnetsh advfirewall firewall add rule name="RDP-3389" protocol=TCP dir=in localport=3389 action=allow[0m
+2026-03-23T05:19:27.4695855Z [36;1mWrite-Host "RDP Enabled!"[0m
+2026-03-23T05:19:27.4835130Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-03-23T05:19:27.4835570Z ##[endgroup]
+2026-03-23T05:19:33.5325042Z The command completed successfully.
+2026-03-23T05:19:33.5327901Z 
+2026-03-23T05:19:33.5896803Z The command completed successfully.
+2026-03-23T05:19:33.5897419Z 
+2026-03-23T05:19:33.6386222Z The command completed successfully.
+2026-03-23T05:19:33.6386757Z 
+2026-03-23T05:19:37.1451382Z Ok.
+2026-03-23T05:19:37.1452444Z 
+2026-03-23T05:19:37.5711206Z RDP Enabled!
+2026-03-23T05:19:37.7051880Z ##[group]Run $ErrorActionPreference = "SilentlyContinue"
+2026-03-23T05:19:37.7052449Z [36;1m$ErrorActionPreference = "SilentlyContinue"[0m
+2026-03-23T05:19:37.7052720Z [36;1m[0m
+2026-03-23T05:19:37.7052922Z [36;1mWrite-Host "=== Killing useless services ==="[0m
+2026-03-23T05:19:37.7053205Z [36;1m$services = @([0m
+2026-03-23T05:19:37.7053460Z [36;1m  "WSearch","SysMain","DiagTrack","dmwappushservice",[0m
+2026-03-23T05:19:37.7053815Z [36;1m  "RetailDemo","MapsBroker","WerSvc","Themes",[0m
+2026-03-23T05:19:37.7054128Z [36;1m  "Spooler","Fax","XblAuthManager","XblGameSave",[0m
+2026-03-23T05:19:37.7054824Z [36;1m  "XboxNetApiSvc","WdNisSvc","WinDefend"[0m
+2026-03-23T05:19:37.7055069Z [36;1m)[0m
+2026-03-23T05:19:37.7055234Z [36;1mforeach ($svc in $services) {[0m
+2026-03-23T05:19:37.7055629Z [36;1m  try { Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue } catch {}[0m
+2026-03-23T05:19:37.7056254Z [36;1m  try { Set-Service -Name $svc -StartupType Disabled -ErrorAction SilentlyContinue } catch {}[0m
+2026-03-23T05:19:37.7056681Z [36;1m}[0m
+2026-03-23T05:19:37.7056857Z [36;1mWrite-Host "Services killed!"[0m
+2026-03-23T05:19:37.7057065Z [36;1m[0m
+2026-03-23T05:19:37.7057243Z [36;1mWrite-Host "=== ALL Animations OFF ==="[0m
+2026-03-23T05:19:37.7057854Z [36;1m$null = New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Force -ErrorAction SilentlyContinue[0m
+2026-03-23T05:19:37.7058664Z [36;1m$null = New-Item -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Force -ErrorAction SilentlyContinue[0m
+2026-03-23T05:19:37.7059437Z [36;1m$null = New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Force -ErrorAction SilentlyContinue[0m
+2026-03-23T05:19:37.7060409Z [36;1mSet-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Type DWord -Force[0m
+2026-03-23T05:19:37.7061321Z [36;1mSet-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Value "0" -Type String -Force[0m
+2026-03-23T05:19:37.7062062Z [36;1mSet-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Value "0" -Type String -Force[0m
+2026-03-23T05:19:37.7062820Z [36;1mSet-ItemProperty -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name "MinAnimate" -Value "0" -Type String -Force[0m
+2026-03-23T05:19:37.7063548Z [36;1mSet-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "FontSmoothing" -Value 0 -Type DWord -Force[0m
+2026-03-23T05:19:37.7064418Z [36;1mSet-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0 -Type DWord -Force[0m
+2026-03-23T05:19:37.7065416Z [36;1mSet-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Value 0 -Type DWord -Force[0m
+2026-03-23T05:19:37.7066430Z [36;1mSet-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "SystemUsesLightTheme" -Value 0 -Type DWord -Force[0m
+2026-03-23T05:19:37.7067328Z [36;1mWrite-Host "Animations + Transparency OFF!"[0m
+2026-03-23T05:19:37.7067581Z [36;1m[0m
+2026-03-23T05:19:37.7067785Z [36;1mWrite-Host "=== MAX CPU - High Performance ==="[0m
+2026-03-23T05:19:37.7068144Z [36;1m& powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c[0m
+2026-03-23T05:19:37.7068460Z [36;1mWrite-Host "Power plan set!"[0m
+2026-03-23T05:19:37.7068667Z [36;1m[0m
+2026-03-23T05:19:37.7068843Z [36;1mWrite-Host "=== RDP Color Depth = 16bit ==="[0m
+2026-03-23T05:19:37.7069496Z [36;1mSet-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" -Name "ColorDepth" -Value 4 -Type DWord -Force[0m
+2026-03-23T05:19:37.7070132Z [36;1m[0m
+2026-03-23T05:19:37.7070301Z [36;1mWrite-Host "=== Disable Telemetry ==="[0m
+2026-03-23T05:19:37.7072612Z [36;1m$null = New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force -ErrorAction SilentlyContinue[0m
+2026-03-23T05:19:37.7073593Z [36;1mSet-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Type DWord -Force[0m
+2026-03-23T05:19:37.7074183Z [36;1m[0m
+2026-03-23T05:19:37.7074345Z [36;1mWrite-Host "=== RAM Status ==="[0m
+2026-03-23T05:19:37.7075013Z [36;1m$os = Get-CimInstance Win32_OperatingSystem[0m
+2026-03-23T05:19:37.7075356Z [36;1m$freeRam = [math]::Round($os.FreePhysicalMemory/1MB, 2)[0m
+2026-03-23T05:19:37.7075671Z [36;1mWrite-Host "Free RAM: ${freeRam} GB"[0m
+2026-03-23T05:19:37.7075936Z [36;1mWrite-Host "OPTIMIZATION COMPLETE!"[0m
+2026-03-23T05:19:37.7139344Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-03-23T05:19:37.7139694Z ##[endgroup]
+2026-03-23T05:19:38.0476533Z === Killing useless services ===
+2026-03-23T05:19:38.1223573Z Services killed!
+2026-03-23T05:19:38.1233311Z === ALL Animations OFF ===
+2026-03-23T05:19:38.2465042Z Animations + Transparency OFF!
+2026-03-23T05:19:38.2468570Z === MAX CPU - High Performance ===
+2026-03-23T05:19:38.5997097Z Power plan set!
+2026-03-23T05:19:38.6002460Z === RDP Color Depth = 16bit ===
+2026-03-23T05:19:38.6040980Z === Disable Telemetry ===
+2026-03-23T05:19:38.6099565Z === RAM Status ===
+2026-03-23T05:19:38.8386555Z Free RAM: 13.02 GB
+2026-03-23T05:19:38.8392717Z OPTIMIZATION COMPLETE!
+2026-03-23T05:19:38.9174268Z ##[group]Run New-Item -ItemType Directory -Force -Path output | Out-Null
+2026-03-23T05:19:38.9175195Z [36;1mNew-Item -ItemType Directory -Force -Path output | Out-Null[0m
+2026-03-23T05:19:38.9176618Z [36;1mInvoke-WebRequest -Uri "https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-pc-windows-msvc.zip" -OutFile bore.zip -UseBasicParsing[0m
+2026-03-23T05:19:38.9178024Z [36;1mExpand-Archive bore.zip -DestinationPath . -Force[0m
+2026-03-23T05:19:38.9178556Z [36;1mWrite-Host "bore downloaded!"[0m
+2026-03-23T05:19:38.9246367Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-03-23T05:19:38.9246714Z ##[endgroup]
+2026-03-23T05:19:40.2864953Z bore downloaded!
+2026-03-23T05:19:40.3916063Z ##[group]Run git config user.name "error404unknownuser99-ux"
+2026-03-23T05:19:40.3917186Z [36;1mgit config user.name "error404unknownuser99-ux"[0m
+2026-03-23T05:19:40.3917930Z [36;1mgit config user.email "error404unknownuser99@users.noreply.github.com"[0m
+2026-03-23T05:19:40.3918601Z [36;1m[0m
+2026-03-23T05:19:40.3918843Z [36;1m$attempt = 0[0m
+2026-03-23T05:19:40.3919142Z [36;1mwhile ($true) {[0m
+2026-03-23T05:19:40.3919450Z [36;1m  $attempt++[0m
+2026-03-23T05:19:40.3919832Z [36;1m  Write-Host "=== Tunnel attempt #$attempt ==="[0m
+2026-03-23T05:19:40.3920508Z [36;1m  Remove-Item "output\bore_out.txt" -ErrorAction SilentlyContinue[0m
+2026-03-23T05:19:40.3921079Z [36;1m[0m
+2026-03-23T05:19:40.3921405Z [36;1m  $proc = Start-Process -FilePath ".\bore.exe" `[0m
+2026-03-23T05:19:40.3921976Z [36;1m    -ArgumentList "local 3389 --to bore.pub" `[0m
+2026-03-23T05:19:40.3922871Z [36;1m    -RedirectStandardOutput "output\bore_out.txt" `[0m
+2026-03-23T05:19:40.3923549Z [36;1m    -RedirectStandardError "output\bore_err.txt" `[0m
+2026-03-23T05:19:40.3924055Z [36;1m    -NoNewWindow -PassThru[0m
+2026-03-23T05:19:40.3924423Z [36;1m[0m
+2026-03-23T05:19:40.3924668Z [36;1m  Start-Sleep -Seconds 8[0m
+2026-03-23T05:19:40.3925013Z [36;1m[0m
+2026-03-23T05:19:40.3925492Z [36;1m  $out = Get-Content "output\bore_out.txt" -Raw -ErrorAction SilentlyContinue[0m
+2026-03-23T05:19:40.3926389Z [36;1m  $err = Get-Content "output\bore_err.txt" -Raw -ErrorAction SilentlyContinue[0m
+2026-03-23T05:19:40.3927035Z [36;1m  $combined = "$out $err"[0m
+2026-03-23T05:19:40.3927369Z [36;1m[0m
+2026-03-23T05:19:40.3927719Z [36;1m  if ($combined -match "listening at bore\.pub:(\d+)") {[0m
+2026-03-23T05:19:40.3928224Z [36;1m    $port = $Matches[1][0m
+2026-03-23T05:19:40.3928639Z [36;1m    Write-Host "TUNNEL LIVE on port: $port"[0m
+2026-03-23T05:19:40.3929059Z [36;1m[0m
+2026-03-23T05:19:40.3929549Z [36;1m    "USERNAME: liveuser" | Out-File output\rdp_credentials.txt -Encoding UTF8[0m
+2026-03-23T05:19:40.3930519Z [36;1m    "PASSWORD: BoreRDP@2025!" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8[0m
+2026-03-23T05:19:40.3931529Z [36;1m    "ADDRESS: bore.pub:$port" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8[0m
+2026-03-23T05:19:40.3932518Z [36;1m    "ATTEMPT: $attempt" | Out-File output\rdp_credentials.txt -Append -Encoding UTF8[0m
+2026-03-23T05:19:40.3933180Z [36;1m[0m
+2026-03-23T05:19:40.3933419Z [36;1m    git add output/[0m
+2026-03-23T05:19:40.3933769Z [36;1m    git diff --staged --quiet[0m
+2026-03-23T05:19:40.3934163Z [36;1m    if ($LASTEXITCODE -ne 0) {[0m
+2026-03-23T05:19:40.3934708Z [36;1m      git commit -m "RDP LIVE bore.pub:$port (attempt $attempt)"[0m
+2026-03-23T05:19:40.3935277Z [36;1m      for ($i = 0; $i -lt 5; $i++) {[0m
+2026-03-23T05:19:40.3935712Z [36;1m        git pull --rebase origin main[0m
+2026-03-23T05:19:40.3936123Z [36;1m        git push[0m
+2026-03-23T05:19:40.3936485Z [36;1m        if ($LASTEXITCODE -eq 0) { break }[0m
+2026-03-23T05:19:40.3937256Z [36;1m        Start-Sleep -Seconds 2[0m
+2026-03-23T05:19:40.3937629Z [36;1m      }[0m
+2026-03-23T05:19:40.3937876Z [36;1m    }[0m
+2026-03-23T05:19:40.3938110Z [36;1m[0m
+2026-03-23T05:19:40.3938425Z [36;1m    Write-Host "Waiting for bore process..."[0m
+2026-03-23T05:19:40.3938882Z [36;1m    $proc.WaitForExit()[0m
+2026-03-23T05:19:40.3939353Z [36;1m    Write-Host "Bore exited! Reconnecting in 5 sec..."[0m
+2026-03-23T05:19:40.3939863Z [36;1m    Start-Sleep -Seconds 5[0m
+2026-03-23T05:19:40.3940227Z [36;1m  } else {[0m
+2026-03-23T05:19:40.3940580Z [36;1m    Write-Host "Port not found, retrying..."[0m
+2026-03-23T05:19:40.3941180Z [36;1m    Stop-Process -Id $proc.Id -ErrorAction SilentlyContinue[0m
+2026-03-23T05:19:40.3941766Z [36;1m    Start-Sleep -Seconds 5[0m
+2026-03-23T05:19:40.3942112Z [36;1m  }[0m
+2026-03-23T05:19:40.3942353Z [36;1m}[0m
+2026-03-23T05:19:40.4044094Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-03-23T05:19:40.4044700Z env:
+2026-03-23T05:19:40.4045660Z   GITHUB_TOKEN: ***
+2026-03-23T05:19:40.4045960Z ##[endgroup]
+2026-03-23T05:19:40.8013614Z === Tunnel attempt #1 ===
+2026-03-23T05:19:48.8727743Z TUNNEL LIVE on port: 4574
+2026-03-23T05:19:48.9191162Z warning: in the working copy of 'output/bore_out.txt', LF will be replaced by CRLF the next time Git touches it
+2026-03-23T05:19:49.0168781Z [main 4b2817b] RDP LIVE bore.pub:4574 (attempt 1)
+2026-03-23T05:19:49.0169344Z  3 files changed, 6 insertions(+)
+2026-03-23T05:19:49.0169727Z  create mode 100644 output/bore_err.txt
+2026-03-23T05:19:49.0169979Z  create mode 100644 output/bore_out.txt
+2026-03-23T05:19:49.0170233Z  create mode 100644 output/rdp_credentials.txt
+2026-03-23T05:19:49.3211162Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-23T05:19:49.3212098Z  * branch            main       -> FETCH_HEAD
+2026-03-23T05:19:49.3215677Z    088d357..5a0e309  main       -> origin/main
+2026-03-23T05:19:49.4850482Z warning: unable to unlink 'output/bore_err.txt': Invalid argument
+2026-03-23T05:19:49.5793456Z warning: unable to unlink 'output/bore_out.txt': Invalid argument
+2026-03-23T05:19:49.5920333Z Rebasing (1/1)
+2026-03-23T05:19:49.5920945Z error: The following untracked working tree files would be overwritten by merge:
+2026-03-23T05:19:49.5922159Z 	output/bore_err.txt
+2026-03-23T05:19:49.5922492Z 	output/bore_out.txt
+2026-03-23T05:19:49.5922831Z Please move or remove them before you merge.
+2026-03-23T05:19:49.5923248Z Aborting
+2026-03-23T05:19:49.5923551Z hint: Could not execute the todo command
+2026-03-23T05:19:49.5923958Z hint:
+2026-03-23T05:19:49.5924533Z hint:     pick 4b2817b45f615bc233639e51293a82b0b18c5b13 # RDP LIVE bore.pub:4574 (attempt 1)
+2026-03-23T05:19:49.5925161Z hint:
+2026-03-23T05:19:49.5925647Z hint: It has been rescheduled; To edit the command before continuing, please
+2026-03-23T05:19:49.5926337Z hint: edit the todo list first:
+2026-03-23T05:19:49.5926681Z hint:
+2026-03-23T05:19:49.5926958Z hint:     git rebase --edit-todo
+2026-03-23T05:19:49.5927348Z hint:     git rebase --continue
+2026-03-23T05:19:49.6296152Z fatal: You are not currently on a branch.
+2026-03-23T05:19:49.6296746Z To push the history leading to the current (detached HEAD)
+2026-03-23T05:19:49.6297221Z state now, use
+2026-03-23T05:19:49.6297415Z 
+2026-03-23T05:19:49.6298103Z     git push origin HEAD:<name-of-remote-branch>
+2026-03-23T05:19:49.6298541Z 
+2026-03-23T05:19:51.8149815Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-23T05:19:51.8150216Z  * branch            main       -> FETCH_HEAD
+2026-03-23T05:19:51.8520276Z Already up to date.
+2026-03-23T05:19:51.8851879Z fatal: You are not currently on a branch.
+2026-03-23T05:19:51.8852507Z To push the history leading to the current (detached HEAD)
+2026-03-23T05:19:51.8852975Z state now, use
+2026-03-23T05:19:51.8853145Z 
+2026-03-23T05:19:51.8853609Z     git push origin HEAD:<name-of-remote-branch>
+2026-03-23T05:19:51.8853947Z 
+2026-03-23T05:19:54.0600814Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-23T05:19:54.0601390Z  * branch            main       -> FETCH_HEAD
+2026-03-23T05:19:54.0969178Z Already up to date.
+2026-03-23T05:19:54.1307043Z fatal: You are not currently on a branch.
+2026-03-23T05:19:54.1307503Z To push the history leading to the current (detached HEAD)
+2026-03-23T05:19:54.1307813Z state now, use
+2026-03-23T05:19:54.1307929Z 
+2026-03-23T05:19:54.1308372Z     git push origin HEAD:<name-of-remote-branch>
+2026-03-23T05:19:54.1308944Z 
+2026-03-23T05:19:56.3201940Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-23T05:19:56.3202345Z  * branch            main       -> FETCH_HEAD
+2026-03-23T05:19:56.3579002Z Already up to date.
+2026-03-23T05:19:56.3925197Z fatal: You are not currently on a branch.
+2026-03-23T05:19:56.3925802Z To push the history leading to the current (detached HEAD)
+2026-03-23T05:19:56.3926371Z state now, use
+2026-03-23T05:19:56.3926544Z 
+2026-03-23T05:19:56.3929246Z     git push origin HEAD:<name-of-remote-branch>
+2026-03-23T05:19:56.3929682Z 
+2026-03-23T05:19:58.5739108Z From https://github.com/error404unknownuser99-ux/Claude
+2026-03-23T05:19:58.5739515Z  * branch            main       -> FETCH_HEAD
+2026-03-23T05:19:58.6104016Z Already up to date.
+2026-03-23T05:19:58.6444978Z fatal: You are not currently on a branch.
+2026-03-23T05:19:58.6445440Z To push the history leading to the current (detached HEAD)
+2026-03-23T05:19:58.6445827Z state now, use
+2026-03-23T05:19:58.6447038Z 
+2026-03-23T05:19:58.6447510Z     git push origin HEAD:<name-of-remote-branch>
+2026-03-23T05:19:58.6447771Z 
+2026-03-23T05:20:00.6487401Z Waiting for bore process...
+2026-03-23T05:23:29.8992155Z ##[error]The operation was canceled.
+2026-03-23T05:23:31.8929966Z Post job cleanup.
+2026-03-23T05:23:32.7520280Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-03-23T05:23:32.7814645Z git version 2.53.0.windows.1
+2026-03-23T05:23:32.7894407Z Temporarily overriding HOME='D:\a\_temp\0badac7d-1875-4aa4-8180-e9cd6e8736cb' before making global git config changes
+2026-03-23T05:23:32.7896128Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-23T05:23:32.7909902Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\Claude\Claude
+2026-03-23T05:23:32.8292974Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-03-23T05:23:32.8650754Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-03-23T05:23:33.4364179Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-23T05:23:33.4646752Z http.https://github.com/.extraheader
+2026-03-23T05:23:33.4694656Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-03-23T05:23:33.5029599Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-03-23T05:23:34.0798135Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-23T05:23:34.1153090Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-03-23T05:23:34.7507938Z Cleaning up orphan processes
+2026-03-23T05:23:34.8013820Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
 --- END JOB ---
 
 
@@ -21,4 +357,4 @@ YAML VALIDATION:
 
 CONCURRENCY: ✅ 1/5 running — sab theek!
 
-⏰ Last updated: 2026-03-23 05:19:31 UTC
+⏰ Last updated: 2026-03-23 05:23:35 UTC
