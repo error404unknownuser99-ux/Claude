@@ -1,4 +1,4 @@
-name: 🤖 VNC + AnyDesk + RDP Session
+name: 🤖 Android Emulator + VNC
 
 on:
   workflow_dispatch:
@@ -13,97 +13,54 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: 🖥️ Start Virtual Display + VNC + bore
+      - name: ⚡ Enable KVM
         run: |
-          sudo apt-get install -y x11vnc xvfb openbox
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
-          Xvfb :99 -screen 0 1280x720x24 &
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 📦 Download F-Droid APK
+        run: |
+          curl -L https://f-droid.org/F-Droid.apk -o fdroid.apk
+          echo "✅ F-Droid Downloaded!"
+
+      - name: 🖥️ Start Virtual Display + VNC + bore PEHLE
+        run: |
+          # Packages install karo
+          sudo apt-get install -y x11vnc xvfb
+
+          # Virtual display start karo
+          Xvfb :99 -screen 0 720x1280x24 &
           export DISPLAY=:99
           echo "DISPLAY=:99" >> $GITHUB_ENV
           sleep 3
 
-          DISPLAY=:99 openbox-session &
-          sleep 2
-
+          # VNC start karo
           x11vnc -display :99 -nopw -forever -shared -bg -o /tmp/x11vnc.log
           sleep 2
           echo "✅ VNC Ready on port 5900!"
 
+          # bore install + tunnel background mein
           curl -Ls https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz | tar zx -C /usr/local/bin
           chmod +x /usr/local/bin/bore
 
+          # Background mein chalao aur port save karo
           bore local 5900 --to bore.pub 2>&1 | tee /tmp/bore.log &
           sleep 5
 
           echo "======================================"
           cat /tmp/bore.log
           echo "======================================"
-          echo "📱 Upar wale log mein VNC port number dekho!"
+          echo "📱 Upar wale log mein port number dekho!"
           echo "Host = bore.pub | Pass = nahi"
           echo "======================================"
 
-      - name: 💻 Install & Start xRDP (Windows-style Remote Desktop)
-        run: |
-          echo "📦 xRDP install ho raha hai..."
-          sudo apt-get install -y xrdp
-
-          echo "export DISPLAY=:99" | sudo tee -a /etc/xrdp/startwm.sh
-
-          sudo useradd -m rdpuser || true
-          echo "rdpuser:rdppass123" | sudo chpasswd
-
-          sudo systemctl enable xrdp
-          sudo systemctl start xrdp
-          sleep 3
-
-          echo "✅ xRDP Ready on port 3389!"
-
-          bore local 3389 --to bore.pub 2>&1 | tee /tmp/bore-rdp.log &
-          sleep 5
-
-          echo "====== RDP bore tunnel =============="
-          cat /tmp/bore-rdp.log
-          echo "======================================"
-          echo "💻 RDP Connect karo:"
-          echo "   Host   = bore.pub : (upar wala port)"
-          echo "   User   = rdpuser"
-          echo "   Pass   = rdppass123"
-          echo "======================================"
-
-      - name: 🖱️ Install AnyDesk
-        run: |
-          echo "📦 AnyDesk install ho raha hai..."
-
-          wget -qO - https://keys.anydesk.com/repos/DEB-GPG-KEY | sudo apt-key add -
-          echo "deb http://deb.anydesk.com/ all main" | sudo tee /etc/apt/sources.list.d/anydesk-stable.list
-          sudo apt-get update -qq
-          sudo apt-get install -y anydesk
-
-          DISPLAY=:99 anydesk &
-          sleep 5
-
-          ANYDESK_ID=$(anydesk --get-id 2>/dev/null || echo "ID fetch karo GUI se")
-
-          echo "======================================"
-          echo "✅ AnyDesk Ready!"
-          echo "   AnyDesk ID = $ANYDESK_ID"
-          echo "======================================"
-
-          echo "anydesk123" | anydesk --set-password 2>/dev/null || true
-          echo "✅ AnyDesk Password = anydesk123"
-
-      - name: ⏳ Session Alive Rakho
-        run: |
-          echo "🔄 Session chal raha hai — 5 ghante tak!"
-          echo ""
-          echo "===== CONNECTION SUMMARY ====="
-          echo "🖥️  VNC    → bore.pub : (bore.log dekho)"
-          echo "💻  RDP    → bore.pub : (bore-rdp.log dekho)"
-          echo "   RDP User = rdpuser | Pass = rdppass123"
-          echo "🖱️  AnyDesk → ID upar dekho | Pass = anydesk123"
-          echo "=============================="
-          sleep 18000
-
-      - name: 🔐 SSH via tmate (backup)
+      - name: 🔐 SSH via Termux
         uses: mxschmitt/action-tmate@v3
         if: always()
