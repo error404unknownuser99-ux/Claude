@@ -1,4 +1,4 @@
-name: 🧪 Auto Log Capture Test
+name: 🧪 Log Gen Kadak Test
 
 on:
   push:
@@ -9,53 +9,35 @@ on:
   workflow_dispatch:
 
 jobs:
-  auto-log-test:
+  log-gen-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: 🪵 Setup Log File
-        run: |
-          mkdir -p output
-          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚀 Workflow started!" > output/detailedlog.txt
-
-      - name: 🧪 Run Test Script (Auto Log Capture)
-        run: |
-          exec > >(while IFS= read -r line; do echo "[$(date -u '+%H:%M:%S UTC')] $line"; done | tee -a output/detailedlog.txt) 2>&1
-
-          echo "========================================="
-          echo "🤖 Auto Log Capture Test"
-          echo "========================================="
-          echo ""
-          echo "📦 System Info:"
-          echo "  OS: $(uname -a)"
-          echo "  Python: $(python3 --version)"
-          echo "  RAM: $(free -h | grep Mem | awk '{print $2}')"
-          echo ""
-          echo "🔄 Steps chal rahe hain..."
-          for i in 1 2 3 4 5; do
-            echo "  ➡️  Step $i/5 chal raha hai..."
-            sleep 1
-          done
-          echo ""
-          echo "📊 Disk Usage:"
-          df -h /
-          echo ""
-          echo "🐍 Python Script Run:"
-          python3 scripts/process_data.py
-          echo ""
-          echo "========================================="
-          echo "✅ Complete! Log file ready hai!"
-          echo "========================================="
-
-      - name: 💾 Commit Log to Repo
+      - name: ⚙️ Git Config
         run: |
           git config user.name "error404unknownuser99-ux"
           git config user.email "error404unknownuser99@users.noreply.github.com"
-          git add output/detailedlog.txt
-          git diff --staged --quiet || git commit -m "🪵 Auto detailedlog [$(date '+%Y-%m-%d %H:%M:%S')]"
-          git pull --rebase origin main
-          git push
+
+      - name: 🪵 Setup BASH_ENV (detailedlog ke liye)
+        run: |
+          mkdir -p output
+          echo 'exec > >(while IFS= read -r line; do echo "[$(date -u +%H:%M:%S)] $line"; done | tee -a "$GITHUB_WORKSPACE/output/detailedlog.txt") 2>&1' > /tmp/autolog.sh
+          echo "BASH_ENV=/tmp/autolog.sh" >> "$GITHUB_ENV"
+          echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] 🚀 Workflow started!" > output/detailedlog.txt
+
+      - name: 📦 Install dependencies
+        run: pip install requests -q
+
+      - name: 🧪 Run Kadak Test
+        run: python scripts/process_data.py
+
+      - name: 💾 Final Commit (agar kuch bacha ho)
+        if: always()
+        run: |
+          git add output/
+          git diff --staged --quiet || git commit -m "✅ Final logs [$(date '+%H:%M:%S')]"
+          git pull --rebase origin main && git push || true
