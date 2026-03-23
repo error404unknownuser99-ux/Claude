@@ -13,3 +13,13 @@
 [2026-03-23 17:12:15 UTC] [INFO]   🔄 Chunk 4/6 — 20 sec ho gaye
 [2026-03-23 17:12:20 UTC] [INFO]   🔄 Chunk 5/6 — 25 sec ho gaye
 [2026-03-23 17:12:25 UTC] [INFO]   🔄 Chunk 6/6 — 30 sec ho gaye
+[2026-03-23 17:12:30 UTC] [INFO] ✅ Auto-push test khatam!
+[2026-03-23 17:12:30 UTC] [INFO] 🔢 Heavy computation shuru...
+[2026-03-23 17:12:31 UTC] [INFO]   Sum of squares (0-999999) = 333332833333500000
+[2026-03-23 17:12:31 UTC] [INFO] ⚠️  Error level test:
+[2026-03-23 17:12:31 UTC] [WARN]   Ye ek warning hai!
+[2026-03-23 17:12:31 UTC] [ERROR]   Ye ek error hai!
+[2026-03-23 17:12:31 UTC] [INFO]   Wapas normal!
+[2026-03-23 17:12:31 UTC] [INFO] 🔍 Same message push skip test:
+[2026-03-23 17:12:31 UTC] [INFO]   Same message!
+[2026-03-23 17:12:31 UTC] [INFO]   Same message!
