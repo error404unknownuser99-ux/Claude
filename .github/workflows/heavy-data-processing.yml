@@ -1,35 +1,70 @@
 name: 🤖 Android Emulator + VNC
 
 on:
-  workflow_dispatch: # Haath se button dabao aur chalu karo
+  workflow_dispatch:
 
 jobs:
   android-vnc:
-    runs-on: macos-latest
-    timeout-minutes: 350 # 5 hours 50 min
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
 
     steps:
 
-      # Step 1 - Checkout
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      # Step 2 - Java Setup
+      - name: ⚡ Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: ☕ Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # Step 3 - F-Droid APK Download (Open Source App Store)
       - name: 📦 Download F-Droid APK
         run: |
           curl -L https://f-droid.org/F-Droid.apk -o fdroid.apk
-          echo "✅ F-Droid APK Downloaded!"
+          echo "✅ F-Droid Downloaded!"
 
-      # Step 4 - Android Emulator Start + Full Setup
-      - name: 📱 Android Emulator + VNC + bore
+      - name: 🖥️ Start Virtual Display + VNC + bore PEHLE
+        run: |
+          # Packages install karo
+          sudo apt-get install -y x11vnc xvfb
+
+          # Virtual display start karo
+          Xvfb :99 -screen 0 720x1280x24 &
+          export DISPLAY=:99
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+          sleep 3
+
+          # VNC start karo
+          x11vnc -display :99 -nopw -forever -shared -bg -o /tmp/x11vnc.log
+          sleep 2
+          echo "✅ VNC Ready on port 5900!"
+
+          # bore install + tunnel background mein
+          curl -Ls https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz | tar zx -C /usr/local/bin
+          chmod +x /usr/local/bin/bore
+
+          # Background mein chalao aur port save karo
+          bore local 5900 --to bore.pub 2>&1 | tee /tmp/bore.log &
+          sleep 5
+
+          echo "======================================"
+          cat /tmp/bore.log
+          echo "======================================"
+          echo "📱 Upar wale log mein port number dekho!"
+          echo "Host = bore.pub | Pass = nahi"
+          echo "======================================"
+
+      - name: 📱 Android Emulator — Same Display Pe!
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          DISPLAY: :99       # ✅ Yahi fix hai — same display!
         with:
           api-level: 30
           target: google_apis
@@ -38,46 +73,15 @@ jobs:
           emulator-options: -no-snapshot-save -noaudio -no-boot-anim
           disable-animations: true
           script: |
-
-            echo "✅ Emulator Ready!"
-
-            # F-Droid install karo
+            echo "✅ Emulator ab :99 display pe chal raha hai!"
             adb install fdroid.apk
             echo "✅ F-Droid Installed!"
-
-            # F-Droid kholo emulator mein
             adb shell monkey -p org.fdroid.fdroid 1
-            echo "✅ F-Droid Open!"
 
-            # VNC Server install karo
-            brew install tiger-vnc
-            mkdir -p ~/.vnc
+            # Jab tak job chale — bore alive rahe
+            echo "🔄 Session chal raha hai..."
+            sleep 18000
 
-            # Password set karo - 123456
-            echo "123456" | vncpasswd -f > ~/.vnc/passwd
-            chmod 600 ~/.vnc/passwd
-
-            # VNC Start karo
-            vncserver :1 -geometry 1280x720 -localhost no
-            export DISPLAY=:1
-            echo "✅ VNC Started on port 5901!"
-
-            # bore install karo - macOS version
-            curl -Ls https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar zx -C /usr/local/bin
-            echo "✅ bore Ready!"
-
-            echo "======================================"
-            echo "📱 Ab apne phone pe yeh karo:"
-            echo "App    : MultiVNC ya RealVNC"
-            echo "Host   : bore.pub"
-            echo "Port   : (neeche wala number dekho)"
-            echo "Pass   : 123456"
-            echo "======================================"
-
-            # Tunnel shuru karo - yahan port number dikhega
-            bore local 5901 --to bore.pub
-
-      # Step 5 - SSH via tmate (Termux se connect karne ke liye)
-      - name: 🔐 SSH Access via Termux
+      - name: 🔐 SSH via Termux
         uses: mxschmitt/action-tmate@v3
-        if: always() # Fail ho ya pass - SSH hamesha milega
+        if: always()
