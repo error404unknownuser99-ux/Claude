@@ -14,38 +14,70 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      # Step 2 - VNC + bore
-      - name: 📱 VNC + bore
+      # Step 2 - Java Setup
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Step 3 - F-Droid APK Download (Open Source App Store)
+      - name: 📦 Download F-Droid APK
         run: |
-          # VNC Server install karo
-          brew install tiger-vnc
-          mkdir -p ~/.vnc
+          curl -L https://f-droid.org/F-Droid.apk -o fdroid.apk
+          echo "✅ F-Droid APK Downloaded!"
 
-          # Password set karo - 123456
-          echo "123456" | vncpasswd -f > ~/.vnc/passwd
-          chmod 600 ~/.vnc/passwd
+      # Step 4 - Android Emulator Start + Full Setup
+      - name: 📱 Android Emulator + VNC + bore
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          ram-size: 4096M
+          emulator-options: -no-snapshot-save -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
 
-          # VNC Start karo
-          vncserver :1 -geometry 1280x720 -localhost no
-          export DISPLAY=:1
-          echo "✅ VNC Started on port 5901!"
+            echo "✅ Emulator Ready!"
 
-          # bore install karo - macOS version
-          curl -Ls https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar zx -C /usr/local/bin
-          echo "✅ bore Ready!"
+            # F-Droid install karo
+            adb install fdroid.apk
+            echo "✅ F-Droid Installed!"
 
-          echo "======================================"
-          echo "📱 Ab apne phone pe yeh karo:"
-          echo "App    : MultiVNC ya RealVNC"
-          echo "Host   : bore.pub"
-          echo "Port   : (neeche wala number dekho)"
-          echo "Pass   : 123456"
-          echo "======================================"
+            # F-Droid kholo emulator mein
+            adb shell monkey -p org.fdroid.fdroid 1
+            echo "✅ F-Droid Open!"
 
-          # Tunnel shuru karo - yahan port number dikhega
-          bore local 5901 --to bore.pub
+            # VNC Server install karo
+            brew install tiger-vnc
+            mkdir -p ~/.vnc
 
-      # Step 3 - SSH via tmate (Termux se connect karne ke liye)
+            # Password set karo - 123456
+            echo "123456" | vncpasswd -f > ~/.vnc/passwd
+            chmod 600 ~/.vnc/passwd
+
+            # VNC Start karo
+            vncserver :1 -geometry 1280x720 -localhost no
+            export DISPLAY=:1
+            echo "✅ VNC Started on port 5901!"
+
+            # bore install karo - macOS version
+            curl -Ls https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar zx -C /usr/local/bin
+            echo "✅ bore Ready!"
+
+            echo "======================================"
+            echo "📱 Ab apne phone pe yeh karo:"
+            echo "App    : MultiVNC ya RealVNC"
+            echo "Host   : bore.pub"
+            echo "Port   : (neeche wala number dekho)"
+            echo "Pass   : 123456"
+            echo "======================================"
+
+            # Tunnel shuru karo - yahan port number dikhega
+            bore local 5901 --to bore.pub
+
+      # Step 5 - SSH via tmate (Termux se connect karne ke liye)
       - name: 🔐 SSH Access via Termux
         uses: mxschmitt/action-tmate@v3
         if: always() # Fail ho ya pass - SSH hamesha milega
