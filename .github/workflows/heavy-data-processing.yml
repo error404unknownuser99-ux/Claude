@@ -1,10 +1,10 @@
-name: 🖥️ VNC + AnyDesk + RDP Remote Access
+name: 🤖 VNC + AnyDesk + RDP Session
 
 on:
   workflow_dispatch:
 
 jobs:
-  remote-desktop:
+  android-vnc:
     runs-on: ubuntu-latest
     timeout-minutes: 350
 
@@ -13,90 +13,97 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: 🖥️ Start Virtual Display (Xvfb + XFCE)
+      - name: 🖥️ Start Virtual Display + VNC + bore
         run: |
-          sudo apt-get install -y xvfb x11vnc xfce4 xfce4-terminal dbus-x11 --no-install-recommends
+          sudo apt-get install -y x11vnc xvfb openbox
+
           Xvfb :99 -screen 0 1280x720x24 &
           export DISPLAY=:99
           echo "DISPLAY=:99" >> $GITHUB_ENV
           sleep 3
-          startxfce4 &
-          sleep 5
-          echo "✅ Virtual Display + XFCE Ready!"
 
-      - name: 🔒 Start VNC Server
-        run: |
+          DISPLAY=:99 openbox-session &
+          sleep 2
+
           x11vnc -display :99 -nopw -forever -shared -bg -o /tmp/x11vnc.log
           sleep 2
           echo "✅ VNC Ready on port 5900!"
 
-      - name: 🌐 Bore Tunnel — VNC (port 5900)
-        run: |
           curl -Ls https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-unknown-linux-musl.tar.gz | tar zx -C /usr/local/bin
           chmod +x /usr/local/bin/bore
-          bore local 5900 --to bore.pub 2>&1 | tee /tmp/bore_vnc.log &
-          sleep 6
-          echo "======================================"
-          cat /tmp/bore_vnc.log
-          echo "======================================"
-          echo "📡 VNC: Host=bore.pub | Port=upar log mein dekho | Pass=nahi"
-          echo "======================================"
 
-      - name: 🟦 Install AnyDesk
-        run: |
-          echo "📦 AnyDesk install ho raha hai..."
-          wget -qO - https://keys.anydesk.com/repos/DEB-GPG-KEY | sudo apt-key add - 2>/dev/null
-          echo "deb http://deb.anydesk.com/ all main" | sudo tee /etc/apt/sources.list.d/anydesk-stable.list
-          sudo apt-get update -q
-          sudo apt-get install -y anydesk
-          echo "✅ AnyDesk Installed!"
-
-          echo "remote123" | sudo anydesk --set-password
-          DISPLAY=:99 anydesk &
+          bore local 5900 --to bore.pub 2>&1 | tee /tmp/bore.log &
           sleep 5
 
-          ANYDESK_ID=$(anydesk --get-id 2>/dev/null || echo "Check AnyDesk window")
           echo "======================================"
-          echo "🟦 AnyDesk ID: $ANYDESK_ID"
-          echo "🔑 AnyDesk Password: remote123"
+          cat /tmp/bore.log
+          echo "======================================"
+          echo "📱 Upar wale log mein VNC port number dekho!"
+          echo "Host = bore.pub | Pass = nahi"
           echo "======================================"
 
-      - name: 🖥️ Install xRDP (RDP — Windows Remote Desktop)
+      - name: 💻 Install & Start xRDP (Windows-style Remote Desktop)
         run: |
           echo "📦 xRDP install ho raha hai..."
           sudo apt-get install -y xrdp
-          echo "startxfce4" | sudo tee /etc/xrdp/startwm.sh > /dev/null
-          sudo chmod +x /etc/xrdp/startwm.sh
-          echo "xfce4-session" > ~/.xsession
-          chmod +x ~/.xsession
-          echo "runner:remote123" | sudo chpasswd
+
+          echo "export DISPLAY=:99" | sudo tee -a /etc/xrdp/startwm.sh
+
+          sudo useradd -m rdpuser || true
+          echo "rdpuser:rdppass123" | sudo chpasswd
+
           sudo systemctl enable xrdp
           sudo systemctl start xrdp
           sleep 3
-          echo "✅ xRDP Status: $(sudo systemctl is-active xrdp) | Port: 3389"
-          echo "🔑 RDP User: runner | Pass: remote123"
 
-      - name: 🌐 Bore Tunnel — RDP (port 3389)
-        run: |
-          bore local 3389 --to bore.pub 2>&1 | tee /tmp/bore_rdp.log &
-          sleep 6
+          echo "✅ xRDP Ready on port 3389!"
+
+          bore local 3389 --to bore.pub 2>&1 | tee /tmp/bore-rdp.log &
+          sleep 5
+
+          echo "====== RDP bore tunnel =============="
+          cat /tmp/bore-rdp.log
           echo "======================================"
-          cat /tmp/bore_rdp.log
-          echo "======================================"
-          echo "🖥️ RDP: Host=bore.pub | Port=upar log mein dekho"
-          echo "🔑 RDP User: runner | Pass: remote123"
+          echo "💻 RDP Connect karo:"
+          echo "   Host   = bore.pub : (upar wala port)"
+          echo "   User   = rdpuser"
+          echo "   Pass   = rdppass123"
           echo "======================================"
 
-      - name: ⏳ Keep Alive (5 hours)
+      - name: 🖱️ Install AnyDesk
         run: |
-          echo "🔄 Session alive hai — enjoy karo!"
-          echo "=== CONNECTION INFO ==="
-          echo "VNC  → bore.pub : [see Bore Tunnel VNC step]  | No password"
-          echo "RDP  → bore.pub : [see Bore Tunnel RDP step]  | User: runner | Pass: remote123"
-          echo "AnyDesk → ID from AnyDesk step               | Pass: remote123"
-          echo "======================"
+          echo "📦 AnyDesk install ho raha hai..."
+
+          wget -qO - https://keys.anydesk.com/repos/DEB-GPG-KEY | sudo apt-key add -
+          echo "deb http://deb.anydesk.com/ all main" | sudo tee /etc/apt/sources.list.d/anydesk-stable.list
+          sudo apt-get update -qq
+          sudo apt-get install -y anydesk
+
+          DISPLAY=:99 anydesk &
+          sleep 5
+
+          ANYDESK_ID=$(anydesk --get-id 2>/dev/null || echo "ID fetch karo GUI se")
+
+          echo "======================================"
+          echo "✅ AnyDesk Ready!"
+          echo "   AnyDesk ID = $ANYDESK_ID"
+          echo "======================================"
+
+          echo "anydesk123" | anydesk --set-password 2>/dev/null || true
+          echo "✅ AnyDesk Password = anydesk123"
+
+      - name: ⏳ Session Alive Rakho
+        run: |
+          echo "🔄 Session chal raha hai — 5 ghante tak!"
+          echo ""
+          echo "===== CONNECTION SUMMARY ====="
+          echo "🖥️  VNC    → bore.pub : (bore.log dekho)"
+          echo "💻  RDP    → bore.pub : (bore-rdp.log dekho)"
+          echo "   RDP User = rdpuser | Pass = rdppass123"
+          echo "🖱️  AnyDesk → ID upar dekho | Pass = anydesk123"
+          echo "=============================="
           sleep 18000
 
-      - name: 🔐 tmate SSH Fallback
+      - name: 🔐 SSH via tmate (backup)
         uses: mxschmitt/action-tmate@v3
         if: always()
