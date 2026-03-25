@@ -1,2 +1,6 @@
-[2026-03-23 05:16:03] ✅ No errors — Run ID: 23422567592
-YAML: ✅ All valid
+[2026-03-25 03:26:43 UTC] ❌ Run fetch error: GitHub API error: 403
+
+==================================================
+YAML VALIDATION:
+  ⚠️ GitHub API error: 403
+==================================================
